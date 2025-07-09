@@ -1,4 +1,3 @@
-// firebase-config.js
 const firebaseConfig = {
   apiKey: "AIzaSyBSwh3Qj-rmHIbDFP63VY3omfjXa7XFqhw",
   authDomain: "adlan-money-trancker.firebaseapp.com",
