@@ -30,8 +30,9 @@ export async function loadUserData(userId) {
 
 // ===== Bonus: Useful Extensions =====
 export async function updateUserData(userId, updates) {
-  await update(ref(db, `users/${userId}`), updates);
-console.log("Data updated successfully!");
+  try {
+    await update(ref(db, `users/${userId}`), updates);
+    console.log("Data updated successfully!");
   } catch (error) {
     console.error("Error updating data:", error);
     throw error;
@@ -39,8 +40,9 @@ console.log("Data updated successfully!");
 }
 
 export async function deleteUserData(userId) {
-  await remove(ref(db, `users/${userId}`));
- console.log("Data deleted successfully!");
+  try {
+    await remove(ref(db, `users/${userId}`));
+    console.log("Data deleted successfully!");
   } catch (error) {
     console.error("Error deleting data:", error);
     throw error;
