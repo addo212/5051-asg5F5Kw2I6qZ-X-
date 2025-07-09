@@ -29,8 +29,12 @@ function loadUserData(userId) {
     } else {
       // First time user - initialize data
       console.log("New user - initializing data");
+      initializeUserData(userId);
     }
   });
+  
+  // Load transactions separately
+  loadRecentTransactions(userId);
 }
 
 // Update dashboard with user data
@@ -38,9 +42,22 @@ function updateDashboard(userData) {
   // Example: Update total balance
   const totalBalanceElement = document.getElementById('totalBalance');
   if (totalBalanceElement && userData.totalBalance) {
-    totalBalanceElement.textContent = `Rp${userData.totalBalance.toFixed(2)}`;
+    totalBalanceElement.textContent = `$${userData.totalBalance.toFixed(2)}`;
+  }
+  
+  // Update monthly income
+  const monthlyIncomeElement = document.getElementById('monthlyIncome');
+  if (monthlyIncomeElement && userData.monthlyIncome) {
+    monthlyIncomeElement.textContent = `$${userData.monthlyIncome.toFixed(2)}`;
+  }
+  
+  // Update monthly expenses
+  const monthlyExpensesElement = document.getElementById('monthlyExpenses');
+  if (monthlyExpensesElement && userData.monthlyExpenses) {
+    monthlyExpensesElement.textContent = `$${userData.monthlyExpenses.toFixed(2)}`;
   }
 }
+
 // Menandai menu aktif berdasarkan halaman saat ini
 function setActiveMenuItem() {
   const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
@@ -55,10 +72,12 @@ function setActiveMenuItem() {
     }
   });
 }
+
 // Panggil fungsi saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
   setActiveMenuItem();
 });
+
 // Tambahkan fungsi ini di main.js
 function loadRecentTransactions(userId) {
   const transactionsRef = ref(db, `users/${userId}/transactions`);
@@ -121,24 +140,6 @@ function displayRecentTransactions(transactions) {
   });
   
   container.innerHTML = html;
-}
-
-// Modify loadUserData to also load transactions
-function loadUserData(userId) {
-  const userRef = ref(db, `users/${userId}`);
-  onValue(userRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      updateDashboard(data);
-    } else {
-      // First time user - initialize data
-      console.log("New user - initializing data");
-      initializeUserData(userId);
-    }
-  });
-  
-  // Load transactions separately
-  loadRecentTransactions(userId);
 }
 
 // Initialize data for new users
