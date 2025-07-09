@@ -96,3 +96,30 @@ export async function deleteTransaction(userId, transactionId) {
     }
 }
 // Batas Akhir Paragraf yang memuat js untuk TRANSAKSI
+
+// Memuat Dompet dan Akun
+export async function initializeUserData(userId) {
+    const initialData = {
+        totalBalance: 0,
+        monthlyIncome: 0,
+        monthlyExpenses: 0,
+        accounts: {
+            income: ['Gaji Addo', 'Gaji Anne', 'Bonus Addo', 'Bonus Anne', 'Other Revenue'],
+            expense: ['Other Will', 'Daycare', 'Ayah', 'Save for Emergency', 'Internet', 'Cell Services', 'Diapers', 'Milk', 'Water & Electrics', 'CC Bill', 'Iuran', 'Gas Ad', 'Gas An', 'Food & Groceries', 'Snack Ad', 'Snack An', 'Homecare', 'Parkir Kantor', 'Personal Care', 'Other Expense', 'Transfer', 'Save', 'Save Aldric', 'Cicilan', 'Pajak Kendaraan', 'Pakaian', 'Laundry', 'Medicine', 'Gas Mobil', 'Hiburan - Wisata Dll']
+        },
+        wallets: {
+            default: {
+                name: "Default Wallet",
+                balance: 0
+            }
+        }
+    };
+
+    try {
+        await set(ref(db, `users/${userId}`), initialData);
+        console.log("Initial user data created");
+    } catch (error) {
+        console.error("Error creating initial data:", error);
+        throw error;
+    }
+}
