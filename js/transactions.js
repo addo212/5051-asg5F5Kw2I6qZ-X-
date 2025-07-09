@@ -1,20 +1,27 @@
+// transactions.js
 import firebaseConfig from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { updateUserData } from './database.js';
+import { updateUserData, loadUserData } from './database.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 let userId;
+let userWallets = {};
+let userAccounts = {};
 
 // Autentikasi
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
-        loadAccounts();
-        loadWallets();
+        loadUserData(userId).then(userData => {
+            userWallets = userData.wallets || {};
+            userAccounts = userData.accounts || {};
+            loadAccounts();
+            loadWallets();
+        });
         loadTransactions();
     } else {
         window.location.href = "index.html";
@@ -24,15 +31,13 @@ onAuthStateChanged(auth, (user) => {
 // Fungsi untuk memuat akun
 function loadAccounts() {
     const accountsSelect = document.getElementById('account');
-    // Ganti dengan data akun dari database atau sumber lainnya
-    const accounts = {
-        income: ['Gaji Addo', 'Gaji Anne', 'Bonus Addo', 'Bonus Anne', 'Other Revenue'],
-        expense: ['Other Will', 'Daycare', 'Ayah', 'Save for Emergency', 'Internet', 'Cell Services', 'Diapers', 'Milk', 'Water & Electrics', 'CC Bill', 'Iuran', 'Gas Ad', 'Gas An', 'Food & Groceries', 'Snack Ad', 'Snack An', 'Homecare', 'Parkir Kantor', 'Personal Care', 'Other Expense', 'Transfer', 'Save', 'Save Aldric', 'Cicilan', 'Pajak Kendaraan', 'Pakaian', 'Laundry', 'Medicine', 'Gas Mobil', 'Hiburan - Wisata Dll']
-    };
-
     accountsSelect.innerHTML = '<option value="">Select Account</option>';
+
     const selectedType = document.getElementById('type').value || 'income';
-    accounts[selectedType].forEach(account => {
+
+    const accountList = userAccounts[selectedType] || [];
+
+    accountList.forEach(account => {
         const option = document.createElement('option');
         option.value = account;
         option.text = account;
@@ -44,43 +49,56 @@ function loadAccounts() {
     });
 }
 
+
 // Fungsi untuk memuat dompet
 function loadWallets() {
     const walletsSelect = document.getElementById('wallet');
-    // Ganti dengan data dompet dari database atau sumber lainnya
-    const wallets = ['Aldric', 'Kas Ado', 'Kas Ane', 'BCA', 'Livin Mandiri', 'Bank Jatim', 'Seabank', 'Jago', 'Celengan', 'Saving', 'KSI', 'Blu', 'KUR', 'other'];
-
     walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
-    wallets.forEach(wallet => {
+
+    Object.keys(userWallets).forEach(walletId => {
+        const wallet = userWallets[walletId];
         const option = document.createElement('option');
-        option.value = wallet;
-        option.text = wallet;
+        option.value = wallet.name;
+        option.text = wallet.name;
         walletsSelect.appendChild(option);
     });
 }
 
 // Fungsi untuk menyimpan transaksi
-async function saveTransaction(transaction) {
-    try {
-        await push(ref(db, `users/${userId}/transactions`), transaction);
-        // Bersihkan form setelah menyimpan transaksi
-        document.getElementById('transactionForm').reset();
-        // Update saldo dan data lain di database
-        updateUserData(userId, { totalBalance: 0 }); // Contoh: Update total balance
-        loadTransactions();
-        // Tampilkan pesan sukses
-        showSuccessMessage('Transaction saved successfully!');
-    } catch (error) {
-        console.error("Error saving transaction:", error);
-        showError('Failed to save transaction. Please try again.');
-    }
+function saveTransaction(transaction) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            showLoading();
+            await push(ref(db, `users/${userId}/transactions`), transaction);
+            // Update saldo dan data lain di database
+            loadUserData(userId).then(userData => {
+                let totalBalance = userData.totalBalance || 0;
+                if (transaction.type === 'income') {
+                    totalBalance += transaction.amount;
+                } else {
+                    totalBalance -= transaction.amount;
+                }
+                updateUserData(userId, { totalBalance: totalBalance });
+            });
+            loadTransactions();
+            hideLoading();
+            showSuccessMessage('Transaction saved successfully!');
+            resolve();
+        } catch (error) {
+            hideLoading();
+            console.error("Error saving transaction:", error);
+            showError('Failed to save transaction. Please try again.');
+            reject(error);
+        }
+    });
 }
+
 
 // Fungsi untuk memuat transaksi
 function loadTransactions() {
     const transactionsRef = ref(db, `users/${userId}/transactions`);
     onValue(transactionsRef, (snapshot) => {
-        const transactionsData = snapshot.val();
+        const transactionsData = snapshot.val() || {}; // Handle null data
         displayTransactions(transactionsData);
     });
 }
@@ -102,7 +120,7 @@ function displayTransactions(transactionsData) {
         const amountClass = isIncome ? 'amount-income' : 'amount-expense';
         const sign = isIncome ? '+' : '-';
         const date = new Date(transaction.timestamp);
-        const formattedDate = date.toLocaleDateString();
+        const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
         html += `
             <li class="transaction-item">
@@ -122,27 +140,33 @@ function displayTransactions(transactionsData) {
     html += '</ul>';
     container.innerHTML = html;
 
-    // Tambahkan event listener untuk tombol hapus
+    // Tambahkan event listener untuk tombol hapus setelah HTML di-update
     const deleteButtons = document.querySelectorAll('.delete-btn');
     deleteButtons.forEach(button => {
         button.addEventListener('click', () => {
             const transactionId = button.dataset.transactionId;
-            deleteTransaction(transactionId);
+            if (confirm('Are you sure you want to delete this transaction?')) {
+                deleteTransaction(userId, transactionId).then(() => {
+                    loadUserData(userId).then(userData => {
+                        let totalBalance = userData.totalBalance || 0;
+                        const deletedTransaction = transactionsData[transactionId];
+                        if (deletedTransaction.type === 'income') {
+                            totalBalance -= deletedTransaction.amount;
+                        } else {
+                            totalBalance += deletedTransaction.amount;
+                        }
+                        updateUserData(userId, { totalBalance: totalBalance });
+                    });
+                    showSuccessMessage('Transaction deleted successfully!');
+                }).catch(error => {
+                    console.error("Error deleting transaction:", error);
+                    showError('Failed to delete transaction. Please try again.');
+                });
+            }
         });
     });
 }
 
-// Fungsi untuk menghapus transaksi
-async function deleteTransaction(transactionId) {
-    try {
-        await remove(ref(db, `users/${userId}/transactions/${transactionId}`));
-        loadTransactions(); // Muat ulang transaksi setelah dihapus
-        showSuccessMessage('Transaction deleted successfully!');
-    } catch (error) {
-        console.error("Error deleting transaction:", error);
-        showError('Failed to delete transaction. Please try again.');
-    }
-}
 
 // Fungsi untuk menampilkan pesan sukses
 function showSuccessMessage(message) {
@@ -167,6 +191,23 @@ function showError(message) {
     }, 3000);
 }
 
+// Fungsi untuk menampilkan loading indicator
+function showLoading() {
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.classList.add('loading-overlay');
+    loadingOverlay.innerHTML = '<div class="loading-spinner"></div> Loading...';
+    document.body.appendChild(loadingOverlay);
+}
+
+// Fungsi untuk menyembunyikan loading indicator
+function hideLoading() {
+    const loadingOverlay = document.querySelector('.loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.remove();
+    }
+}
+
+
 // Event listener untuk form transaksi
 document.getElementById('transactionForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -176,10 +217,31 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
     const account = document.getElementById('account').value;
     const description = document.getElementById('description').value;
     const wallet = document.getElementById('wallet').value;
-    const amount = parseFloat(document.getElementById('amount').value);
+    let amount = parseFloat(document.getElementById('amount').value);
 
+    // Validasi input
+    if (!date) {
+        showError('Please select a date.');
+        return;
+    }
+    if (!type) {
+        showError('Please select a transaction type.');
+        return;
+    }
+    if (!account) {
+        showError('Please select an account.');
+        return;
+    }
+    if (!description) {
+        showError('Please enter a description.');
+        return;
+    }
+    if (!wallet) {
+        showError('Please select a wallet.');
+        return;
+    }
     if (isNaN(amount) || amount <= 0) {
-        showError('Please enter a valid amount');
+        showError('Please enter a valid amount.');
         return;
     }
 
@@ -190,7 +252,7 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
         description,
         wallet,
         amount,
-        timestamp: new Date(date).getTime() // Simpan timestamp untuk pengurutan
+        timestamp: new Date(date).getTime()
     };
 
     await saveTransaction(transaction);
