@@ -41,3 +41,17 @@ function updateDashboard(userData) {
     totalBalanceElement.textContent = `$${userData.totalBalance.toFixed(2)}`;
   }
 }
+// Menandai menu aktif berdasarkan halaman saat ini
+function setActiveMenuItem() {
+  const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+  const menuItems = document.querySelectorAll('.dropdown-content a');
+  
+  menuItems.forEach(item => {
+    const itemHref = item.getAttribute('href');
+    if (itemHref === currentPage) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}
