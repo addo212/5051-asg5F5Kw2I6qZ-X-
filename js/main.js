@@ -55,3 +55,7 @@ function setActiveMenuItem() {
     }
   });
 }
+// Panggil fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+  setActiveMenuItem();
+});
