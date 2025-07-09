@@ -54,3 +54,45 @@ export async function saveDataForCurrentUser(data) {
   if (!auth.currentUser) throw new Error("User not logged in");
   await saveUserData(auth.currentUser.uid, data);
 }
+
+// Paragraf yang memuat js untuk TRANSAKSI
+export async function saveTransaction(userId, transaction) {
+    try {
+        await push(ref(db, `users/${userId}/transactions`), transaction);
+        console.log("Transaction saved successfully!");
+    } catch (error) {
+        console.error("Error saving transaction:", error);
+        throw error;
+    }
+}
+
+export async function loadTransactions(userId) {
+    try {
+        const snapshot = await get(ref(db, `users/${userId}/transactions`));
+        return snapshot.exists() ? snapshot.val() : {}; // Return empty object if no transactions
+    } catch (error) {
+        console.error("Error loading transactions:", error);
+        throw error;
+    }
+}
+
+export async function updateTransaction(userId, transactionId, updates) {
+    try {
+        await update(ref(db, `users/${userId}/transactions/${transactionId}`), updates);
+        console.log("Transaction updated successfully!");
+    } catch (error) {
+        console.error("Error updating transaction:", error);
+        throw error;
+    }
+}
+
+export async function deleteTransaction(userId, transactionId) {
+    try {
+        await remove(ref(db, `users/${userId}/transactions/${transactionId}`));
+        console.log("Transaction deleted successfully!");
+    } catch (error) {
+        console.error("Error deleting transaction:", error);
+        throw error;
+    }
+}
+// Batas Akhir Paragraf yang memuat js untuk TRANSAKSI
