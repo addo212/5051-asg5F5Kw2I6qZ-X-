@@ -318,16 +318,16 @@ input:checked + .slider:before {
 .dashboard-body {
     height: auto;
     display: block;
-    background-color: #f8f9fa;
+    background-color: var(--bg-primary); /* Ganti dari #f8f9fa */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* AUTH CONTAINER */
 .auth-container {
-    background: white;
+    background: var(--bg-secondary); /* Ganti dari white */
     padding: 2.5rem;
     border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    box-shadow: var(--card-shadow); /* Ganti dari 0 5px 20px rgba(0,0,0,0.08) */
     width: 350px;
     text-align: center;
     transition: transform 0.3s ease;
@@ -347,19 +347,23 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
+    color: var(--text-primary); /* Tambahkan ini */
 }
 
 input {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color); /* Ganti dari #ddd */
     border-radius: 4px;
     box-sizing: border-box;
+    background-color: var(--bg-secondary); /* Tambahkan ini */
+    color: var(--text-primary); /* Tambahkan ini */
 }
 
 /* BUTTONS */
+/* BUTTONS */
 .btn-primary {
-    background-color: #4CAF50;
+    background-color: var(--accent-color); /* Ganti dari #4CAF50 */
     color: white;
     border: none;
     padding: 0.85rem 1.5rem;
@@ -372,7 +376,7 @@ input {
 }
 
 .btn-primary:hover {
-    background-color: #45a049;
+    background-color: var(--accent-hover); /* Ganti dari #45a049 */
     transform: translateY(-2px);
 }
 
@@ -381,9 +385,9 @@ input {
 }
 
 .btn-secondary {
-    background-color: #f5f7fa;
-    color: #333;
-    border: 1px solid #ddd;
+    background-color: var(--bg-primary); /* Ganti dari #f5f7fa */
+    color: var(--text-primary); /* Ganti dari #333 */
+    border: 1px solid var(--border-color); /* Ganti dari #ddd */
     padding: 0.75rem 1.5rem;
     border-radius: 4px;
     cursor: pointer;
@@ -393,9 +397,9 @@ input {
 }
 
 .btn-logout {
-    background-color: #f8f9fa;
-    color: #dc3545;
-    border: 1px solid #dc3545;
+    background-color: var(--bg-secondary); /* Ganti dari #f8f9fa */
+    color: var(--danger-color); /* Ganti dari #dc3545 */
+    border: 1px solid var(--danger-color); /* Ganti dari #dc3545 */
     padding: 0.5rem 1rem;
     border-radius: 6px;
     cursor: pointer;
@@ -406,14 +410,14 @@ input {
 }
 
 .btn-logout:hover {
-    background-color: #dc3545;
+    background-color: var(--danger-color); /* Ganti dari #dc3545 */
     color: white;
 }
 
 /* STATUS MESSAGE */
 .status-message {
     margin-top: 1rem;
-    color: #666;
+    color: var(--text-secondary); /* Ganti dari #666 */
     font-size: 0.9rem;
 }
 
@@ -431,9 +435,9 @@ header {
     align-items: center;
     margin-bottom: 2.5rem;
     padding: 1rem 1.5rem;
-    background-color: white;
+    background-color: var(--bg-secondary); /* Ganti dari white */
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: var(--card-shadow); /* Ganti dari 0 4px 12px rgba(0,0,0,0.05) */
 }
 
 .header-left {
@@ -455,12 +459,12 @@ header {
 .nav-link {
     padding: 0.5rem 1rem;
     text-decoration: none;
-    color: #333;
+    color: var(--text-primary); /* Ganti dari #333 */
     border-radius: 4px;
 }
 
 .nav-link.active {
-    background-color: #4CAF50;
+    background-color: var(--accent-color); /* Ganti dari #4CAF50 */
     color: white;
 }
 
@@ -471,7 +475,7 @@ header {
 }
 
 .dropbtn {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); /* Ganti dari #4CAF50, #45a049 */
     color: white;
     padding: 12px 24px;
     font-size: 16px;
@@ -494,9 +498,9 @@ header {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: white;
+    background-color: var(--bg-secondary); /* Ganti dari white */
     min-width: 220px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: var(--card-shadow); /* Ganti dari 0 8px 24px rgba(0,0,0,0.12) */
     z-index: 1;
     border-radius: 12px;
     overflow: hidden;
@@ -510,7 +514,7 @@ header {
 }
 
 .dropdown-content a {
-    color: #333;
+    color: var(--text-primary);
     padding: 14px 20px;
     text-decoration: none;
     display: flex;
@@ -524,23 +528,23 @@ header {
     width: 20px;
     text-align: center;
     font-size: 1.1rem;
-    color: #666;
+   color: var(--text-secondary);
 }
 
 .dropdown-content a:hover {
-    background-color: #f8f9fa;
-    border-left: 4px solid #4CAF50;
+    background-color: var(--bg-primary);
+    border-left: 4px solid var(--accent-color);
 }
 
 .dropdown-content a.active {
-    background-color: #f0f7f0;
-    color: #4CAF50;
+    background-color: var(--bg-primary);
+    color: var(--accent-color);
     font-weight: 600;
-    border-left: 4px solid #4CAF50;
+    border-left: 4px solid var(--accent-color);
 }
 
 .dropdown-content a.active i {
-    color: #4CAF50;
+    color: var(--accent-color);
 }
 
 /* Show the dropdown menu on hover */
@@ -557,10 +561,10 @@ header {
 }
 
 .stat-card {
-    background: white;
+    background: var(--bg-secondary);
     padding: 1.8rem;
     border-radius: 16px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    box-shadow: var(--card-shadow);
     transition: transform 0.3s, box-shadow 0.3s;
     position: relative;
     overflow: hidden;
@@ -573,7 +577,7 @@ header {
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end)); 
 }
 
 .stat-card:hover {
@@ -582,7 +586,7 @@ header {
 }
 
 .stat-card h3 {
-    color: #555;
+    color: var(--text-secondary);
     margin-top: 0;
     font-size: 1rem;
     font-weight: 500;
@@ -593,12 +597,12 @@ header {
 
 .stat-card h3::before {
     content: '•';
-    color: #4CAF50;
+    color: var(--accent-color);
     font-size: 1.5rem;
 }
 
 .stat-card p {
-    color: #333;
+    color: var(--text-primary);
     font-size: 2rem;
     font-weight: 600;
     margin: 15px 0 0;
