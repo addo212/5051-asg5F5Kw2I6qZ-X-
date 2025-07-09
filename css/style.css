@@ -826,3 +826,63 @@ input:checked + .slider:before {
     color: white;
     font-size: 1.2rem;
 }
+/*BAGIAN INI ADALAH CSS UNTUK MENU TRANSAKSI*/
+/* TRANSACTION HISTORY */
+#transactionHistory ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#transactionHistory li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#transactionHistory li:last-child {
+    border-bottom: none;
+}
+
+.transaction-details {
+    flex: 1;
+}
+
+.transaction-amount {
+    font-weight: bold;
+    margin-left: 1rem;
+}
+
+.amount-income {
+    color: var(--income-color);
+}
+
+.amount-expense {
+    color: var(--expense-color);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-left: 10px;
+}
+
+.delete-btn:hover {
+    color: darken(var(--danger-color), 10%);
+}
+
+.success-message {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
