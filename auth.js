@@ -46,3 +46,12 @@ auth.onAuthStateChanged(user => {
     window.location.href = "dashboard.html";
   }
 });
+
+// Add to existing auth.js
+if (document.getElementById('logoutBtn')) {
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    auth.signOut().then(() => {
+      window.location.href = "index.html";
+    });
+  });
+}
