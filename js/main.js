@@ -1,30 +1,45 @@
 // main.js - Dashboard functionality
+
+// Import modules
 import firebaseConfig from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { initializeUserData, loadUserData, loadTransactions } from './database.js';
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// Check if user is logged in
+// User ID
+let userId;
+
+// ============================================================================
+// Fungsi untuk memeriksa apakah pengguna sudah login dan memuat data pengguna
+// ============================================================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
+
+        // Load user data
         loadUserData(userId).then((userData) => {
             if (!userData) {
+                // Initialize user data if it doesn't exist
                 initializeUserData(userId).then(() => {
+                    // Reload user data after initialization
                     loadUserData(userId).then(updatedUserData => {
                         updateDashboard(updatedUserData);
-                        loadRecentTransactions(userId);
-                    })
+                        loadRecentTransactions(userId); // Load transactions after user data is loaded
+                    });
                 });
             } else {
                 updateDashboard(userData);
-                loadRecentTransactions(userId);
+                loadRecentTransactions(userId); // Load transactions if user data exists
             }
+        }).catch((error) => {
+            console.error("Error loading user data:", error);
+            // Handle error, misalnya tampilkan pesan error ke pengguna
         });
     } else {
         // Redirect to login if not logged in
@@ -32,9 +47,10 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-let userId; // Define userId outside onAuthStateChanged
 
-// Update dashboard with user data
+// ============================================================================
+// Fungsi untuk memperbarui dashboard dengan data pengguna
+// ============================================================================
 function updateDashboard(userData) {
     const currency = localStorage.getItem('currency') || 'USD';
     const currencySymbol = getCurrencySymbol(currency);
@@ -55,6 +71,9 @@ function updateDashboard(userData) {
     }
 }
 
+// ============================================================================
+// Fungsi untuk mendapatkan simbol mata uang
+// ============================================================================
 function getCurrencySymbol(currency) {
     switch (currency) {
         case 'USD': return '$';
@@ -65,7 +84,9 @@ function getCurrencySymbol(currency) {
     }
 }
 
-// Menandai menu aktif berdasarkan halaman saat ini
+// ============================================================================
+// Fungsi untuk menandai menu aktif berdasarkan halaman saat ini
+// ============================================================================
 function setActiveMenuItem() {
     const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
     const menuItems = document.querySelectorAll('.dropdown-content a');
@@ -80,12 +101,9 @@ function setActiveMenuItem() {
     });
 }
 
-// Panggil fungsi saat halaman dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    setActiveMenuItem();
-});
-
-// Load recent transactions
+// ============================================================================
+// Fungsi untuk memuat transaksi terbaru
+// ============================================================================
 function loadRecentTransactions(userId) {
     loadTransactions(userId).then(transactionsData => {
         if (transactionsData) {
@@ -94,7 +112,6 @@ function loadRecentTransactions(userId) {
             const recentTransactions = transactionsArray.slice(0, 5);
             displayRecentTransactions(recentTransactions);
         } else {
-            // No transactions yet
             const recentTransactionsContainer = document.getElementById('recentTransactions');
             if (recentTransactionsContainer) {
                 recentTransactionsContainer.innerHTML = '<p class="empty-state">No recent transactions</p>';
@@ -102,9 +119,13 @@ function loadRecentTransactions(userId) {
         }
     }).catch(error => {
         console.error("Error loading transactions:", error);
+        // Handle error, misalnya tampilkan pesan error ke pengguna
     });
 }
 
+// ============================================================================
+// Fungsi untuk menampilkan transaksi terbaru di dashboard
+// ============================================================================
 function displayRecentTransactions(transactions) {
     const container = document.getElementById('recentTransactions');
     if (!container) return;
@@ -119,7 +140,7 @@ function displayRecentTransactions(transactions) {
         const isIncome = transaction.type === 'income';
         const iconClass = isIncome ? 'income' : 'expense';
         const amountClass = isIncome ? 'amount-income' : 'amount-expense';
-        const icon = isIncome ? 'fa-arrow-down' : 'fa-arrow-up'; // Ikon sesuai jenis transaksi
+        const icon = isIncome ? 'fa-arrow-down' : 'fa-arrow-up';
         const sign = isIncome ? '+' : '-';
 
         const date = new Date(transaction.timestamp);
@@ -145,3 +166,9 @@ function displayRecentTransactions(transactions) {
 
     container.innerHTML = html;
 }
+
+
+// Panggil fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    setActiveMenuItem();
+});
