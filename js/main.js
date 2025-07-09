@@ -38,7 +38,7 @@ function updateDashboard(userData) {
   // Example: Update total balance
   const totalBalanceElement = document.getElementById('totalBalance');
   if (totalBalanceElement && userData.totalBalance) {
-    totalBalanceElement.textContent = `$${userData.totalBalance.toFixed(2)}`;
+    totalBalanceElement.textContent = `Rp${userData.totalBalance.toFixed(2)}`;
   }
 }
 // Menandai menu aktif berdasarkan halaman saat ini
