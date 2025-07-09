@@ -10,6 +10,14 @@ body {
     height: 100vh;
 }
 
+/* DASHBOARD BODY STYLES */
+.dashboard-body {
+    height: auto;
+    display: block;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 /* AUTH CONTAINER */
 .auth-container {
     background: white;
@@ -58,10 +66,12 @@ input {
     margin-top: 1.2rem;
     transition: background-color 0.3s, transform 0.2s;
 }
+
 .btn-primary:hover {
     background-color: #45a049;
     transform: translateY(-2px);
 }
+
 .btn-primary:active {
     transform: translateY(0);
 }
@@ -78,6 +88,24 @@ input {
     margin-top: 0.5rem;
 }
 
+.btn-logout {
+    background-color: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-logout:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
 /* STATUS MESSAGE */
 .status-message {
     margin-top: 1rem;
@@ -85,23 +113,59 @@ input {
     font-size: 0.9rem;
 }
 
-/* DASHBOARD STYLES */
+/* DASHBOARD CONTAINER */
 .dashboard-container {
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 1rem;
+    margin: 0 auto;
+    padding: 1.5rem;
 }
 
+/* HEADER STYLES */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    padding: 1rem 1.5rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dashboard-logo {
+    height: 35px;
+    width: auto;
+}
+
+/* NAVIGATION STYLES */
 .main-nav {
     margin-bottom: 2.5rem;
 }
+
+.nav-link {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+}
+
+.nav-link.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* DROPDOWN MENU STYLES */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
 .dropbtn {
     background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
@@ -120,6 +184,7 @@ header {
 .dropbtn:hover {
     box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
     transform: translateY(-2px);
+    background-color: #45a049;
 }
 
 .dropdown-content {
@@ -174,149 +239,12 @@ header {
     color: #4CAF50;
 }
 
-.nav-link {
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-    color: #333;
-    border-radius: 4px;
-}
-
-.nav-link.active {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.stat-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.btn-logout {
-    background-color: #f8f9fa;
-    color: #dc3545;
-    border: 1px solid #dc3545;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-logout:hover {
-    background-color: #dc3545;
-    color: white;
-}
-/* DROPDOWN MENU STYLES */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
     display: block;
 }
 
-/* Change color of dropdown button when dropdown content is shown */
-.dropdown:hover .dropbtn {
-    background-color: #45a049;
-}
-
-/* MODERN DASHBOARD STYLES */
-.dashboard-body {
-    height: auto;
-    display: block;
-    background-color: #f8f9fa;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem;
-}
-/* Header yang lebih modern */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-    padding: 1rem 1.5rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.dashboard-logo {
-    height: 35px;
-    width: auto;
-}
-/* IMPROVED DROPDOWN MENU */
-.dropbtn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 20px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: background-color 0.3s;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: white;
-    min-width: 200px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    z-index: 1;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 5px;
-}
-
-.dropdown-content a {
-    color: #333;
-    padding: 14px 20px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.2s;
-    border-left: 3px solid transparent;
-}
-
-.dropdown-content a i {
-    width: 20px;
-    text-align: center;
-}
-
-.dropdown-content a:hover {
-    background-color: #f9f9f9;
-    border-left: 3px solid #4CAF50;
-}
-
-.dropdown-content a.active {
-    background-color: #f0f7f0;
-    color: #4CAF50;
-    font-weight: 600;
-    border-left: 3px solid #4CAF50;
-}
-
-/* IMPROVED STATS CARDS */
-/* Card statistik yang lebih menarik */
+/* STATS CARDS */
 .stats-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -372,29 +300,13 @@ header {
     margin: 15px 0 0;
 }
 
-/* LOGO ON LOGIN PAGE - Ukuran lebih kecil */
+/* LOGO ON LOGIN PAGE */
 .logo {
-    width: 80px; /* Lebih kecil dari 120px */
+    width: 80px;
     height: auto;
     margin-bottom: 15px;
 }
 
-/* RESPONSIVE ADJUSTMENTS */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .btn-logout {
-        align-self: flex-end;
-    }
-    
-    .stats-summary {
-        grid-template-columns: 1fr;
-    }
-}
 /* RECENT TRANSACTIONS SECTION */
 .recent-transactions {
     margin-top: 40px;
@@ -429,7 +341,7 @@ header {
     font-style: italic;
 }
 
-/* Akan digunakan untuk item transaksi */
+/* TRANSACTION ITEMS */
 .transaction-item {
     display: flex;
     justify-content: space-between;
@@ -487,4 +399,21 @@ header {
 
 .amount-expense {
     color: #f44336;
+}
+
+/* RESPONSIVE ADJUSTMENTS */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .btn-logout {
+        align-self: flex-end;
+    }
+    
+    .stats-summary {
+        grid-template-columns: 1fr;
+    }
 }
