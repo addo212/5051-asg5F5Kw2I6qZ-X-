@@ -23,11 +23,12 @@
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
                 <div class="dropdown-content">
-                    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Home</a>
+                    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
                     <a href="transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a>
                     <a href="wallets.html"><i class="fas fa-wallet"></i> Wallets</a>
                     <a href="budgets.html"><i class="fas fa-chart-pie"></i> Budgets</a>
                     <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
                 </div>
             </div>
         </nav>
@@ -37,7 +38,6 @@
                 <h3>Total Balance</h3>
                 <p id="totalBalance">$0.00</p>
             </div>
-            <!-- Tambahkan card statistik lainnya -->
             <div class="stat-card">
                 <h3>Monthly Income</h3>
                 <p id="monthlyIncome">$0.00</p>
@@ -47,6 +47,15 @@
                 <p id="monthlyExpenses">$0.00</p>
             </div>
         </div>
+        
+        <!-- RECENT TRANSACTIONS SECTION -->
+        <section class="recent-transactions">
+            <h2><i class="fas fa-history"></i> Recent Transactions</h2>
+            <div class="transaction-list" id="recentTransactions">
+                <!-- Will be filled by JavaScript -->
+                <p class="empty-state">No recent transactions</p>
+            </div>
+        </section>
     </div>
 
    <script type="module" src="js/auth.js"></script>
