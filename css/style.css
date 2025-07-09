@@ -438,3 +438,96 @@ header {
         grid-template-columns: 1fr;
     }
 }
+/* RECENT TRANSACTIONS SECTION */
+.recent-transactions {
+    margin-top: 40px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.recent-transactions h2 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.recent-transactions h2 i {
+    color: #4CAF50;
+}
+
+.transaction-list {
+    min-height: 100px;
+}
+
+.empty-state {
+    color: #999;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Akan digunakan untuk item transaksi */
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.income {
+    background-color: #4CAF50;
+}
+
+.expense {
+    background-color: #f44336;
+}
+
+.transaction-info h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.transaction-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.transaction-amount {
+    font-weight: 600;
+}
+
+.amount-income {
+    color: #4CAF50;
+}
+
+.amount-expense {
+    color: #f44336;
+}
