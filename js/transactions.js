@@ -3,32 +3,41 @@ import firebaseConfig from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { updateUserData, loadUserData } from './database.js';
+import { updateUserData, loadUserData, saveTransaction, loadTransactions, deleteTransaction, getAccounts, getWallets } from './database.js';
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+
+// Global variables
 let userId;
 let userWallets = {};
 let userAccounts = {};
 
-// Autentikasi
+// ============================================================================
+// Authentication state listener
+// ============================================================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
         loadUserData(userId).then(userData => {
             userWallets = userData.wallets || {};
-            userAccounts = userData.accounts || {};
+            userAccounts = userData.accounts || { income: [], expense: [] };
             loadAccounts();
             loadWallets();
         });
-        loadTransactions();
+        loadTransactions(userId).then((transactions) => {
+            displayTransactions(transactions);
+        });
     } else {
         window.location.href = "index.html";
     }
 });
 
-// Fungsi untuk memuat akun
+// ============================================================================
+// Function to load accounts from database
+// ============================================================================
 function loadAccounts() {
     const accountsSelect = document.getElementById('account');
     accountsSelect.innerHTML = '<option value="">Select Account</option>';
@@ -49,61 +58,27 @@ function loadAccounts() {
     });
 }
 
-
-// Fungsi untuk memuat dompet
+// ============================================================================
+// Function to load wallets from database
+// ============================================================================
 function loadWallets() {
     const walletsSelect = document.getElementById('wallet');
     walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
 
-    Object.keys(userWallets).forEach(walletId => {
-        const wallet = userWallets[walletId];
-        const option = document.createElement('option');
-        option.value = wallet.name;
-        option.text = wallet.name;
-        walletsSelect.appendChild(option);
-    });
+    if (userWallets) {
+        Object.keys(userWallets).forEach(walletId => {
+            const wallet = userWallets[walletId];
+            const option = document.createElement('option');
+            option.value = wallet.name;
+            option.text = wallet.name;
+            walletsSelect.appendChild(option);
+        });
+    }
 }
 
-// Fungsi untuk menyimpan transaksi
-function saveTransaction(transaction) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            showLoading();
-            await push(ref(db, `users/${userId}/transactions`), transaction);
-            // Update saldo dan data lain di database
-            loadUserData(userId).then(userData => {
-                let totalBalance = userData.totalBalance || 0;
-                if (transaction.type === 'income') {
-                    totalBalance += transaction.amount;
-                } else {
-                    totalBalance -= transaction.amount;
-                }
-                updateUserData(userId, { totalBalance: totalBalance });
-            });
-            loadTransactions();
-            hideLoading();
-            showSuccessMessage('Transaction saved successfully!');
-            resolve();
-        } catch (error) {
-            hideLoading();
-            console.error("Error saving transaction:", error);
-            showError('Failed to save transaction. Please try again.');
-            reject(error);
-        }
-    });
-}
-
-
-// Fungsi untuk memuat transaksi
-function loadTransactions() {
-    const transactionsRef = ref(db, `users/${userId}/transactions`);
-    onValue(transactionsRef, (snapshot) => {
-        const transactionsData = snapshot.val() || {}; // Handle null data
-        displayTransactions(transactionsData);
-    });
-}
-
-// Fungsi untuk menampilkan transaksi
+// ============================================================================
+// Function to display transactions
+// ============================================================================
 function displayTransactions(transactionsData) {
     const container = document.getElementById('transactionHistory');
     if (!container) return;
@@ -140,7 +115,7 @@ function displayTransactions(transactionsData) {
     html += '</ul>';
     container.innerHTML = html;
 
-    // Tambahkan event listener untuk tombol hapus setelah HTML di-update
+    // Add event listeners to delete buttons after HTML update
     const deleteButtons = document.querySelectorAll('.delete-btn');
     deleteButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -155,7 +130,11 @@ function displayTransactions(transactionsData) {
                         } else {
                             totalBalance += deletedTransaction.amount;
                         }
-                        updateUserData(userId, { totalBalance: totalBalance });
+                        updateUserData(userId, { totalBalance: totalBalance }).then(() => {
+                            loadTransactions(userId).then((transactions) => {
+                                displayTransactions(transactions);
+                            });
+                        });
                     });
                     showSuccessMessage('Transaction deleted successfully!');
                 }).catch(error => {
@@ -168,7 +147,9 @@ function displayTransactions(transactionsData) {
 }
 
 
-// Fungsi untuk menampilkan pesan sukses
+// ============================================================================
+// Function to display success message
+// ============================================================================
 function showSuccessMessage(message) {
     const successMessage = document.createElement('p');
     successMessage.textContent = message;
@@ -180,7 +161,9 @@ function showSuccessMessage(message) {
     }, 3000);
 }
 
-// Fungsi untuk menampilkan pesan error
+// ============================================================================
+// Function to display error message
+// ============================================================================
 function showError(message) {
     const errorElement = document.getElementById('formError');
     errorElement.textContent = message;
@@ -191,7 +174,9 @@ function showError(message) {
     }, 3000);
 }
 
-// Fungsi untuk menampilkan loading indicator
+// ============================================================================
+// Function to show loading indicator
+// ============================================================================
 function showLoading() {
     const loadingOverlay = document.createElement('div');
     loadingOverlay.classList.add('loading-overlay');
@@ -199,7 +184,9 @@ function showLoading() {
     document.body.appendChild(loadingOverlay);
 }
 
-// Fungsi untuk menyembunyikan loading indicator
+// ============================================================================
+// Function to hide loading indicator
+// ============================================================================
 function hideLoading() {
     const loadingOverlay = document.querySelector('.loading-overlay');
     if (loadingOverlay) {
@@ -207,8 +194,9 @@ function hideLoading() {
     }
 }
 
-
-// Event listener untuk form transaksi
+// ============================================================================
+// Event listener for transaction form submission
+// ============================================================================
 document.getElementById('transactionForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -255,5 +243,21 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
         timestamp: new Date(date).getTime()
     };
 
-    await saveTransaction(transaction);
+    await saveTransaction(userId, transaction)
+        .then(() => {
+            // Update total balance after saving transaction
+            loadUserData(userId).then(userData => {
+                let totalBalance = userData.totalBalance || 0;
+                if (transaction.type === 'income') {
+                    totalBalance += transaction.amount;
+                } else {
+                    totalBalance -= transaction.amount;
+                }
+                updateUserData(userId, { totalBalance: totalBalance });
+            });
+        })
+        .catch(error => {
+            console.error("Error saving transaction:", error);
+            showError('Failed to save transaction. Please try again.');
+        });
 });
