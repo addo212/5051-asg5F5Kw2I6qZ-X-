@@ -1,154 +1,44 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simulasi KPR Fixed</title>
-  <style>
-    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
-    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-    input, button { width: 100%; padding: 10px; margin: 5px 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 8px; border: 1px solid #ccc; text-align: right; }
-    th:first-child, td:first-child { text-align: center; }
-    .summary { margin-top: 20px; padding: 10px; background: #e0f7fa; }
-    .actions { display: flex; gap: 10px; }
-  </style>
+    <!-- BASIC META TAGS -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker - Login</title>
+    
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    
+    <!-- CSS LINKS -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Simulasi KPR Fixed Berjangka</h1>
-
-    <label>Harga Rumah</label><input type="text" id="hargaRumah" />
-    <label>DP (%)</label><input type="number" id="dpPersen" />
-    <label>Tenor (tahun)</label><input type="number" id="tenor" />
-    <label>Fixed 1 (tahun)</label><input type="number" id="fixed1Year" />
-    <label>Bunga Fixed 1 (%)</label><input type="text" class="bunga" id="fixed1Rate" />
-    <label>Fixed 2 (tahun)</label><input type="number" id="fixed2Year" />
-    <label>Bunga Fixed 2 (%)</label><input type="text" class="bunga" id="fixed2Rate" />
-    <label>Fixed 3 (tahun)</label><input type="number" id="fixed3Year" />
-    <label>Bunga Fixed 3 (%)</label><input type="text" class="bunga" id="fixed3Rate" />
-    <label>Floating Rate (%)</label><input type="text" class="bunga" id="floatingRate" />
-
-    <div class="actions">
-      <button onclick="hitungAmortisasi()">Hitung</button>
-      <button onclick="cetakPDF()">Cetak PDF</button>
+    <!-- LOGIN FORM CONTAINER -->
+    <div class="auth-container">
+        <h1>Personal Finance Tracker</h1>
+        
+        <!-- EMAIL INPUT -->
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Your email">
+        </div>
+        
+        <!-- PASSWORD INPUT -->
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Your password">
+        </div>
+        
+        <!-- ACTION BUTTONS -->
+        <button id="loginBtn" class="btn-primary">Login</button>
+        <button id="signupBtn" class="btn-secondary">Sign Up</button>
+        
+        <!-- STATUS MESSAGE -->
+        <p id="authStatus" class="status-message"></p>
     </div>
 
-    <div id="ringkasanBiaya" class="summary"></div>
-    <div id="tabelHasil"></div>
-  </div>
-
-  <script>
-    function parseCurrency(value) {
-      return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
-    }
-    function parsePercent(str) {
-      return parseFloat(str.replace("%", "").replace(",", ".")) || 0;
-    }
-
-    function hitungAmortisasi() {
-      const hargaRumah = parseCurrency(document.getElementById("hargaRumah").value);
-      const dpPersen = parseFloat(document.getElementById("dpPersen").value) / 100;
-      const tenor = parseInt(document.getElementById("tenor").value);
-      const bulan = tenor * 12;
-      const pinjaman = hargaRumah * (1 - dpPersen);
-
-      const fixed1Year = parseInt(document.getElementById("fixed1Year").value);
-      const fixed1Rate = parsePercent(document.getElementById("fixed1Rate").value);
-      const fixed2Year = parseInt(document.getElementById("fixed2Year").value);
-      const fixed2Rate = parsePercent(document.getElementById("fixed2Rate").value);
-      const fixed3Year = parseInt(document.getElementById("fixed3Year").value);
-      const fixed3Rate = parsePercent(document.getElementById("fixed3Rate").value);
-      const floatingRate = parsePercent(document.getElementById("floatingRate").value);
-
-      const rows = [];
-      let sisa = pinjaman;
-      let totalBunga = 0;
-      let totalAngsuran = 0;
-
-      for (let i = 1; i <= bulan; i++) {
-        let rate = floatingRate;
-        if (i <= fixed1Year * 12) rate = fixed1Rate;
-        else if (i <= (fixed1Year + fixed2Year) * 12) rate = fixed2Rate;
-        else if (i <= (fixed1Year + fixed2Year + fixed3Year) * 12) rate = fixed3Rate;
-
-        const ratePerBulan = rate / 100 / 12;
-        const n = bulan - i + 1;
-        const bunga = sisa * ratePerBulan;
-        const angsuranBulanan = sisa * ratePerBulan / (1 - Math.pow(1 + ratePerBulan, -n));
-        const pokok = angsuranBulanan - bunga;
-        const sisaBaru = sisa - pokok;
-
-        totalBunga += bunga;
-        totalAngsuran += angsuranBulanan;
-
-        rows.push({
-          bulan: i,
-          rate: rate.toFixed(2) + "%",
-          bunga: Math.round(bunga),
-          pokok: Math.round(pokok),
-          angsuran: Math.round(angsuranBulanan),
-          sisaPinjaman: Math.round(sisaBaru)
-        });
-
-        sisa = sisaBaru;
-      }
-
-      const biayaNotaris = pinjaman * 0.07;
-      const biayaProvisi = hargaRumah * 0.01;
-      const biayaAdmin = 500000;
-      const nominalDP = hargaRumah * dpPersen;
-      const angsuranPertama = rows[0].angsuran;
-      const totalAwal = nominalDP + biayaNotaris + biayaProvisi + biayaAdmin + angsuranPertama;
-
-      document.getElementById("ringkasanBiaya").innerHTML = `
-        <b>Ringkasan Biaya Awal</b><br>
-        Nominal DP: Rp ${nominalDP.toLocaleString("id-ID")}<br>
-        Biaya Notaris: Rp ${biayaNotaris.toLocaleString("id-ID")}<br>
-        Biaya Provisi: Rp ${biayaProvisi.toLocaleString("id-ID")}<br>
-        Biaya Admin: Rp ${biayaAdmin.toLocaleString("id-ID")}<br>
-        Angsuran Pertama: Rp ${angsuranPertama.toLocaleString("id-ID")}<br>
-        <b>Total Awal: Rp ${totalAwal.toLocaleString("id-ID")}</b><br><hr>
-        Total Bunga: Rp ${totalBunga.toLocaleString("id-ID")}<br>
-        Total Angsuran: Rp ${totalAngsuran.toLocaleString("id-ID")}
-      `;
-
-      let html = `<table><thead><tr>
-        <th>Bulan</th><th>Bunga (%)</th><th>Bunga (Rp)</th>
-        <th>Pokok</th><th>Angsuran</th><th>Sisa</th>
-      </tr></thead><tbody>`;
-      rows.forEach(r => {
-        html += `<tr>
-          <td>${r.bulan}</td><td>${r.rate}</td><td>${r.bunga.toLocaleString("id-ID")}</td>
-          <td>${r.pokok.toLocaleString("id-ID")}</td><td>${r.angsuran.toLocaleString("id-ID")}</td>
-          <td>${r.sisaPinjaman.toLocaleString("id-ID")}</td>
-        </tr>`;
-      });
-      html += "</tbody></table>";
-      document.getElementById("tabelHasil").innerHTML = html;
-
-      kirimKeGoogleSheet(rows);
-    }
-
-    function cetakPDF() {
-      const hasil = document.getElementById("ringkasanBiaya").outerHTML + document.getElementById("tabelHasil").outerHTML;
-      const win = window.open('', '_blank');
-      win.document.write(`<html><head><title>Hasil Simulasi</title></head><body>${hasil}</body></html>`);
-      win.document.close();
-      win.print();
-    }
-
-    function kirimKeGoogleSheet(data) {
-      fetch("https://script.google.com/macros/s/AKfycbw-EVu4sqQqIQ0WhyUfSmSsPM3sHXb0lsV3ZHrLcZZ4zA5hKA46azOFrQOYHfnKA_lX/exec", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.text())
-      .then(txt => alert("✅ Data terkirim ke Spreadsheet!"))
-      .catch(err => alert("❌ Gagal mengirim: " + err.message));
-    }
-  </script>
+    <!-- FIREBASE INIT & AUTH SCRIPT -->
+    <script src="js/auth.js"></script>
 </body>
 </html>
