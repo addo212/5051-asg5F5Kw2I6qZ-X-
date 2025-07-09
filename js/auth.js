@@ -1,15 +1,18 @@
-// Initialize Firebase
-import { app } from './firebase-config.js';
-import { getAuth } from 'firebase/auth';
+import firebaseConfig from './firebase-config.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
-const auth = getAuth(app); // Properly initialized auth
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 // Login function
 document.getElementById('loginBtn')?.addEventListener('click', () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   
-  auth.signInWithEmailAndPassword(email, password)
+  signInWithEmailAndPassword(auth, email, password)
     .then(() => {
       window.location.href = "dashboard.html";
     })
@@ -29,7 +32,7 @@ document.getElementById('signupBtn')?.addEventListener('click', () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   
-  auth.createUserWithEmailAndPassword(email, password)
+  createUserWithEmailAndPassword(auth, email, password)
     .then(() => {
       document.getElementById('authStatus').textContent = "Account created successfully!";
     })
@@ -43,7 +46,7 @@ document.getElementById('signupBtn')?.addEventListener('click', () => {
 });
 
 // Auth state listener
-auth.onAuthStateChanged(user => {
+onAuthStateChanged(auth, user => {
   const isOnLoginPage = window.location.pathname.includes('index.html') || 
                         window.location.pathname === '/';
   
@@ -52,9 +55,9 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// Logout handler (optional chaining)
+// Logout handler
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
-  auth.signOut().then(() => {
+  signOut(auth).then(() => {
     window.location.href = "index.html";
   });
 });
