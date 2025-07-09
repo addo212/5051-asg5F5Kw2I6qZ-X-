@@ -505,7 +505,10 @@ header {
     border-radius: 12px;
     overflow: hidden;
     margin-top: 8px;
-    animation: fadeIn 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+    transform: translateY(-10px)
 }
 
 @keyframes fadeIn {
@@ -550,6 +553,22 @@ header {
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
     display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+/* Tambahkan ini untuk delay penutupan */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown:not(:hover) .dropdown-content {
+    transition-delay: 0.5s; /* Delay 500ms sebelum menutup */
+}
+
+.dropdown:hover .dropdown-content {
+    transition-delay: 0s; /* Tidak ada delay saat membuka */
 }
 
 /* STATS CARDS */
