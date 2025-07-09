@@ -13,11 +13,16 @@ body {
 /* AUTH CONTAINER */
 .auth-container {
     background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
     width: 350px;
     text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.auth-container:hover {
+    transform: translateY(-5px);
 }
 
 /* FORM ELEMENTS */
@@ -45,12 +50,20 @@ input {
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
+    padding: 0.85rem 1.5rem;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 1.2rem;
+    transition: background-color 0.3s, transform 0.2s;
+}
+.btn-primary:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-secondary {
@@ -87,11 +100,78 @@ header {
 }
 
 .main-nav {
+    margin-bottom: 2.5rem;
+}
+.dropbtn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
     display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+}
+
+.dropbtn:hover {
+    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 220px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 14px 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    border-left: 4px solid transparent;
+}
+
+.dropdown-content a i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.dropdown-content a:hover {
+    background-color: #f8f9fa;
+    border-left: 4px solid #4CAF50;
+}
+
+.dropdown-content a.active {
+    background-color: #f0f7f0;
+    color: #4CAF50;
+    font-weight: 600;
+    border-left: 4px solid #4CAF50;
+}
+
+.dropdown-content a.active i {
+    color: #4CAF50;
 }
 
 .nav-link {
@@ -114,12 +194,21 @@ header {
 }
 
 .btn-logout {
-    background-color: #f44336;
-    color: white;
-    border: none;
+    background-color: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #dc3545;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-logout:hover {
+    background-color: #dc3545;
+    color: white;
 }
 /* DROPDOWN MENU STYLES */
 .dropdown {
@@ -178,17 +267,30 @@ header {
 .dropdown:hover .dropbtn {
     background-color: #45a049;
 }
-/* IMPROVED DASHBOARD STYLES */
+
+/* MODERN DASHBOARD STYLES */
 .dashboard-body {
     height: auto;
     display: block;
-    background-color: #f5f7fa;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.5rem;
+}
+/* Header yang lebih modern */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1rem 1.5rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .header-left {
@@ -198,10 +300,9 @@ header {
 }
 
 .dashboard-logo {
-    height: 40px;
+    height: 35px;
     width: auto;
 }
-
 /* IMPROVED DROPDOWN MENU */
 .dropbtn {
     background-color: #4CAF50;
@@ -258,24 +359,37 @@ header {
 }
 
 /* IMPROVED STATS CARDS */
+/* Card statistik yang lebih menarik */
 .stats-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 25px;
     margin-top: 30px;
 }
 
 .stat-card {
     background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    padding: 1.8rem;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 .stat-card h3 {
@@ -283,20 +397,29 @@ header {
     margin-top: 0;
     font-size: 1rem;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-card h3::before {
+    content: '•';
+    color: #4CAF50;
+    font-size: 1.5rem;
 }
 
 .stat-card p {
     color: #333;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 600;
-    margin: 10px 0 0;
+    margin: 15px 0 0;
 }
 
-/* LOGO ON LOGIN PAGE */
+/* LOGO ON LOGIN PAGE - Ukuran lebih kecil */
 .logo {
-    width: 120px;
+    width: 80px; /* Lebih kecil dari 120px */
     height: auto;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 /* RESPONSIVE ADJUSTMENTS */
