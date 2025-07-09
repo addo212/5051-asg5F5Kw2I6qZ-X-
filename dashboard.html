@@ -5,27 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Finance Tracker</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body>
+<body class="dashboard-body">
     <div class="dashboard-container">
         <header>
-            <h1>Welcome to Your Dashboard</h1>
-            <button id="logoutBtn" class="btn-logout">Logout</button>
+            <div class="header-left">
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <h1>Finance Tracker</h1>
+            </div>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </header>
         
+        <!-- MENU NAVIGASI DENGAN DROPDOWN -->
         <nav class="main-nav">
-            <a href="dashboard.html" class="nav-link active">Home</a>
-            <a href="transactions.html" class="nav-link">Transactions</a>
-            <a href="wallets.html" class="nav-link">Wallets</a>
-            <a href="budgets.html" class="nav-link">Budgets</a>
-            <a href="reports.html" class="nav-link">Reports</a>
+            <div class="dropdown">
+                <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Home</a>
+                    <a href="transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a>
+                    <a href="wallets.html"><i class="fas fa-wallet"></i> Wallets</a>
+                    <a href="budgets.html"><i class="fas fa-chart-pie"></i> Budgets</a>
+                    <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
+                </div>
+            </div>
         </nav>
         
         <div class="stats-summary">
-            <!-- Will be filled with JavaScript later -->
             <div class="stat-card">
                 <h3>Total Balance</h3>
                 <p id="totalBalance">$0.00</p>
+            </div>
+            <!-- Tambahkan card statistik lainnya -->
+            <div class="stat-card">
+                <h3>Monthly Income</h3>
+                <p id="monthlyIncome">$0.00</p>
+            </div>
+            <div class="stat-card">
+                <h3>Monthly Expenses</h3>
+                <p id="monthlyExpenses">$0.00</p>
             </div>
         </div>
     </div>
