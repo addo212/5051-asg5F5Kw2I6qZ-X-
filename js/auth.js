@@ -1,3 +1,8 @@
+import { app } from './firebase-config.js';
+import { getAuth } from 'firebase/auth';
+
+const auth = getAuth(app); // Properly initialized auth
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
