@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- BASIC META TAGS -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Finance Tracker - Login</title>
-        
-    <!-- CSS LINKS -->
+    <title>Dashboard - Finance Tracker</title>
     <link rel="stylesheet" href="css/style.css">
-    
-    <!-- WEBSITE LOGO (MOVED FROM HEAD TO BODY) -->
-    <link rel="icon" href="images/logo.jpg">
+    <!-- Tambahkan Font Awesome untuk ikon dropdown -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <!-- WEBSITE LOGO (BETTER PLACEMENT) -->
-    <img src="images/logo.jpg" alt="App Logo" class="logo">
-    
-    <!-- LOGIN FORM CONTAINER -->
-    <div class="auth-container">
-        <h1>Personal Finance Tracker</h1>
+    <div class="dashboard-container">
+        <header>
+            <h1>Welcome to Your Dashboard</h1>
+            <button id="logoutBtn" class="btn-logout">Logout</button>
+        </header>
         
-        <!-- EMAIL INPUT -->
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Your email">
+        <!-- MENU NAVIGASI BARU DENGAN DROPDOWN -->
+        <nav class="main-nav">
+            <div class="dropdown">
+                <button class="dropbtn">Menu <i class="fas fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html" class="active">Home</a>
+                    <a href="transactions.html">Transactions</a>
+                    <a href="wallets.html">Wallets</a>
+                    <a href="budgets.html">Budgets</a>
+                    <a href="reports.html">Reports</a>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="stats-summary">
+            <!-- Will be filled with JavaScript later -->
+            <div class="stat-card">
+                <h3>Total Balance</h3>
+                <p id="totalBalance">$0.00</p>
+            </div>
         </div>
-        
-        <!-- PASSWORD INPUT -->
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Your password">
-        </div>
-        
-        <!-- ACTION BUTTONS -->
-        <button id="loginBtn" class="btn-primary">Login</button>
-        <button id="signupBtn" class="btn-secondary">Sign Up</button>
-        
-        <!-- STATUS MESSAGE -->
-        <p id="authStatus" class="status-message"></p>
     </div>
 
-    <!-- FIREBASE INIT & AUTH SCRIPT -->
-    <script type="module" src="js/auth.js"></script>
+   <script type="module" src="js/auth.js"></script>
+   <script type="module" src="js/main.js"></script>
 </body>
 </html>
