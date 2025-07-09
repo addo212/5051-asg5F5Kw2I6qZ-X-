@@ -31,10 +31,20 @@ export async function loadUserData(userId) {
 // ===== Bonus: Useful Extensions =====
 export async function updateUserData(userId, updates) {
   await update(ref(db, `users/${userId}`), updates);
+console.log("Data updated successfully!");
+  } catch (error) {
+    console.error("Error updating data:", error);
+    throw error;
+  }
 }
 
 export async function deleteUserData(userId) {
   await remove(ref(db, `users/${userId}`));
+ console.log("Data deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    throw error;
+  }
 }
 
 // Optional: Auto-bind to authenticated user
