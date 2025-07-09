@@ -8,9 +8,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Login function
-document.getElementById('loginBtn')?.addEventListener('click', () => {
+document.getElementById('loginBtn')?.addEventListener('click', (e) => {
+  e.preventDefault(); // Prevent default form submission
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  // Simple validation
+  if (!email || !password) {
+    document.getElementById('authStatus').textContent = "Please enter both email and password";
+    return;
+  }
   
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
