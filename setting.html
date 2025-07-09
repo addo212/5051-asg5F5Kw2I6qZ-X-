@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Finance Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <header>
+            <div class="header-left">
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <h1>Finance Tracker</h1>
+            </div>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </header>
+        
+        <!-- MENU NAVIGASI DENGAN DROPDOWN -->
+        <nav class="main-nav">
+            <div class="dropdown">
+                <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a>
+                    <a href="wallets.html"><i class="fas fa-wallet"></i> Wallets</a>
+                    <a href="budgets.html"><i class="fas fa-chart-pie"></i> Budgets</a>
+                    <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="settings.html" class="active"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- SETTINGS CONTENT -->
+        <div class="settings-container">
+            <h2><i class="fas fa-palette"></i> Theme Settings</h2>
+            
+            <div class="settings-section">
+                <h3>Choose Theme</h3>
+                <div class="theme-options">
+                    <div class="theme-option" data-theme="light">
+                        <div class="theme-preview light-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>Light</span>
+                        <i class="fas fa-check theme-selected"></i>
+                    </div>
+                    
+                    <div class="theme-option" data-theme="dark">
+                        <div class="theme-preview dark-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>Dark</span>
+                        <i class="fas fa-check theme-selected"></i>
+                    </div>
+                    
+                    <div class="theme-option" data-theme="blue">
+                        <div class="theme-preview blue-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>Blue</span>
+                        <i class="fas fa-check theme-selected"></i>
+                    </div>
+                    
+                    <div class="theme-option" data-theme="purple">
+                        <div class="theme-preview purple-theme">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <span>Purple</span>
+                        <i class="fas fa-check theme-selected"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Other Settings</h3>
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="notificationsToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Enable Notifications</span>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="switch">
+                        <input type="checkbox" id="soundsToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Enable Sounds</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/theme.js"></script>
+</body>
+</html>
