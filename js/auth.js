@@ -32,7 +32,26 @@ document.getElementById('loginBtn')?.addEventListener('click', (e) => {
       document.getElementById('authStatus').textContent = errorMessage;
     });
 });
+// Loading
+function setLoading(isLoading) {
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    if (isLoading) {
+      loginBtn.textContent = "Logging in...";
+      loginBtn.disabled = true;
+    } else {
+      loginBtn.textContent = "Login";
+      loginBtn.disabled = false;
+    }
+  }
+}
 
+// Gunakan dalam login
+setLoading(true);
+signInWithEmailAndPassword(auth, email, password)
+  .then(...)
+  .catch(...)
+  .finally(() => setLoading(false));
 // Signup function
 document.getElementById('signupBtn')?.addEventListener('click', () => {
   const email = document.getElementById('email').value;
