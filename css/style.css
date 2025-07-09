@@ -618,15 +618,15 @@ header {
 /* RECENT TRANSACTIONS SECTION */
 .recent-transactions {
     margin-top: 40px;
-    background: white;
+    background: var(--bg-secondary);
     padding: 1.5rem;
     border-radius: 16px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    box-shadow: var(--card-shadow);
 }
 
 .recent-transactions h2 {
     font-size: 1.2rem;
-    color: #333;
+    color: var(--text-primary);
     margin-top: 0;
     margin-bottom: 1.5rem;
     display: flex;
@@ -635,7 +635,7 @@ header {
 }
 
 .recent-transactions h2 i {
-    color: #4CAF50;
+    color: var(--accent-color);
 }
 
 .transaction-list {
@@ -643,7 +643,7 @@ header {
 }
 
 .empty-state {
-    color: #999;
+    color: var(--text-secondary);
     text-align: center;
     padding: 20px;
     font-style: italic;
@@ -655,7 +655,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .transaction-item:last-child {
@@ -679,22 +679,23 @@ header {
 }
 
 .income {
-    background-color: #4CAF50;
+    background-color: var(--income-color);
 }
 
 .expense {
-    background-color: #f44336;
+    background-color: var(--expense-color);
 }
 
 .transaction-info h4 {
     margin: 0;
     font-size: 1rem;
+    color: var(--text-primary);
 }
 
 .transaction-info p {
     margin: 0;
     font-size: 0.8rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .transaction-amount {
@@ -702,11 +703,11 @@ header {
 }
 
 .amount-income {
-    color: #4CAF50;
+    color: var(--income-color);
 }
 
 .amount-expense {
-    color: #f44336;
+    color: var(--expense-color);
 }
 
 /* RESPONSIVE ADJUSTMENTS */
