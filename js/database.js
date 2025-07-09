@@ -1,7 +1,11 @@
+import firebaseConfig from './firebase-config.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
-import { auth } from "./firebase-config.js"; // Optional: Link to auth if needed
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
-const db = getDatabase();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
 // ===== Core CRUD Operations =====
 export async function saveUserData(userId, data) {
