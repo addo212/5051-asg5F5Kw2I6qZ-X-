@@ -39,6 +39,13 @@
         <!-- STATUS MESSAGE -->
         <p id="authStatus" class="status-message"></p>
     </div>
+    <script>
+    // Apply saved theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 
     <!-- FIREBASE INIT & AUTH SCRIPT -->
     <script type="module" src="js/auth.js"></script>
