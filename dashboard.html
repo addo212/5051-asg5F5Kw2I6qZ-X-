@@ -57,6 +57,14 @@
             </div>
         </section>
     </div>
+    
+    <script>
+    // Apply saved theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 
    <script type="module" src="js/auth.js"></script>
    <script type="module" src="js/main.js"></script>
