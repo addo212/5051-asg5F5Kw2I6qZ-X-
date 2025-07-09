@@ -1,4 +1,6 @@
-// firebase-config.js
+import { initializeApp } from "firebase/app";
+
+// Config (consider moving to .env)
 const firebaseConfig = {
   apiKey: "AIzaSyBSwh3Qj-rmHIbDFP63VY3omfjXa7XFqhw",
   authDomain: "adlan-money-trancker.firebaseapp.com",
@@ -8,5 +10,5 @@ const firebaseConfig = {
   appId: "1:686344739681:web:ad4fa48709e96c3ae30320"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize and export
+export const app = initializeApp(firebaseConfig);
