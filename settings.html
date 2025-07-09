@@ -104,11 +104,41 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
         });
+    <div class="settings-section">
+    <h3>Manage Accounts</h3>
+    <div id="accountsContainer">
+        <div class="account-list">
+            <ul id="incomeAccountsList"></ul>
+            <ul id="expenseAccountsList"></ul>
+        </div>
+        <form id="addAccountForm">
+            <input type="text" id="newAccountName" placeholder="Account Name">
+            <select id="newAccountType">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <button type="submit" class="btn-primary">Add Account</button>
+        </form>
+    </div>
+</div>
+
+<div class="settings-section">
+    <h3>Manage Wallets</h3>
+    <div id="walletsContainer">
+        <ul id="walletsList"></ul>
+        <form id="addWalletForm">
+            <input type="text" id="newWalletName" placeholder="Wallet Name">
+            <button type="submit" class="btn-primary">Add Wallet</button>
+        </form>
+    </div>
+</div>
+
     </script>
 
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/dropdown.js"></script>
+    <script type="module" src="js/settings.js"></script>
 </body>
 </html>
