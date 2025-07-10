@@ -1,6 +1,7 @@
 // main.js - Dashboard functionality
 import { auth, initializeUserData, loadUserData, loadTransactions } from './database.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { formatRupiah } from './utils.js';
 
 // ============================================================================
 // Main Application Logic
