@@ -109,32 +109,33 @@
         <!-- Daftar dompet akan ditampilkan di sini oleh settings.js -->
         <ul id="walletsList"></ul> 
         
-        <form id="addWalletForm">
-            <h3>Add New Wallet</h3>
-            <div class="form-group">
-                <label for="newWalletName">Wallet Name</label>
-                <input type="text" id="newWalletName" placeholder="e.g., Savings, Daily Cash" required>
-            </div>
+        <!-- Form untuk menambah dompet baru -->
+                    <form id="addWalletForm" class="add-item-form">
+                        <h3 style="margin-top: 2rem;">Add New Wallet</h3>
+                        <div class="form-group">
+                            <label for="newWalletName">Wallet Name</label>
+                            <input type="text" id="newWalletName" placeholder="e.g., Savings, Daily Cash" required>
+                        </div>
 
-            <!-- Input Warna Baru -->
-            <div class="form-group">
-                <label for="newWalletColor">Wallet Color</label>
-                <input type="color" id="newWalletColor" value="#6c5ce7">
-            </div>
+                        <div class="form-group">
+                            <label for="newWalletColor">Wallet Color</label>
+                            <input type="color" id="newWalletColor" value="#6c5ce7" class="color-input">
+                        </div>
 
-            <!-- Pilihan Ikon Baru -->
-            <div class="form-group">
-                <label for="newWalletIcon">Choose an Icon</label>
-                <div class="icon-picker" id="iconPicker">
-                    <!-- Ikon akan di-generate oleh JavaScript -->
+                        <div class="form-group">
+                            <label>Choose an Icon</label>
+                            <div class="icon-picker" id="iconPicker">
+                                <!-- Ikon akan di-generate oleh JavaScript -->
+                            </div>
+                            <input type="hidden" id="selectedWalletIcon" value="fa-wallet">
+                        </div>
+
+                        <button type="submit" class="btn-primary">Add Wallet</button>
+                    </form>
                 </div>
-                <input type="hidden" id="selectedWalletIcon" value="fa-wallet">
             </div>
-
-            <button type="submit" class="btn-primary">Add Wallet</button>
-        </form>
+        </div>
     </div>
-</div>
 
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/main.js"></script>
