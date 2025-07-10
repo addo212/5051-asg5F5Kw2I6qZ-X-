@@ -67,12 +67,14 @@ function displayWallets() {
         return;
     }
 
-    // Menggunakan class dari style.css yang baru ditambahkan
+    // Menggunakan class dari style.css yang akan kita tambahkan
     let html = '<ul class="wallet-list-container">'; 
     for (const walletId in userWallets) {
         const wallet = userWallets[walletId];
         const currency = localStorage.getItem('currency') || 'USD';
         const currencySymbol = getCurrencySymbol(currency);
+        
+        // Struktur HTML baru untuk setiap kartu dompet
         html += `
             <li class="wallet-item">
                 <div class="wallet-info">
