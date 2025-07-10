@@ -17,21 +17,24 @@
   --gradient-end: #8BC34A;
 }
 
-/* Dark Theme - IMPROVED CONTRAST */
+/* Dark Theme - DENGAN AKSEN WARNA EMAS BARU */
 [data-theme="dark"] {
   --bg-primary: #121212;
   --bg-secondary: #1e1e1e;
-  --text-primary: #ffffff; /* Lebih terang untuk kontras lebih baik */
-  --text-secondary: #cccccc; /* Lebih terang untuk kontras lebih baik */
-  --accent-color: #4ecca3;
-  --accent-hover: #3da58a;
-  --border-color: #444444; /* Lebih terang untuk visibilitas */
-  --card-shadow: 0 5px 15px rgba(0,0,0,0.4); /* Shadow lebih gelap */
-  --danger-color: #ff6b6b; /* Lebih terang untuk kontras */
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  /* Warna Aksen Emas Baru */
+  --accent-color: #F9A825; /* Emas */
+  --accent-hover: #F57F17; /* Emas lebih gelap saat hover */
+  --border-color: #444444;
+  --card-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  --danger-color: #ff6b6b;
+  /* Warna income/expense tetap untuk kejelasan */
   --income-color: #4ecca3;
-  --expense-color: #ff6b6b; /* Lebih terang untuk kontras */
-  --gradient-start: #4ecca3;
-  --gradient-end: #2e8b57;
+  --expense-color: #ff6b6b;
+  /* Gradien disesuaikan dengan tema emas */
+  --gradient-start: #F9A825;
+  --gradient-end: #F57F17;
 }
 
 /* Blue Theme */
