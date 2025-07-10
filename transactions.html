@@ -6,7 +6,8 @@
     <title>Transactions - Finance Tracker</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="icon" href="images/logo.jpeg"> <script>
+    <link rel="icon" href="images/logo.jpeg">
+    <script>
         // Apply saved theme
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -79,10 +80,42 @@
                 </div>
 
                 <button type="submit" class="btn-primary">Save Transaction</button>
-                <p id="formError" class="status-message" style="display: none;"></p> <div id="successMessage" class="success-message" style="display: none;"></div>
+                <p id="formError" class="status-message" style="display: none;"></p>
+                <div id="successMessage" class="success-message" style="display: none;"></div> 
             </form>
 
             <h2><i class="fas fa-history"></i> Transaction History</h2>
+
+            <div class="filter-container">
+                <div class="form-group">
+                    <label for="filterStartDate">Start Date:</label>
+                    <input type="date" id="filterStartDate">
+                </div>
+                <div class="form-group">
+                    <label for="filterEndDate">End Date:</label>
+                    <input type="date" id="filterEndDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="filterWallet">Wallet:</label>
+                    <select id="filterWallet">
+                        <option value="">All Wallets</option>
+                        <!-- Wallets will be loaded here -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="filterAccount">Account:</label>
+                    <select id="filterAccount">
+                        <option value="">All Accounts</option>
+                        <!-- Accounts will be loaded here -->
+                    </select>
+                </div>
+
+                <button id="applyFilters" class="btn-primary">Apply Filters</button>
+                <button id="resetFilters" class="btn-secondary">Reset Filters</button>
+            </div>
+
             <div id="transactionHistory">
                 <!-- Transaction history will be loaded here -->
                 <p class="empty-state">No transactions yet.</p>
