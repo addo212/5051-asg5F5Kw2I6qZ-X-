@@ -8,6 +8,7 @@ import { auth, db, loadUserData } from './database.js';
 // Impor fungsi spesifik dari Firebase SDK
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+import { formatRupiah } from './utils.js';
 
 // ============================================================================
 // Global Variables
@@ -88,7 +89,7 @@ function displayWallets() {
                     <i class="fas ${iconClass} wallet-icon"></i>
                     <h3>${wallet.name}</h3>
                 </div>
-                <p class="wallet-balance">${currencySymbol}${wallet.balance.toFixed(2)}</p>
+                <p class="wallet-balance">${formatRupiah(wallet.balance)}</p>
             </li>
         `;
     });
@@ -109,12 +110,11 @@ function loadTransferFormOptions() {
 
     for (const walletId in userWallets) {
         const wallet = userWallets[walletId];
-        const currencySymbol = getCurrencySymbol(localStorage.getItem('currency') || 'USD');
-
+        
         // Opsi untuk dropdown "From", menampilkan saldo
         const fromOption = document.createElement('option');
         fromOption.value = walletId;
-        fromOption.text = `${wallet.name} (${currencySymbol}${wallet.balance.toFixed(2)})`;
+        fromOption.text = `${wallet.name} (${formatRupiah(wallet.balance)})`;
         fromWalletSelect.appendChild(fromOption);
 
         // Opsi untuk dropdown "To"
