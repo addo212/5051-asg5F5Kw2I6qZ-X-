@@ -62,29 +62,47 @@ function displayWallets() {
     const walletsListElement = document.getElementById('walletsList');
     if (!walletsListElement) return;
 
-    if (Object.keys(userWallets).length === 0) {
+    // Definisikan palet warna dan ikon kita
+    const palette = [
+        { gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', icon: 'fa-credit-card' },
+        { gradient: 'linear-gradient(135deg, #2af598 0%, #009efd 100%)', icon: 'fa-piggy-bank' },
+        { gradient: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)', icon: 'fa-university' },
+        { gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', icon: 'fa-briefcase' },
+        { gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', icon: 'fa-leaf' },
+        { gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', icon: 'fa-heart' },
+        { gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)', icon: 'fa-seedling' }
+    ];
+
+    const walletIds = Object.keys(userWallets);
+
+    if (walletIds.length === 0) {
         walletsListElement.innerHTML = '<p class="empty-state">No wallets found. Add one in Settings.</p>';
         return;
     }
 
-    // Menggunakan class dari style.css yang akan kita tambahkan
     let html = '<ul class="wallet-list-container">'; 
-    for (const walletId in userWallets) {
+    
+    walletIds.forEach((walletId, index) => {
         const wallet = userWallets[walletId];
         const currency = localStorage.getItem('currency') || 'USD';
         const currencySymbol = getCurrencySymbol(currency);
         
-        // Struktur HTML baru untuk setiap kartu dompet
+        // Mengambil gaya dari palet secara bergiliran
+        const styleIndex = index % palette.length;
+        const currentStyle = palette[styleIndex];
+
+        // Struktur HTML baru dengan inline style untuk background dan class untuk ikon
         html += `
-            <li class="wallet-item">
+            <li class="wallet-item" style="background: ${currentStyle.gradient};">
                 <div class="wallet-info">
-                    <i class="fas fa-wallet wallet-icon"></i>
+                    <i class="fas ${currentStyle.icon} wallet-icon"></i>
                     <h3>${wallet.name}</h3>
                 </div>
                 <p class="wallet-balance">${currencySymbol}${wallet.balance.toFixed(2)}</p>
             </li>
         `;
-    }
+    });
+
     html += '</ul>';
     walletsListElement.innerHTML = html;
 }
