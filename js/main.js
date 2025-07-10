@@ -14,10 +14,15 @@ async function initializeApp(user) {
             userData = await loadUserData(user.uid); // Reload data after initialization
         }
         
-        updateDashboard(userData);
-        
+        // Hitung dan perbarui data bulanan sebelum menampilkan dashboard
         const transactions = await loadTransactions(user.uid);
         const transactionsArray = Object.values(transactions || {});
+        
+        const monthlyData = calculateMonthlySummary(transactionsArray);
+        userData.monthlyIncome = monthlyData.income;
+        userData.monthlyExpenses = monthlyData.expense;
+
+        updateDashboard(userData);
         displayRecentTransactions(transactionsArray);
 
     } catch (error) {
@@ -62,6 +67,32 @@ function updateDashboard(userData) {
         monthlyExpensesElement.textContent = `${currencySymbol}${(userData.monthlyExpenses || 0).toFixed(2)}`;
     }
 }
+
+// ============================================================================
+// Calculate Monthly Income and Expenses
+// ============================================================================
+function calculateMonthlySummary(transactions) {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    let income = 0;
+    let expense = 0;
+
+    transactions.forEach(transaction => {
+        const transactionDate = new Date(transaction.timestamp);
+        if (transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear) {
+            if (transaction.type === 'income') {
+                income += transaction.amount;
+            } else {
+                expense += transaction.amount;
+            }
+        }
+    });
+
+    return { income, expense };
+}
+
 
 // ============================================================================
 // Get currency symbol
