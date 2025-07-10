@@ -41,7 +41,7 @@ export async function updateUserData(userId, updates) {
 export async function saveTransaction(userId, transaction) {
     try {
         const newTransactionRef = push(ref(db, `users/${userId}/transactions`));
-        // Simpan transaksi bersama dengan ID uniknya
+        // Simpan transaksi bersama dengan ID uniknya (key) di dalam objek itu sendiri
         await set(newTransactionRef, { ...transaction, id: newTransactionRef.key });
         console.log("Transaction saved successfully!");
     } catch (error) {
@@ -64,6 +64,7 @@ export function loadTransactions(userId) {
 
 export async function deleteTransaction(userId, transactionId) {
     try {
+        // Path untuk menghapus transaksi sekarang sudah benar
         await remove(ref(db, `users/${userId}/transactions/${transactionId}`));
         console.log("Transaction deleted successfully!");
     } catch (error) {
@@ -94,19 +95,20 @@ export function deleteAccount(userId, accountName, accountType) {
     });
 }
 
-export function saveWallet(userId, walletName, color, icon) { // Tambahkan parameter color & icon
+// Fungsi ini sekarang menerima parameter color dan icon
+export function saveWallet(userId, walletName, color, icon) {
     return get(ref(db, `users/${userId}/wallets`)).then((snapshot) => {
         const wallets = snapshot.val() || {};
         if (Object.values(wallets).some(wallet => wallet.name === walletName)) {
             throw new Error('Wallet with this name already exists.');
         }
         const newWalletRef = push(ref(db, `users/${userId}/wallets`));
-        // Simpan data baru termasuk warna dan ikon
+        // Simpan data baru termasuk warna dan ikon dengan nilai default
         return set(newWalletRef, { 
             name: walletName, 
             balance: 0,
-            color: color || '#6c5ce7', // Warna default jika tidak ada
-            icon: icon || 'fa-wallet' // Ikon default jika tidak ada
+            color: color || '#6c5ce7', // Warna default ungu
+            icon: icon || 'fa-wallet'  // Ikon default dompet
         });
     });
 }
@@ -127,7 +129,9 @@ export async function initializeUserData(userId) {
             income: ['Gaji Addo', 'Gaji Anne', 'Bonus Addo', 'Bonus Anne', 'Other Revenue'],
             expense: ['Other Will', 'Daycare', 'Ayah', 'Save for Emergency', 'Internet', 'Cell Services', 'Diapers', 'Milk', 'Water & Electrics', 'CC Bill', 'Iuran', 'Gas Ad', 'Gas An', 'Food & Groceries', 'Snack Ad', 'Snack An', 'Homecare', 'Parkir Kantor', 'Personal Care', 'Other Expense', 'Transfer', 'Save', 'Save Aldric', 'Cicilan', 'Pajak Kendaraan', 'Pakaian', 'Laundry', 'Medicine', 'Gas Mobil', 'Hiburan - Wisata Dll']
         },
-        defaultWallet: { 
+        // PERBAIKAN: Objek 'wallets' sekarang menjadi induk dari 'defaultWallet'
+        wallets: {
+            defaultWallet: { 
                 name: "Default Wallet", 
                 balance: 0,
                 color: '#4CAF50', // Warna hijau untuk dompet default
