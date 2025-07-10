@@ -4,39 +4,27 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebas
 import { getDatabase, ref, set, get, update, remove, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
-// Initialize Firebase
+// ============================================================================
+// Firebase Initialization (HANYA DI FILE INI)
+// ============================================================================
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+export const db = getDatabase(app);
+export const auth = getAuth(app);
 
 
 // ============================================================================
 // User Data Operations
 // ============================================================================
-
-// Function to save user data
-export async function saveUserData(userId, data) {
-    try {
-        await set(ref(db, `users/${userId}`), data);
-        console.log("Data saved successfully!");
-    } catch (error) {
-        console.error("Error saving data:", error);
-        throw error;
-    }
-}
-
-// Function to load user data
 export async function loadUserData(userId) {
     try {
         const snapshot = await get(ref(db, `users/${userId}`));
         return snapshot.exists() ? snapshot.val() : null;
     } catch (error) {
-        console.error("Error loading data:", error);
+        console.error("Error loading user data:", error);
         throw error;
     }
 }
 
-// Function to update user data
 export async function updateUserData(userId, updates) {
     try {
         await update(ref(db, `users/${userId}`), updates);
@@ -47,26 +35,14 @@ export async function updateUserData(userId, updates) {
     }
 }
 
-// Function to delete user data
-export async function deleteUserData(userId) {
-    try {
-        await remove(ref(db, `users/${userId}`));
-        console.log("Data deleted successfully!");
-    } catch (error) {
-        console.error("Error deleting data:", error);
-        throw error;
-    }
-}
-
-
 // ============================================================================
 // Transaction Operations
 // ============================================================================
-
-// Function to save a new transaction
 export async function saveTransaction(userId, transaction) {
     try {
-        await push(ref(db, `users/${userId}/transactions`), transaction);
+        const newTransactionRef = push(ref(db, `users/${userId}/transactions`));
+        // Simpan transaksi bersama dengan ID uniknya
+        await set(newTransactionRef, { ...transaction, id: newTransactionRef.key });
         console.log("Transaction saved successfully!");
     } catch (error) {
         console.error("Error saving transaction:", error);
@@ -74,13 +50,11 @@ export async function saveTransaction(userId, transaction) {
     }
 }
 
-// Function to load transactions
 export function loadTransactions(userId) {
     return new Promise((resolve, reject) => {
         const transactionsRef = ref(db, `users/${userId}/transactions`);
         onValue(transactionsRef, (snapshot) => {
-            const transactionsData = snapshot.val();
-            resolve(transactionsData || {});
+            resolve(snapshot.val() || {});
         }, (error) => {
             console.error("Error loading transactions:", error);
             reject(error);
@@ -88,18 +62,6 @@ export function loadTransactions(userId) {
     });
 }
 
-// Function to update a transaction
-export async function updateTransaction(userId, transactionId, updates) {
-    try {
-        await update(ref(db, `users/${userId}/transactions/${transactionId}`), updates);
-        console.log("Transaction updated successfully!");
-    } catch (error) {
-        console.error("Error updating transaction:", error);
-        throw error;
-    }
-}
-
-// Function to delete a transaction
 export async function deleteTransaction(userId, transactionId) {
     try {
         await remove(ref(db, `users/${userId}/transactions/${transactionId}`));
@@ -113,31 +75,17 @@ export async function deleteTransaction(userId, transactionId) {
 // ============================================================================
 // Account and Wallet Operations
 // ============================================================================
-
-// Function to get accounts
-export function getAccounts(userId) {
-    return get(ref(db, `users/${userId}/accounts`)).then((snapshot) => {
-        return snapshot.val() || { income: [], expense: [] };
-    });
-}
-
-// Function to get wallets
-export function getWallets(userId) {
-    return get(ref(db, `users/${userId}/wallets`)).then((snapshot) => {
-        return snapshot.val() || {};
-    });
-}
-
-// Function to save an account
 export function saveAccount(userId, accountName, accountType) {
     return get(ref(db, `users/${userId}/accounts`)).then((snapshot) => {
         const accounts = snapshot.val() || { income: [], expense: [] };
+        if (accounts[accountType].includes(accountName)) {
+            throw new Error('Account with this name already exists.');
+        }
         accounts[accountType].push(accountName);
         return set(ref(db, `users/${userId}/accounts`), accounts);
     });
 }
 
-// Function to delete an account
 export function deleteAccount(userId, accountName, accountType) {
     return get(ref(db, `users/${userId}/accounts`)).then((snapshot) => {
         const accounts = snapshot.val() || { income: [], expense: [] };
@@ -146,18 +94,20 @@ export function deleteAccount(userId, accountName, accountType) {
     });
 }
 
-// Function to save a wallet
 export function saveWallet(userId, walletName) {
-    return push(ref(db, `users/${userId}/wallets`)).then(newWalletRef => {
+    return get(ref(db, `users/${userId}/wallets`)).then((snapshot) => {
+        const wallets = snapshot.val() || {};
+        if (Object.values(wallets).some(wallet => wallet.name === walletName)) {
+            throw new Error('Wallet with this name already exists.');
+        }
+        const newWalletRef = push(ref(db, `users/${userId}/wallets`));
         return set(newWalletRef, { name: walletName, balance: 0 });
     });
 }
 
-// Function to delete a wallet
 export function deleteWallet(userId, walletId) {
     return remove(ref(db, `users/${userId}/wallets/${walletId}`));
 }
-
 
 // ============================================================================
 // Initial Data Setup
@@ -172,14 +122,10 @@ export async function initializeUserData(userId) {
             expense: ['Other Will', 'Daycare', 'Ayah', 'Save for Emergency', 'Internet', 'Cell Services', 'Diapers', 'Milk', 'Water & Electrics', 'CC Bill', 'Iuran', 'Gas Ad', 'Gas An', 'Food & Groceries', 'Snack Ad', 'Snack An', 'Homecare', 'Parkir Kantor', 'Personal Care', 'Other Expense', 'Transfer', 'Save', 'Save Aldric', 'Cicilan', 'Pajak Kendaraan', 'Pakaian', 'Laundry', 'Medicine', 'Gas Mobil', 'Hiburan - Wisata Dll']
         },
         wallets: {
-            default: {
-                name: "Default Wallet",
-                balance: 0
-            }
+            defaultWallet: { name: "Default Wallet", balance: 0 }
         },
         transactions: {}
     };
-
     try {
         await set(ref(db, `users/${userId}`), initialData);
         console.log("Initial user data created");
