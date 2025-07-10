@@ -1050,3 +1050,35 @@ css
     align-self: flex-end; /* Mendorong ke kanan */
     margin-top: 1rem; /* Memberi jarak dari atas */
 }
+/* ============================================================================ */
+/* SETTINGS PAGE - ICON PICKER STYLES */
+/* ============================================================================ */
+.icon-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: var(--bg-primary);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.icon-option {
+    font-size: 1.5rem;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    color: var(--text-secondary);
+}
+
+.icon-option:hover {
+    background-color: var(--bg-secondary);
+    transform: scale(1.1);
+}
+
+.icon-option.selected {
+    background-color: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
+}
