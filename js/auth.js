@@ -1,13 +1,11 @@
-import firebaseConfig from './firebase-config.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } 
+// auth.js
+import { auth } from './database.js'; // Impor auth dari database.js
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
+// ============================================================================
 // Loading state function
+// ============================================================================
 function setLoading(isLoading, buttonId = 'loginBtn') {
   const button = document.getElementById(buttonId);
   if (button) {
@@ -21,13 +19,14 @@ function setLoading(isLoading, buttonId = 'loginBtn') {
   }
 }
 
+// ============================================================================
 // Login function
+// ============================================================================
 document.getElementById('loginBtn')?.addEventListener('click', (e) => {
-  e.preventDefault(); // Prevent default form submission
+  e.preventDefault();
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   
-  // Simple validation
   if (!email || !password) {
     document.getElementById('authStatus').textContent = "Please enter both email and password";
     return;
@@ -39,23 +38,27 @@ document.getElementById('loginBtn')?.addEventListener('click', (e) => {
       window.location.href = "dashboard.html";
     })
     .catch(error => {
-      let errorMessage = error.message;
-      if (error.code === "auth/wrong-password") {
-        errorMessage = "Wrong password. Try again.";
+      let errorMessage;
+      if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+        errorMessage = "Wrong password or email. Try again.";
       } else if (error.code === "auth/user-not-found") {
         errorMessage = "Email not registered.";
+      } else {
+        errorMessage = "An error occurred. Please try again.";
+        console.error("Login Error:", error);
       }
       document.getElementById('authStatus').textContent = errorMessage;
     })
     .finally(() => setLoading(false));
 });
 
+// ============================================================================
 // Signup function
+// ============================================================================
 document.getElementById('signupBtn')?.addEventListener('click', () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   
-  // Simple validation
   if (!email || !password) {
     document.getElementById('authStatus').textContent = "Please enter both email and password";
     return;
@@ -64,39 +67,39 @@ document.getElementById('signupBtn')?.addEventListener('click', () => {
   setLoading(true, 'signupBtn');
   createUserWithEmailAndPassword(auth, email, password)
     .then(() => {
-      document.getElementById('authStatus').textContent = "Account created successfully!";
+      document.getElementById('authStatus').textContent = "Account created successfully! Please log in.";
     })
     .catch(error => {
-      let errorMessage = error.message;
+      let errorMessage;
       if (error.code === "auth/email-already-in-use") {
         errorMessage = "Email already registered.";
+      } else {
+        errorMessage = "An error occurred during sign up.";
+        console.error("Signup Error:", error);
       }
       document.getElementById('authStatus').textContent = errorMessage;
     })
     .finally(() => setLoading(false, 'signupBtn'));
 });
 
-// Auth state listener
+// ============================================================================
+// Auth state listener (untuk redirect)
+// ============================================================================
 onAuthStateChanged(auth, user => {
-  const isOnLoginPage = window.location.pathname.includes('index.html') || 
-                        window.location.pathname === '/';
+  const isOnLoginPage = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/');
   
   if (user && isOnLoginPage) {
     window.location.href = "dashboard.html";
   }
 });
 
+// ============================================================================
 // Logout handler
+// ============================================================================
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
-  console.log("Logout button clicked"); // Debugging
   signOut(auth).then(() => {
     window.location.href = "index.html";
   }).catch(error => {
     console.error("Error signing out:", error);
   });
 });
-
-// Check if we're on dashboard and log auth state
-if (window.location.pathname.includes('dashboard.html')) {
-  console.log("On dashboard, auth state:", auth.currentUser);
-}
