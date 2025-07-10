@@ -1,5 +1,7 @@
-/* BASE STYLES */
-/* THEME VARIABLES */
+/* ============================================================================ */
+/* 1. BASE STYLES & THEME VARIABLES
+/* ============================================================================ */
+
 :root {
   /* Default Light Theme */
   --bg-primary: #f5f7fa;
@@ -17,21 +19,24 @@
   --gradient-end: #8BC34A;
 }
 
-/* Dark Theme - IMPROVED CONTRAST */
+/* Dark Theme - DENGAN AKSEN WARNA EMAS BARU */
 [data-theme="dark"] {
   --bg-primary: #121212;
   --bg-secondary: #1e1e1e;
-  --text-primary: #ffffff; /* Lebih terang untuk kontras lebih baik */
-  --text-secondary: #cccccc; /* Lebih terang untuk kontras lebih baik */
-  --accent-color: #4ecca3;
-  --accent-hover: #3da58a;
-  --border-color: #444444; /* Lebih terang untuk visibilitas */
-  --card-shadow: 0 5px 15px rgba(0,0,0,0.4); /* Shadow lebih gelap */
-  --danger-color: #ff6b6b; /* Lebih terang untuk kontras */
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  /* Warna Aksen Emas Baru */
+  --accent-color: #F9A825; /* Emas */
+  --accent-hover: #F57F17; /* Emas lebih gelap saat hover */
+  --border-color: #444444;
+  --card-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  --danger-color: #ff6b6b;
+  /* Warna income/expense tetap untuk kejelasan */
   --income-color: #4ecca3;
-  --expense-color: #ff6b6b; /* Lebih terang untuk kontras */
-  --gradient-start: #4ecca3;
-  --gradient-end: #2e8b57;
+  --expense-color: #ff6b6b;
+  /* Gradien disesuaikan dengan tema emas */
+  --gradient-start: #F9A825;
+  --gradient-end: #F57F17;
 }
 
 /* Blue Theme */
@@ -68,18 +73,13 @@
   --gradient-end: #8e44ad;
 }
 
+/* ============================================================================ */
+/* 2. GENERAL & REUSABLE COMPONENTS
+/* ============================================================================ */
+
 /* Smooth theme transition */
 * {
     transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
-}
-
-/* DASHBOARD BODY STYLES */
-.dashboard-body {
-    height: auto;
-    display: block;
-    background-color: var(--bg-primary);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text-primary); /* Ensure text color is set */
 }
 
 body {
@@ -87,42 +87,72 @@ body {
     background-color: var(--bg-primary);
     margin: 0;
     padding: 0;
+    color: var(--text-primary);
+}
+
+/* Body khusus untuk halaman login */
+body:not(.dashboard-body) {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    color: var(--text-primary);
 }
 
-/* AUTH CONTAINER */
-.auth-container {
+/* Body untuk halaman setelah login */
+.dashboard-body {
+    height: auto;
+    display: block;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.content-container {
     background: var(--bg-secondary);
-    padding: 2.5rem;
+    padding: 2rem;
     border-radius: 12px;
     box-shadow: var(--card-shadow);
-    width: 350px;
+}
+
+.content-container h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    margin-top: 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-container h2 i {
+    color: var(--accent-color);
+}
+
+.empty-state {
+    color: var(--text-secondary);
     text-align: center;
-    transition: transform 0.3s ease;
+    padding: 20px;
+    font-style: italic;
 }
 
-.auth-container:hover {
-    transform: translateY(-5px);
-}
-
-/* FORM ELEMENTS */
+/* --- Form Elements --- */
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     text-align: left;
 }
 
-label {
+.form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: var(--text-primary);
 }
 
-input {
+.form-group input,
+.form-group select {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border-color);
@@ -132,14 +162,26 @@ input {
     color: var(--text-primary);
 }
 
-/* Dark theme specific input styles */
-[data-theme="dark"] input {
-    background-color: #2d2d2d; /* Slightly lighter than bg-secondary */
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select {
+    background-color: #2d2d2d;
     border-color: #555555;
     color: #ffffff;
 }
 
-/* BUTTONS */
+[data-theme="dark"] .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23bbb'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+/* --- Buttons --- */
 .btn-primary {
     background-color: var(--accent-color);
     color: white;
@@ -174,7 +216,6 @@ input {
     margin-top: 0.5rem;
 }
 
-/* Dark theme specific button styles */
 [data-theme="dark"] .btn-secondary {
     background-color: #2d2d2d;
     border-color: #555555;
@@ -198,21 +239,26 @@ input {
     color: white;
 }
 
-/* STATUS MESSAGE */
-.status-message {
-    margin-top: 1rem;
-    color: var(--text-secondary);
+/* Tombol 'Add' yang lebih kecil */
+.btn-primary-small {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
     font-size: 0.9rem;
+    transition: background-color 0.3s;
 }
 
-/* DASHBOARD CONTAINER */
-.dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem;
+.btn-primary-small:hover {
+    background-color: var(--accent-hover);
 }
 
-/* HEADER STYLES */
+/* ============================================================================ */
+/* 3. HEADER & NAVIGATION
+/* ============================================================================ */
+
 header {
     display: flex;
     justify-content: space-between;
@@ -239,24 +285,11 @@ header {
     width: auto;
 }
 
-/* NAVIGATION STYLES */
 .main-nav {
     margin-bottom: 2.5rem;
 }
 
-.nav-link {
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-    color: var(--text-primary);
-    border-radius: 4px;
-}
-
-.nav-link.active {
-    background-color: var(--accent-color);
-    color: white;
-}
-
-/* DROPDOWN MENU STYLES */
+/* --- Dropdown Menu --- */
 .dropdown {
     position: relative;
     display: inline-block;
@@ -297,19 +330,16 @@ header {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-/* Dark theme specific dropdown styles */
 [data-theme="dark"] .dropdown-content {
     background-color: #2d2d2d;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-/* Animasi untuk dropdown */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Kelas show untuk dropdown yang ditambahkan via JavaScript */
 .dropdown-content.show {
     display: block;
     opacity: 1;
@@ -341,7 +371,6 @@ header {
     padding-left: 24px;
 }
 
-/* Dark theme specific dropdown hover */
 [data-theme="dark"] .dropdown-content a:hover {
     background-color: #3d3d3d;
 }
@@ -353,7 +382,6 @@ header {
     border-left: 4px solid var(--accent-color);
 }
 
-/* Dark theme specific active item */
 [data-theme="dark"] .dropdown-content a.active {
     background-color: #3d3d3d;
 }
@@ -368,7 +396,38 @@ header {
     box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
 }
 
-/* STATS CARDS */
+/* ============================================================================ */
+/* 4. PAGE-SPECIFIC STYLES
+/* ============================================================================ */
+
+/* --- Login Page --- */
+.auth-container {
+    background: var(--bg-secondary);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    width: 350px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.auth-container:hover {
+    transform: translateY(-5px);
+}
+
+.logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.status-message {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* --- Dashboard Page --- */
 .stats-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -424,14 +483,6 @@ header {
     margin: 15px 0 0;
 }
 
-/* LOGO ON LOGIN PAGE */
-.logo {
-    width: 80px;
-    height: auto;
-    margin-bottom: 15px;
-}
-
-/* RECENT TRANSACTIONS SECTION */
 .recent-transactions {
     margin-top: 40px;
     background: var(--bg-secondary);
@@ -454,23 +505,43 @@ header {
     color: var(--accent-color);
 }
 
+/* --- Transactions Page --- */
+#transactionHistory ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#transactionHistory li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    background-color: var(--bg-secondary);
+    box-shadow: var(--card-shadow);
+}
+
+#transactionHistory li:hover {
+    background-color: var(--bg-primary);
+    transform: translateY(-2px);
+}
+
+#transactionHistory li:last-child {
+    border-bottom: none;
+}
+
 .transaction-list {
     min-height: 100px;
 }
 
-.empty-state {
-    color: var(--text-secondary);
-    text-align: center;
-    padding: 20px;
-    font-style: italic;
-}
-
-/* TRANSACTION ITEMS */
 .transaction-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
+    padding: 12px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -478,13 +549,7 @@ header {
     border-bottom: none;
 }
 
-.transaction-details {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.transaction-icon {
+.transaction-item .transaction-icon {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -492,41 +557,212 @@ header {
     align-items: center;
     justify-content: center;
     color: white;
+    margin-right: 1rem;
 }
 
-.income {
-    background-color: var(--income-color);
-}
+.transaction-icon.income { background-color: var(--income-color); }
+.transaction-icon.expense { background-color: var(--expense-color); }
+.transaction-icon.transfer { background-color: #3498db; }
 
-.expense {
-    background-color: var(--expense-color);
+.transaction-details {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
 }
 
 .transaction-info h4 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--text-primary);
+    font-weight: 600;
 }
 
 .transaction-info p {
-    margin: 0;
-    font-size: 0.8rem;
+    margin: 5px 0 0;
+    font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
 .transaction-amount {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-left: 1rem;
+}
+
+.amount-income { color: var(--income-color); }
+.amount-expense { color: var(--expense-color); }
+.amount-transfer { color: var(--text-secondary); }
+
+.transaction-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    margin-left: 10px;
+}
+
+.edit-btn { color: var(--accent-color); }
+.edit-btn:hover { color: var(--accent-hover); }
+.delete-btn { color: var(--danger-color); }
+.delete-btn:hover { color: #a82835; }
+
+.filter-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    background-color: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.filter-controls .form-group {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-filter {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
 }
 
-.amount-income {
-    color: var(--income-color);
+.btn-filter.apply {
+    background-color: var(--accent-color);
+    color: white;
+}
+.btn-filter.apply:hover {
+    background-color: var(--accent-hover);
 }
 
-.amount-expense {
-    color: var(--expense-color);
+.btn-filter.reset {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+.btn-filter.reset:hover {
+    background-color: var(--bg-primary);
 }
 
-/* SETTINGS PAGE STYLES */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination-container button {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.pagination-container button:hover:not(:disabled) {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.pagination-container button.active {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    font-weight: bold;
+}
+
+.pagination-container button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Wallets Page --- */
+.wallet-list-container {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.wallet-item {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.wallet-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.wallet-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.wallet-icon {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.wallet-item h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+}
+
+.wallet-balance {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    align-self: flex-end;
+    margin-top: 1rem;
+}
+
+/* --- Settings Page --- */
 .settings-container {
     background: var(--bg-secondary);
     padding: 2rem;
@@ -708,417 +944,7 @@ header {
     opacity: 1;
 }
 
-/* Toggle Switch */
-.setting-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-    color: var(--text-primary);
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-}
-
-input:checked + .slider {
-    background-color: var(--accent-color);
-}
-
-input:focus + .slider {
-    box-shadow: 0 0 1px var(--accent-color);
-}
-
-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
-.slider.round {
-    border-radius: 24px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
-}
-
-/* RESPONSIVE ADJUSTMENTS */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .btn-logout {
-        align-self: flex-end;
-    }
-    
-    .stats-summary {
-        grid-template-columns: 1fr;
-    }
-}
-/* LOADING INDICATOR */
-.loading-spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left: 4px solid var(--accent-color);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Dark theme specific loading spinner */
-[data-theme="dark"] .loading-spinner {
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid var(--accent-color);
-}
-
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    color: white;
-    font-size: 1.2rem;
-}
-/*BAGIAN INI ADALAH CSS UNTUK MENU TRANSAKSI*/
-css
-
-
-/* TRANSACTION HISTORY */
-#transactionHistory ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-#transactionHistory li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px; /* Increased padding */
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s; /* Added transition */
-    border-radius: 8px; /* Rounded corners */
-    margin-bottom: 5px; /* Spacing between items */
-    background-color: var(--bg-secondary); /* Use secondary background color */
-    box-shadow: var(--card-shadow); /* Add shadow */
-}
-
-#transactionHistory li:hover {
-    background-color: var(--bg-primary); /* Highlight on hover */
-    transform: translateY(-2px); /* Slight lift on hover */
-}
-
-#transactionHistory li:last-child {
-    border-bottom: none;
-}
-
-.transaction-details {
-    flex: 1;
-    display: flex;
-    align-items: flex-start; /* Align items to the top */
-    flex-direction: column; /* Stack details vertically */
-}
-
-.transaction-info h4 {
-    margin: 0;
-    font-size: 1.1rem; /* Slightly larger font size */
-    color: var(--text-primary);
-    font-weight: 600; /* Bolder font weight */
-}
-
-.transaction-info p {
-    margin: 5px 0 0; /* Adjusted margin */
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-.transaction-amount {
-    font-weight: bold;
-    font-size: 1.2rem; /* Larger font size */
-    margin-left: 1rem;
-}
-
-.amount-income {
-    color: var(--income-color);
-}
-
-.amount-expense {
-    color: var(--expense-color);
-}
-
-.delete-btn {
-    background: none;
-    border: none;
-    color: var(--danger-color);
-    cursor: pointer;
-    font-size: 1.1rem;
-    margin-left: 20px; /* Increased margin */
-    transition: color 0.2s; /* Added transition */
-}
-
-.delete-btn:hover {
-    color: darken(var(--danger-color), 15%); /* Darker hover color */
-}
-
-.success-message {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px;
-    border-radius: 4px;
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-}
-
-/* CONTENT CONTAINER */
-.content-container {
-    background: var(--bg-secondary);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-}
-
-.content-container h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-primary);
-    margin-top: 0;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.content-container h2 i {
-    color: var(--accent-color);
-}
-
-/* FORM */
-.form-group {
-    margin-bottom: 1.5rem;
-    text-align: left;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    box-sizing: border-box;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-}
-
-.form-group select {
-    appearance: none; /* Remove default arrow */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Custom arrow */
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px; /* Adjust padding for arrow */
-}
-
-/* Dark theme specific input styles */
-[data-theme="dark"] .form-group input,
-[data-theme="dark"] .form-group select {
-    background-color: #2d2d2d; /* Slightly lighter than bg-secondary */
-    border-color: #555555;
-    color: #ffffff;
-}
-
-[data-theme="dark"] .form-group select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23bbb'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Lighter arrow for dark theme */
-}
-/* ============================================================================ */
-/* WALLETS PAGE STYLES (Halaman Dompet) */
-/* ============================================================================ */
-
-/* Wadah utama untuk grid dompet */
-.wallet-list-container {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-/* Kotak untuk setiap dompet (sekarang dengan background gradien) */
-.wallet-item {
-    /* Hapus border-left, karena kita menggunakan background penuh */
-    /* border-left: 5px solid var(--accent-color); */
-    
-    color: white; /* Warna teks utama di dalam kartu adalah putih */
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column; /* Mengatur item secara vertikal */
-    justify-content: space-between; /* Mendorong saldo ke bawah */
-    min-height: 120px; /* Memberi tinggi minimal pada kartu */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden; /* Untuk efek di masa depan */
-}
-
-.wallet-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-/* Grup untuk ikon dan nama dompet */
-.wallet-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-/* Ikon dompet (sekarang putih dan lebih lembut) */
-.wallet-icon {
-    font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.7); /* Putih dengan sedikit transparansi */
-}
-
-/* Nama dompet (sekarang putih) */
-.wallet-item h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: white; /* Pastikan warna putih */
-}
-
-/* Saldo dompet (sekarang putih, lebih besar, dan di pojok kanan bawah) */
-.wallet-balance {
-    margin: 0;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: white; /* Pastikan warna putih */
-    align-self: flex-end; /* Mendorong ke kanan */
-    margin-top: 1rem; /* Memberi jarak dari atas */
-}
-/* ============================================================================ */
-/* SETTINGS PAGE - CUSTOM STYLES */
-/* ============================================================================ */
-
-/* Styling untuk daftar item (akun dan dompet) */
-.item-list {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 2rem;
-}
-
-.item-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: var(--bg-primary);
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-}
-
-/* Styling untuk form tambah item */
-.add-item-form {
-    border-top: 1px solid var(--border-color);
-    padding-top: 1.5rem;
-}
-
-/* Styling untuk input warna */
-.color-input {
-    padding: 5px !important; /* Override padding umum */
-    height: 40px;
-    width: 100px !important; /* Override width umum */
-}
-
-/* Styling untuk pemilih ikon */
-.icon-picker {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    background-color: var(--bg-primary);
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 5px;
-}
-
-.icon-option {
-    font-size: 1.5rem;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    color: var(--text-secondary);
-}
-
-.icon-option:hover {
-    background-color: var(--bg-secondary);
-    transform: scale(1.1);
-}
-
-.icon-option.selected {
-    background-color: var(--accent-color);
-    color: white;
-    transform: scale(1.1);
-}
-/* ============================================================================ */
-/* SETTINGS PAGE - PROFESSIONAL LAYOUT */
-/* ============================================================================ */
-
-/* Grid utama untuk kartu pengaturan */
+/* Settings Management Grid */
 .settings-management-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -1126,7 +952,6 @@ css
     margin-top: 2rem;
 }
 
-/* Styling untuk setiap kartu manajemen (Akun & Dompet) */
 .item-management-card {
     background-color: var(--bg-secondary);
     padding: 1.5rem;
@@ -1136,7 +961,6 @@ css
     flex-direction: column;
 }
 
-/* Header di dalam setiap kartu */
 .item-list-header {
     display: flex;
     align-items: center;
@@ -1157,19 +981,18 @@ css
     font-size: 1.1rem;
 }
 
-/* Grid untuk daftar akun (Income & Expense berdampingan) */
 .settings-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    flex-grow: 1; /* Membuat daftar mengisi ruang yang tersedia */
+    flex-grow: 1;
 }
 
-/* Daftar item (berlaku untuk akun dan dompet) */
 .item-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    margin-bottom: 2rem;
 }
 
 .item-list h4 {
@@ -1200,14 +1023,12 @@ css
     opacity: 1;
 }
 
-/* Form untuk menambah item baru */
 .add-item-form {
     border-top: 1px solid var(--border-color);
     padding-top: 1rem;
-    margin-top: auto; /* Mendorong form ke bagian bawah kartu */
+    margin-top: auto;
 }
 
-/* Grup form inline (input dan tombol sejajar) */
 .form-group-inline {
     display: flex;
     gap: 10px;
@@ -1219,209 +1040,15 @@ css
     flex-grow: 1;
 }
 
-/* Tombol 'Add' yang lebih kecil */
-.btn-primary-small {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-}
-
-.btn-primary-small:hover {
-    background-color: var(--accent-hover);
-}
-
-/* Penyesuaian untuk Icon Picker di dalam form inline */
 .form-group-inline .icon-picker {
     padding: 5px;
     flex-grow: 1;
 }
-/* ============================================================================ */
-/* TRANSACTIONS PAGE - FILTER & PAGINATION STYLES */
-/* ============================================================================ */
 
-/* Panel filter utama */
-.filter-panel {
+/* Icon Picker */
+.icon-picker {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end; /* Menyejajarkan tombol dengan bagian bawah input */
+    gap: 10px;
     background-color: var(--bg-primary);
-    padding: 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 2rem;
-}
-
-/* Wadah untuk semua input filter */
-.filter-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    flex-grow: 1; /* Mengambil ruang sebanyak mungkin */
-}
-
-.filter-controls .form-group {
-    flex: 1; /* Membuat setiap grup input fleksibel */
-    min-width: 200px; /* Lebar minimal sebelum membungkus */
-    margin-bottom: 0;
-}
-
-/* Wadah untuk tombol filter */
-.filter-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Tombol filter kustom */
-.btn-filter {
-    padding: 0.75rem 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-}
-
-.btn-filter.apply {
-    background-color: var(--accent-color);
-    color: white;
-}
-.btn-filter.apply:hover {
-    background-color: var(--accent-hover);
-}
-
-.btn-filter.reset {
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-}
-.btn-filter.reset:hover {
-    background-color: var(--bg-primary);
-}
-
-/* Wadah untuk tombol pagination */
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 2rem;
-}
-
-.pagination-container button {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.pagination-container button:hover:not(:disabled) {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
-
-.pagination-container button.active {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-    font-weight: bold;
-}
-
-.pagination-container button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ============================================================================ */
-/* MODAL STYLES */
-/* ============================================================================ */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: var(--bg-secondary);
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    width: 80%;
-    max-width: 600px;
-    position: relative;
-}
-
-.close-modal {
-    color: var(--text-secondary);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-modal:hover {
-    color: var(--text-primary);
-}
-
-/* Transaction actions container */
-.transaction-actions {
-    display: flex;
-    gap: 8px;
-}
-
-/* Edit button */
-.edit-btn {
-    background: none;
-    border: none;
-    color: var(--accent-color);
-    cursor: pointer;
-    font-size: 1.1rem;
-    transition: color 0.2s;
-}
-
-.edit-btn:hover {
-    color: var(--accent-hover);
-}
-/* Gaya untuk nominal transfer (netral) */
-.amount-transfer {
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-
-/* Gaya untuk ikon transaksi */
-.transaction-item .transaction-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    margin-right: 1rem;
-}
-
-.transaction-icon.income { background-color: var(--income-color); }
-.transaction-icon.expense { background-color: var(--expense-color); }
-.transaction-icon.transfer { background-color: #3498db; } /* Warna biru untuk transfer */
-
-/* Pastikan transaction-details mengambil sisa ruang */
-.transaction-item .transaction-details {
-    flex-grow: 1;
-}
+    padding: 10px;
