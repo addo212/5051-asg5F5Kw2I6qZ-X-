@@ -130,6 +130,7 @@ function loadTransferFormOptions() {
 // ============================================================================
 async function handleBalanceTransfer(fromWalletId, toWalletId, amount) {
     try {
+        showLoading();
         const fromWallet = userWallets[fromWalletId];
         const toWallet = userWallets[toWalletId];
 
@@ -140,33 +141,47 @@ async function handleBalanceTransfer(fromWalletId, toWalletId, amount) {
             throw new Error("Insufficient balance in the source wallet.");
         }
 
+        // 1. Buat objek transaksi untuk riwayat
+        const transferTransaction = {
+            date: new Date().toISOString().split('T')[0], // Tanggal hari ini
+            type: 'transfer',
+            amount: amount,
+            description: `Transfer from ${fromWallet.name} to ${toWallet.name}`,
+            fromWallet: fromWallet.name,
+            toWallet: toWallet.name,
+            account: 'Transfer', // Menggunakan kategori akun 'Transfer'
+            timestamp: new Date().getTime()
+        };
+
+        // 2. Simpan transaksi transfer ke database
+        await saveTransaction(userId, transferTransaction);
+
+        // 3. Lanjutkan dengan memperbarui saldo dompet
         const newFromBalance = fromWallet.balance - amount;
         const newToBalance = toWallet.balance + amount;
 
-        // Membuat satu objek update untuk memastikan operasi atomik (semua berhasil atau semua gagal)
         const updates = {};
         updates[`/users/${userId}/wallets/${fromWalletId}/balance`] = newFromBalance;
         updates[`/users/${userId}/wallets/${toWalletId}/balance`] = newToBalance;
 
-        // Menjalankan update ke database
         await update(ref(db), updates);
 
-        // Update data lokal untuk pembaruan UI instan
+        // Update data lokal dan tampilkan ulang
         userWallets[fromWalletId].balance = newFromBalance;
         userWallets[toWalletId].balance = newToBalance;
         
-        // Tampilkan ulang data yang sudah diperbarui
         displayWallets();
-        loadTransferFormOptions(); // Perbarui saldo di dropdown juga
+        loadTransferFormOptions();
 
-        showSuccessMessage('Transfer successful!');
+        showSuccessMessage('Transfer successful and recorded in history!');
 
     } catch (error) {
         console.error("Error transferring balance:", error);
         showError(error.message);
+    } finally {
+        hideLoading();
     }
 }
-
 // ============================================================================
 // UI Helper Functions
 // ============================================================================
