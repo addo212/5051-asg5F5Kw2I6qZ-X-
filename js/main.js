@@ -50,22 +50,20 @@ onAuthStateChanged(auth, (user) => {
 // ============================================================================
 function updateDashboard(userData) {
     if (!userData) return;
-    const currency = localStorage.getItem('currency') || 'USD';
-    const currencySymbol = getCurrencySymbol(currency);
 
     const totalBalanceElement = document.getElementById('totalBalance');
     if (totalBalanceElement) {
-        totalBalanceElement.textContent = `${currencySymbol}${(userData.totalBalance || 0).toFixed(2)}`;
+        totalBalanceElement.textContent = formatRupiah(userData.totalBalance || 0);
     }
 
     const monthlyIncomeElement = document.getElementById('monthlyIncome');
     if (monthlyIncomeElement) {
-        monthlyIncomeElement.textContent = `${currencySymbol}${(userData.monthlyIncome || 0).toFixed(2)}`;
+        monthlyIncomeElement.textContent = formatRupiah(userData.monthlyIncome || 0);
     }
 
     const monthlyExpensesElement = document.getElementById('monthlyExpenses');
     if (monthlyExpensesElement) {
-        monthlyExpensesElement.textContent = `${currencySymbol}${(userData.monthlyExpenses || 0).toFixed(2)}`;
+        monthlyExpensesElement.textContent = formatRupiah(userData.monthlyExpenses || 0);
     }
 }
 
@@ -147,7 +145,7 @@ function displayRecentTransactions(transactions) {
                     </div>
                 </div>
                 <div class="transaction-amount ${amountClass}">
-                    ${sign}$${Math.abs(transaction.amount).toFixed(2)}
+                    ${sign} ${formatRupiah(transaction.amount)}
                 </div>
             </div>
         `;
