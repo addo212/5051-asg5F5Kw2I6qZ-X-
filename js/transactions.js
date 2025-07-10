@@ -10,6 +10,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/fi
 import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 // Impor fungsi pagination baru kita
 import { paginate, renderPaginationControls } from './pagination.js';
+import { formatRupiah } from './utils.js';
 
 // ============================================================================
 // Global Variables & Constants
@@ -488,7 +489,7 @@ function displayTransactions(transactionsOnPage) {
                     </div>
                 </div>
                 <div class="transaction-amount ${amountClass}">
-                    ${sign}$${Math.abs(transaction.amount).toFixed(2)}
+                    ${sign} ${formatRupiah(transaction.amount)}
                 </div>
                 <div class="transaction-actions">
                     <button class="edit-btn" data-transaction-id="${transaction.id}"><i class="fas fa-edit"></i></button>
