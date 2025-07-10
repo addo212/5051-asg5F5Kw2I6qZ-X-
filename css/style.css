@@ -1399,3 +1399,29 @@ css
 .edit-btn:hover {
     color: var(--accent-hover);
 }
+/* Gaya untuk nominal transfer (netral) */
+.amount-transfer {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Gaya untuk ikon transaksi */
+.transaction-item .transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+}
+
+.transaction-icon.income { background-color: var(--income-color); }
+.transaction-icon.expense { background-color: var(--expense-color); }
+.transaction-icon.transfer { background-color: #3498db; } /* Warna biru untuk transfer */
+
+/* Pastikan transaction-details mengambil sisa ruang */
+.transaction-item .transaction-details {
+    flex-grow: 1;
+}
