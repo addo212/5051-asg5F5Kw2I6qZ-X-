@@ -62,17 +62,6 @@ function displayWallets() {
     const walletsListElement = document.getElementById('walletsList');
     if (!walletsListElement) return;
 
-    // Definisikan palet warna dan ikon kita
-    const palette = [
-        { gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', icon: 'fa-credit-card' },
-        { gradient: 'linear-gradient(135deg, #2af598 0%, #009efd 100%)', icon: 'fa-piggy-bank' },
-        { gradient: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)', icon: 'fa-university' },
-        { gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', icon: 'fa-briefcase' },
-        { gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', icon: 'fa-leaf' },
-        { gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', icon: 'fa-heart' },
-        { gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)', icon: 'fa-seedling' }
-    ];
-
     const walletIds = Object.keys(userWallets);
 
     if (walletIds.length === 0) {
@@ -82,20 +71,21 @@ function displayWallets() {
 
     let html = '<ul class="wallet-list-container">'; 
     
-    walletIds.forEach((walletId, index) => {
+    walletIds.forEach(walletId => {
         const wallet = userWallets[walletId];
         const currency = localStorage.getItem('currency') || 'USD';
         const currencySymbol = getCurrencySymbol(currency);
         
-        // Mengambil gaya dari palet secara bergiliran
-        const styleIndex = index % palette.length;
-        const currentStyle = palette[styleIndex];
+        // Menggunakan warna flat dari database sebagai background
+        // Jika warna tidak ada, gunakan warna default
+        const bgColor = wallet.color || '#6c5ce7'; 
+        // Menggunakan ikon dari database
+        const iconClass = wallet.icon || 'fa-wallet'; 
 
-        // Struktur HTML baru dengan inline style untuk background dan class untuk ikon
         html += `
-            <li class="wallet-item" style="background: ${currentStyle.gradient};">
+            <li class="wallet-item" style="background-color: ${bgColor};">
                 <div class="wallet-info">
-                    <i class="fas ${currentStyle.icon} wallet-icon"></i>
+                    <i class="fas ${iconClass} wallet-icon"></i>
                     <h3>${wallet.name}</h3>
                 </div>
                 <p class="wallet-balance">${currencySymbol}${wallet.balance.toFixed(2)}</p>
