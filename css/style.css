@@ -1051,8 +1051,40 @@ css
     margin-top: 1rem; /* Memberi jarak dari atas */
 }
 /* ============================================================================ */
-/* SETTINGS PAGE - ICON PICKER STYLES */
+/* SETTINGS PAGE - CUSTOM STYLES */
 /* ============================================================================ */
+
+/* Styling untuk daftar item (akun dan dompet) */
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.item-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+/* Styling untuk form tambah item */
+.add-item-form {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+/* Styling untuk input warna */
+.color-input {
+    padding: 5px !important; /* Override padding umum */
+    height: 40px;
+    width: 100px !important; /* Override width umum */
+}
+
+/* Styling untuk pemilih ikon */
 .icon-picker {
     display: flex;
     flex-wrap: wrap;
