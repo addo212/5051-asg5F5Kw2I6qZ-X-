@@ -104,17 +104,37 @@
             </div>
 
             <div class="settings-section">
-                <h2><i class="fas fa-wallet"></i> Wallet Settings</h2>
-                <div id="walletsContainer">
-                    <ul id="walletsList"></ul>
-                    <form id="addWalletForm">
-                        <input type="text" id="newWalletName" placeholder="Wallet Name">
-                        <button type="submit" class="btn-primary">Add Wallet</button>
-                    </form>
-                </div>
+    <h2><i class="fas fa-wallet"></i> Wallet Settings</h2>
+    <div id="walletsContainer">
+        <!-- Daftar dompet akan ditampilkan di sini oleh settings.js -->
+        <ul id="walletsList"></ul> 
+        
+        <form id="addWalletForm">
+            <h3>Add New Wallet</h3>
+            <div class="form-group">
+                <label for="newWalletName">Wallet Name</label>
+                <input type="text" id="newWalletName" placeholder="e.g., Savings, Daily Cash" required>
             </div>
-        </div>
+
+            <!-- Input Warna Baru -->
+            <div class="form-group">
+                <label for="newWalletColor">Wallet Color</label>
+                <input type="color" id="newWalletColor" value="#6c5ce7">
+            </div>
+
+            <!-- Pilihan Ikon Baru -->
+            <div class="form-group">
+                <label for="newWalletIcon">Choose an Icon</label>
+                <div class="icon-picker" id="iconPicker">
+                    <!-- Ikon akan di-generate oleh JavaScript -->
+                </div>
+                <input type="hidden" id="selectedWalletIcon" value="fa-wallet">
+            </div>
+
+            <button type="submit" class="btn-primary">Add Wallet</button>
+        </form>
     </div>
+</div>
 
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/main.js"></script>
