@@ -72,6 +72,16 @@ export async function deleteTransaction(userId, transactionId) {
         throw error;
     }
 }
+// Function to update a transaction
+export async function updateTransaction(userId, transactionId, updates) {
+    try {
+        await set(ref(db, `users/${userId}/transactions/${transactionId}`), updates);
+        console.log("Transaction updated successfully!");
+    } catch (error) {
+        console.error("Error updating transaction:", error);
+        throw error;
+    }
+}
 
 // ============================================================================
 // Account and Wallet Operations
