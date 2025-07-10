@@ -85,54 +85,53 @@
                 </div>
             </div>
 
-            <div class="settings-section">
-                <h2><i class="fas fa-list"></i> Account Settings</h2>
-                <div id="accountsContainer">
-                    <div class="account-list">
-                        <ul id="incomeAccountsList"></ul>
-                        <ul id="expenseAccountsList"></ul>
+            <!-- STRUKTUR BARU UNTUK PENGATURAN AKUN DAN DOMPET -->
+            <div class="settings-management-grid">
+
+                <!-- KARTU PENGATURAN AKUN -->
+                <div class="item-management-card">
+                    <div class="item-list-header">
+                        <i class="fas fa-list"></i>
+                        <h3>Account Settings</h3>
                     </div>
-                    <form id="addAccountForm">
-                        <input type="text" id="newAccountName" placeholder="Account Name">
-                        <select id="newAccountType">
-                            <option value="income">Income</option>
-                            <option value="expense">Expense</option>
-                        </select>
-                        <button type="submit" class="btn-primary">Add Account</button>
+                    <div class="settings-grid">
+                        <ul id="incomeAccountsList" class="item-list"></ul>
+                        <ul id="expenseAccountsList" class="item-list"></ul>
+                    </div>
+                    <form id="addAccountForm" class="add-item-form">
+                        <div class="form-group">
+                            <input type="text" id="newAccountName" placeholder="New Account Name" required>
+                        </div>
+                        <div class="form-group-inline">
+                            <select id="newAccountType">
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                            <button type="submit" class="btn-primary-small">Add</button>
+                        </div>
                     </form>
                 </div>
-            </div>
 
-            <div class="settings-section">
-    <h2><i class="fas fa-wallet"></i> Wallet Settings</h2>
-    <div id="walletsContainer">
-        <!-- Daftar dompet akan ditampilkan di sini oleh settings.js -->
-        <ul id="walletsList"></ul> 
-        
-        <!-- Form untuk menambah dompet baru -->
+                <!-- KARTU PENGATURAN DOMPET -->
+                <div class="item-management-card">
+                    <div class="item-list-header">
+                        <i class="fas fa-wallet"></i>
+                        <h3>Wallet Settings</h3>
+                    </div>
+                    <ul id="walletsList" class="item-list"></ul>
                     <form id="addWalletForm" class="add-item-form">
-                        <h3 style="margin-top: 2rem;">Add New Wallet</h3>
                         <div class="form-group">
-                            <label for="newWalletName">Wallet Name</label>
-                            <input type="text" id="newWalletName" placeholder="e.g., Savings, Daily Cash" required>
+                            <input type="text" id="newWalletName" placeholder="New Wallet Name" required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="newWalletColor">Wallet Color</label>
+                        <div class="form-group-inline">
                             <input type="color" id="newWalletColor" value="#6c5ce7" class="color-input">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Choose an Icon</label>
-                            <div class="icon-picker" id="iconPicker">
-                                <!-- Ikon akan di-generate oleh JavaScript -->
-                            </div>
+                            <div class="icon-picker" id="iconPicker"></div>
                             <input type="hidden" id="selectedWalletIcon" value="fa-wallet">
+                            <button type="submit" class="btn-primary-small">Add</button>
                         </div>
-
-                        <button type="submit" class="btn-primary">Add Wallet</button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
