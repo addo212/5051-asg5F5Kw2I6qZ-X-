@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallets - Finance Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="icon" href="images/logo.jpeg">
+    <script>
+        // Apply saved theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <header>
+            <div class="header-left">
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <h1>Finance Tracker</h1>
+            </div>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </header>
+
+        <nav class="main-nav">
+            <div class="dropdown">
+                <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a>
+                    <a href="wallets.html" class="active"><i class="fas fa-wallet"></i> Wallets</a>
+                    <a href="budgets.html"><i class="fas fa-chart-pie"></i> Budgets</a>
+                    <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="content-container">
+            <h2><i class="fas fa-wallet"></i> My Wallets</h2>
+            <div id="walletsList">
+                <p class="empty-state">Loading wallets...</p>
+            </div>
+        </div>
+
+        <script type="module" src="js/auth.js"></script>
+        <script type="module" src="js/wallets.js"></script>
+        <script src="js/theme.js"></script>
+        <script src="js/dropdown.js"></script>
+    </body>
+</html>
