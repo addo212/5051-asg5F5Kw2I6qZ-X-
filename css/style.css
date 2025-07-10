@@ -993,55 +993,60 @@ css
     padding: 0;
     margin: 0;
     display: grid;
-    /* Membuat grid yang responsif: kolom akan otomatis menyesuaikan diri */
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem; /* Jarak antar kartu dompet */
+    gap: 1.5rem;
 }
 
-/* Kotak untuk setiap dompet */
+/* Kotak untuk setiap dompet (sekarang dengan background gradien) */
 .wallet-item {
-    background-color: var(--bg-secondary);
+    /* Hapus border-left, karena kita menggunakan background penuh */
+    /* border-left: 5px solid var(--accent-color); */
+    
+    color: white; /* Warna teks utama di dalam kartu adalah putih */
     padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     display: flex;
-    justify-content: space-between; /* Mendorong nama ke kiri dan saldo ke kanan */
-    align-items: center;
-    border-left: 5px solid var(--accent-color); /* Garis aksen warna di kiri */
+    flex-direction: column; /* Mengatur item secara vertikal */
+    justify-content: space-between; /* Mendorong saldo ke bawah */
+    min-height: 120px; /* Memberi tinggi minimal pada kartu */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden; /* Untuk efek di masa depan */
 }
 
 .wallet-item:hover {
-    transform: translateY(-5px); /* Efek mengangkat saat di-hover */
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
 
 /* Grup untuk ikon dan nama dompet */
 .wallet-info {
     display: flex;
     align-items: center;
-    gap: 1rem; /* Jarak antara ikon dan nama */
+    gap: 1rem;
 }
 
-/* Ikon dompet */
+/* Ikon dompet (sekarang putih dan lebih lembut) */
 .wallet-icon {
-    font-size: 1.8rem; /* Ukuran ikon lebih besar */
-    color: var(--accent-color);
-    opacity: 0.8;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7); /* Putih dengan sedikit transparansi */
 }
 
-/* Nama dompet */
+/* Nama dompet (sekarang putih) */
 .wallet-item h3 {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: white; /* Pastikan warna putih */
 }
 
-/* Saldo dompet */
+/* Saldo dompet (sekarang putih, lebih besar, dan di pojok kanan bawah) */
 .wallet-balance {
     margin: 0;
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: white; /* Pastikan warna putih */
+    align-self: flex-end; /* Mendorong ke kanan */
+    margin-top: 1rem; /* Memberi jarak dari atas */
 }
