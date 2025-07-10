@@ -1,53 +1,59 @@
 // transactions.js
-import firebaseConfig from './firebase-config.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { updateUserData, loadUserData, saveTransaction, loadTransactions, deleteTransaction } from './database.js';
+import { auth, db, loadUserData, loadTransactions, saveTransaction, deleteTransaction, updateUserData } from './database.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-// Global variables
+// ============================================================================
+// Global Variables
+// ============================================================================
 let userId;
-let userWallets = {};
+let allTransactions = {};
 let userAccounts = {};
-let transactionsData = {}; // Store all transactions
-
+let userWallets = {};
 
 // ============================================================================
-// Authentication state listener
+// Main Initialization on Auth State Change
 // ============================================================================
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         userId = user.uid;
-        loadUserData(userId).then(userData => {
-            userWallets = userData.wallets || {};
-            userAccounts = userData.accounts || { income: [], expense: [] };
-            loadAccounts();
-            loadWallets();
-            loadFilters(); // Load filters initially
-        });
-        loadTransactions(userId).then((transactions) => {
-            transactionsData = transactions || {};
-            displayTransactions(transactionsData); // Display all transactions initially
-        });
+        try {
+            const userData = await loadUserData(userId);
+            if (userData) {
+                userAccounts = userData.accounts || { income: [], expense: [] };
+                userWallets = userData.wallets || {};
+                // Muat dropdown untuk form dan filter
+                loadAccounts(userAccounts);
+                loadWallets(userWallets);
+                loadFilters(userAccounts, userWallets);
+            }
+            
+            allTransactions = await loadTransactions(userId);
+            // Ubah objek transaksi menjadi array untuk ditampilkan
+            const transactionsArray = Object.keys(allTransactions).map(key => ({
+                id: key,
+                ...allTransactions[key]
+            }));
+            displayTransactions(transactionsArray);
+
+        } catch (error) {
+            console.error("Error initializing transactions page:", error);
+        }
     } else {
         window.location.href = "index.html";
     }
 });
 
 // ============================================================================
-// Function to load accounts from database
+// Function to load accounts into form dropdown
 // ============================================================================
-function loadAccounts() {
+function loadAccounts(accounts) {
     const accountsSelect = document.getElementById('account');
+    if (!accountsSelect) return;
     accountsSelect.innerHTML = '<option value="">Select Account</option>';
 
     const selectedType = document.getElementById('type').value || 'income';
-    const accountList = userAccounts[selectedType] || [];
+    const accountList = accounts[selectedType] || [];
 
     accountList.forEach(account => {
         const option = document.createElement('option');
@@ -55,118 +61,111 @@ function loadAccounts() {
         option.text = account;
         accountsSelect.appendChild(option);
     });
+}
 
-    document.getElementById('type').addEventListener('change', () => {
-        loadAccounts();
+// Event listener for transaction type change
+document.getElementById('type')?.addEventListener('change', () => {
+    loadAccounts(userAccounts);
+});
+
+// ============================================================================
+// Function to load wallets into form dropdown
+// ============================================================================
+function loadWallets(wallets) {
+    const walletsSelect = document.getElementById('wallet');
+    if (!walletsSelect) return;
+    walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
+
+    Object.keys(wallets).forEach(walletId => {
+        const wallet = wallets[walletId];
+        const option = document.createElement('option');
+        option.value = wallet.name;
+        option.text = wallet.name;
+        walletsSelect.appendChild(option);
     });
 }
 
 // ============================================================================
-// Function to load wallets from database
+// Filter Functions
 // ============================================================================
-function loadWallets() {
-    const walletsSelect = document.getElementById('wallet');
-    walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
-
-    if (userWallets) {
-        Object.keys(userWallets).forEach(walletId => {
-            const wallet = userWallets[walletId];
-            const option = document.createElement('option');
-            option.value = wallet.name;
-            option.text = wallet.name;
-            walletsSelect.appendChild(option);
-        });
-    }
+function loadFilters(accounts, wallets) {
+    loadFilterWallets(wallets);
+    loadFilterAccounts(accounts);
 }
 
-// ============================================================================
-// Function to load filter options
-// ============================================================================
-function loadFilters() {
-    loadFilterWallets();
-    loadFilterAccounts();
-}
-
-// ============================================================================
-// Function to load wallets into filter select
-// ============================================================================
-function loadFilterWallets() {
+function loadFilterWallets(wallets) {
     const filterWalletSelect = document.getElementById('filterWallet');
+    if (!filterWalletSelect) return;
     filterWalletSelect.innerHTML = '<option value="">All Wallets</option>';
 
-    if (userWallets) {
-        Object.keys(userWallets).forEach(walletId => {
-            const wallet = userWallets[walletId];
-            const option = document.createElement('option');
-            option.value = wallet.name;
-            option.text = wallet.name;
-            filterWalletSelect.appendChild(option);
-        });
-    }
+    Object.keys(wallets).forEach(walletId => {
+        const wallet = wallets[walletId];
+        const option = document.createElement('option');
+        option.value = wallet.name;
+        option.text = wallet.name;
+        filterWalletSelect.appendChild(option);
+    });
 }
 
-// ============================================================================
-// Function to load accounts into filter select
-// ============================================================================
-function loadFilterAccounts() {
+function loadFilterAccounts(accounts) {
     const filterAccountSelect = document.getElementById('filterAccount');
+    if (!filterAccountSelect) return;
     filterAccountSelect.innerHTML = '<option value="">All Accounts</option>';
 
-    if (userAccounts) {
-        const allAccounts = [...(userAccounts.income || []), ...(userAccounts.expense || [])];
-        allAccounts.forEach(account => {
-            const option = document.createElement('option');
-            option.value = account;
-            option.text = account;
-            filterAccountSelect.appendChild(option);
-        });
-    }
+    const allAccounts = [...(accounts.income || []), ...(accounts.expense || [])];
+    const uniqueAccounts = [...new Set(allAccounts)];
+    uniqueAccounts.forEach(account => {
+        const option = document.createElement('option');
+        option.value = account;
+        option.text = account;
+        filterAccountSelect.appendChild(option);
+    });
 }
 
-// ============================================================================
-// Function to filter transactions
-// ============================================================================
 function filterTransactions() {
     const filterStartDate = document.getElementById('filterStartDate').value;
     const filterEndDate = document.getElementById('filterEndDate').value;
     const filterWallet = document.getElementById('filterWallet').value;
     const filterAccount = document.getElementById('filterAccount').value;
 
-    const filteredTransactions = Object.values(transactionsData).filter(transaction => {
+    const filtered = Object.keys(allTransactions).filter(key => {
+        const transaction = allTransactions[key];
         const transactionDate = new Date(transaction.date);
         const startDate = filterStartDate ? new Date(filterStartDate) : null;
         const endDate = filterEndDate ? new Date(filterEndDate) : null;
+
+        if (startDate) startDate.setHours(0, 0, 0, 0);
+        if (endDate) endDate.setHours(23, 59, 59, 999);
 
         const matchesDate = (!startDate || transactionDate >= startDate) && (!endDate || transactionDate <= endDate);
         const matchesWallet = !filterWallet || transaction.wallet === filterWallet;
         const matchesAccount = !filterAccount || transaction.account === filterAccount;
 
         return matchesDate && matchesWallet && matchesAccount;
-    });
+    }).map(key => ({ id: key, ...allTransactions[key] }));
 
-    displayTransactions(filteredTransactions);
+    displayTransactions(filtered);
 }
 
-// ============================================================================
-// Function to reset filters
-// ============================================================================
 function resetFilters() {
     document.getElementById('filterStartDate').value = '';
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterWallet').value = '';
     document.getElementById('filterAccount').value = '';
-    displayTransactions(transactionsData); // Tampilkan semua transaksi
+    const transactionsArray = Object.keys(allTransactions).map(key => ({
+        id: key,
+        ...allTransactions[key]
+    }));
+    displayTransactions(transactionsArray);
 }
 
-// ============================================================================
-// Event listeners for filter and reset buttons
-// ============================================================================
-document.getElementById('applyFilters').addEventListener('click', (e) => {
+// Event listeners for filter buttons
+document.getElementById('applyFilters')?.addEventListener('click', (e) => {
     e.preventDefault();
     filterTransactions();
 });
 
-document.getElementById('resetFilters').addEventListener('click', (e) => {
+document.getElementById('resetFilters')?.addEventListener('click', (e) => {
     e.preventDefault();
     resetFilters();
 });
@@ -174,17 +173,19 @@ document.getElementById('resetFilters').addEventListener('click', (e) => {
 // ============================================================================
 // Function to display transactions
 // ============================================================================
-function displayTransactions(transactions) {
+function displayTransactions(transactionsArray) {
     const container = document.getElementById('transactionHistory');
     if (!container) return;
 
-    if (!transactions || transactions.length === 0) {
-        container.innerHTML = '<p class="empty-state">No transactions yet or no transactions match the filter.</p>';
+    transactionsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+    if (!transactionsArray || transactionsArray.length === 0) {
+        container.innerHTML = '<p class="empty-state">No transactions found.</p>';
         return;
     }
 
     let html = '<ul>';
-    transactions.forEach(transaction => {
+    transactionsArray.forEach(transaction => {
         const isIncome = transaction.type === 'income';
         const amountClass = isIncome ? 'amount-income' : 'amount-expense';
         const sign = isIncome ? '+' : '-';
@@ -209,69 +210,79 @@ function displayTransactions(transactions) {
     html += '</ul>';
     container.innerHTML = html;
 
-    // Tambahkan event listener untuk tombol hapus setelah HTML di-update
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', () => {
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', async () => {
             const transactionId = button.dataset.transactionId;
             if (confirm('Are you sure you want to delete this transaction?')) {
-                deleteTransaction(userId, transactionId).then(() => {
-                    loadUserData(userId).then(userData => {
-                        let totalBalance = userData.totalBalance || 0;
-                        const deletedTransaction = transactions.find(t => t.id === transactionId); // Find the deleted transaction
-                        if (deletedTransaction) {
-                            if (deletedTransaction.type === 'income') {
-                                totalBalance -= deletedTransaction.amount;
-                            } else {
-                                totalBalance += deletedTransaction.amount;
-                            }
-                            updateUserData(userId, { totalBalance: totalBalance });
-                        }
-                    });
+                try {
+                    showLoading();
+                    const deletedTransaction = allTransactions[transactionId];
+                    if (!deletedTransaction) throw new Error("Transaction not found");
+
+                    // Hapus transaksi dari database
+                    await deleteTransaction(userId, transactionId);
+
+                    // Update saldo
+                    const userData = await loadUserData(userId);
+                    let totalBalance = userData.totalBalance || 0;
+                    const walletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === deletedTransaction.wallet);
+                    let walletBalance = userData.wallets[walletId]?.balance || 0;
+
+                    if (deletedTransaction.type === 'income') {
+                        totalBalance -= deletedTransaction.amount;
+                        walletBalance -= deletedTransaction.amount;
+                    } else {
+                        totalBalance += deletedTransaction.amount;
+                        walletBalance += deletedTransaction.amount;
+                    }
+
+                    await updateUserData(userId, { totalBalance: totalBalance });
+                    await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
+
                     showSuccessMessage('Transaction deleted successfully!');
-                    loadTransactions(userId).then((transactions) => {
-                        displayTransactions(transactions);
-                    });
-                }).catch(error => {
+                    
+                    // Muat ulang data dan tampilkan lagi
+                    allTransactions = await loadTransactions(userId);
+                    const updatedTransactionsArray = Object.keys(allTransactions).map(key => ({ id: key, ...allTransactions[key] }));
+                    displayTransactions(updatedTransactionsArray);
+
+                } catch (error) {
                     console.error("Error deleting transaction:", error);
                     showError('Failed to delete transaction. Please try again.');
-                });
+                } finally {
+                    hideLoading();
+                }
             }
         });
     });
 }
 
-
 // ============================================================================
-// Function to display success message
+// UI Helper Functions (Messages and Loading)
 // ============================================================================
 function showSuccessMessage(message) {
-    const successMessage = document.createElement('p');
-    successMessage.textContent = message;
-    successMessage.classList.add('success-message');
-    document.body.appendChild(successMessage);
-
-    setTimeout(() => {
-        successMessage.remove();
-    }, 3000);
+    const successElement = document.getElementById('successMessage');
+    if(successElement) {
+        successElement.textContent = message;
+        successElement.style.display = 'block';
+        setTimeout(() => {
+            successElement.style.display = 'none';
+        }, 3000);
+    }
 }
 
-// ============================================================================
-// Function to display error message
-// ============================================================================
 function showError(message) {
     const errorElement = document.getElementById('formError');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
-
-    setTimeout(() => {
-        errorElement.style.display = 'none';
-    }, 3000);
+    if(errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 3000);
+    }
 }
 
-// ============================================================================
-// Function to show loading indicator
-// ============================================================================
 function showLoading() {
     const loadingOverlay = document.createElement('div');
     loadingOverlay.classList.add('loading-overlay');
@@ -279,9 +290,6 @@ function showLoading() {
     document.body.appendChild(loadingOverlay);
 }
 
-// ============================================================================
-// Function to hide loading indicator
-// ============================================================================
 function hideLoading() {
     const loadingOverlay = document.querySelector('.loading-overlay');
     if (loadingOverlay) {
@@ -292,7 +300,7 @@ function hideLoading() {
 // ============================================================================
 // Event listener for transaction form submission
 // ============================================================================
-document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+document.getElementById('transactionForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const date = document.getElementById('date').value;
@@ -302,29 +310,9 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
     const wallet = document.getElementById('wallet').value;
     let amount = parseFloat(document.getElementById('amount').value);
 
-    // Validasi input
-    if (!date) {
-        showError('Please select a date.');
-        return;
-    }
-    if (!type) {
-        showError('Please select a transaction type.');
-        return;
-    }
-    if (!account) {
-        showError('Please select an account.');
-        return;
-    }
-    if (!description) {
-        showError('Please enter a description.');
-        return;
-    }
-    if (!wallet) {
-        showError('Please select a wallet.');
-        return;
-    }
-    if (isNaN(amount) || amount <= 0) {
-        showError('Please enter a valid amount.');
+    // Validation
+    if (!date || !type || !account || !description || !wallet || isNaN(amount) || amount <= 0) {
+        showError('Please fill all fields with valid data.');
         return;
     }
 
@@ -335,36 +323,40 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
         description,
         wallet,
         amount,
-        timestamp: new Date(date).getTime(),
-        id: generateUUID() // Generate a unique ID for the transaction
+        timestamp: new Date(date).getTime()
     };
 
     try {
         showLoading();
+        // Simpan transaksi
         await saveTransaction(userId, transaction);
-        // Update total balance after saving transaction
+
+        // Update saldo
         const userData = await loadUserData(userId);
         let totalBalance = userData.totalBalance || 0;
+        const walletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === wallet);
+        if (!walletId) throw new Error("Wallet not found for update.");
+        
+        let walletBalance = userData.wallets[walletId].balance || 0;
+
         if (transaction.type === 'income') {
             totalBalance += transaction.amount;
-        } else {
-            totalBalance -= transaction.amount;
-        }
-
-        // Update wallet balance
-        const walletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === wallet);
-        let walletBalance = userData.wallets[walletId].balance || 0;
-        if (transaction.type === 'income') {
             walletBalance += transaction.amount;
         } else {
+            totalBalance -= transaction.amount;
             walletBalance -= transaction.amount;
         }
 
+        await updateUserData(userId, { totalBalance: totalBalance });
         await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
 
-        await updateUserData(userId, { totalBalance: totalBalance });
-        displayTransactions(await loadTransactions(userId)); // Reload and display transactions
         showSuccessMessage('Transaction saved successfully!');
+        e.target.reset(); // Reset form
+        
+        // Muat ulang data dan tampilkan lagi
+        allTransactions = await loadTransactions(userId);
+        const updatedTransactionsArray = Object.keys(allTransactions).map(key => ({ id: key, ...allTransactions[key] }));
+        displayTransactions(updatedTransactionsArray);
 
     } catch (error) {
         console.error("Error saving transaction:", error);
@@ -373,20 +365,3 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
         hideLoading();
     }
 });
-
-
-function generateUUID() { // Public Domain/MIT
-    var d = new Date().getTime();//Timestamp
-    var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16;//random number between 0 and 16
-        if(d > 0){//Use timestamp until depleted
-            r = (d + r)%16 | 0;
-            d = Math.floor(d/16);
-        } else {//Use microseconds since page-load if supported
-            r = (d2 + r)%16 | 0;
-            d2 = Math.floor(d2/16);
-        }
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-}
