@@ -1,5 +1,11 @@
 // transactions.js
+
+// ============================================================================
+// Module Imports
+// ============================================================================
+// Impor fungsi dan instance yang dibutuhkan dari file database.js terpusat
 import { auth, db, loadUserData, loadTransactions, saveTransaction, deleteTransaction, updateUserData } from './database.js';
+// Impor fungsi spesifik dari Firebase SDK
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
@@ -7,47 +13,54 @@ import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-
 // Global Variables
 // ============================================================================
 let userId;
-let allTransactions = {};
-let userAccounts = {};
-let userWallets = {};
+let allTransactions = {}; // Menyimpan semua transaksi dari database untuk filtering
+let userAccounts = {};    // Menyimpan data akun pengguna
+let userWallets = {};     // Menyimpan data dompet pengguna
 
 // ============================================================================
-// Main Initialization on Auth State Change
+// Main Initialization on Auth State Change (Titik Awal Eksekusi)
 // ============================================================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         userId = user.uid;
         try {
+            // 1. Muat data pengguna (termasuk akun dan dompet) terlebih dahulu
             const userData = await loadUserData(userId);
             if (userData) {
                 userAccounts = userData.accounts || { income: [], expense: [] };
                 userWallets = userData.wallets || {};
-                // Muat dropdown untuk form dan filter
-                loadAccounts(userAccounts);
-                loadWallets(userWallets);
+                
+                // 2. Setelah data ada, isi dropdown untuk form dan filter
+                loadAccountsForForm(userAccounts);
+                loadWalletsForForm(userWallets);
                 loadFilters(userAccounts, userWallets);
             }
             
+            // 3. Muat semua transaksi
             allTransactions = await loadTransactions(userId);
-            // Ubah objek transaksi menjadi array untuk ditampilkan
+            
+            // 4. Ubah objek transaksi menjadi array untuk ditampilkan
             const transactionsArray = Object.keys(allTransactions).map(key => ({
-                id: key,
+                id: key, // Penting: 'id' adalah key unik dari Firebase
                 ...allTransactions[key]
             }));
+            
+            // 5. Tampilkan transaksi di UI
             displayTransactions(transactionsArray);
 
         } catch (error) {
             console.error("Error initializing transactions page:", error);
         }
     } else {
+        // Jika tidak ada pengguna, arahkan kembali ke halaman login
         window.location.href = "index.html";
     }
 });
 
 // ============================================================================
-// Function to load accounts into form dropdown
+// Function to load accounts into the transaction form dropdown
 // ============================================================================
-function loadAccounts(accounts) {
+function loadAccountsForForm(accounts) {
     const accountsSelect = document.getElementById('account');
     if (!accountsSelect) return;
     accountsSelect.innerHTML = '<option value="">Select Account</option>';
@@ -63,15 +76,15 @@ function loadAccounts(accounts) {
     });
 }
 
-// Event listener for transaction type change
+// Event listener untuk mengubah pilihan akun saat tipe transaksi (income/expense) diubah
 document.getElementById('type')?.addEventListener('change', () => {
-    loadAccounts(userAccounts);
+    loadAccountsForForm(userAccounts);
 });
 
 // ============================================================================
-// Function to load wallets into form dropdown
+// Function to load wallets into the transaction form dropdown
 // ============================================================================
-function loadWallets(wallets) {
+function loadWalletsForForm(wallets) {
     const walletsSelect = document.getElementById('wallet');
     if (!walletsSelect) return;
     walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
@@ -171,7 +184,7 @@ document.getElementById('resetFilters')?.addEventListener('click', (e) => {
 });
 
 // ============================================================================
-// Function to display transactions
+// Function to display transactions in the UI
 // ============================================================================
 function displayTransactions(transactionsArray) {
     const container = document.getElementById('transactionHistory');
@@ -210,7 +223,7 @@ function displayTransactions(transactionsArray) {
     html += '</ul>';
     container.innerHTML = html;
 
-    // Add event listeners for delete buttons
+    // Add event listeners for delete buttons after they are rendered
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', async () => {
             const transactionId = button.dataset.transactionId;
@@ -229,20 +242,24 @@ function displayTransactions(transactionsArray) {
                     const walletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === deletedTransaction.wallet);
                     let walletBalance = userData.wallets[walletId]?.balance || 0;
 
+                    // Logika pembaruan saldo yang benar
                     if (deletedTransaction.type === 'income') {
                         totalBalance -= deletedTransaction.amount;
                         walletBalance -= deletedTransaction.amount;
-                    } else {
+                    } else { // 'expense'
                         totalBalance += deletedTransaction.amount;
                         walletBalance += deletedTransaction.amount;
                     }
 
+                    // Simpan saldo baru ke database
                     await updateUserData(userId, { totalBalance: totalBalance });
-                    await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
+                    if (walletId) {
+                        await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
+                    }
 
                     showSuccessMessage('Transaction deleted successfully!');
                     
-                    // Muat ulang data dan tampilkan lagi
+                    // Muat ulang data dan tampilkan lagi untuk sinkronisasi
                     allTransactions = await loadTransactions(userId);
                     const updatedTransactionsArray = Object.keys(allTransactions).map(key => ({ id: key, ...allTransactions[key] }));
                     displayTransactions(updatedTransactionsArray);
@@ -342,18 +359,19 @@ document.getElementById('transactionForm')?.addEventListener('submit', async (e)
         if (transaction.type === 'income') {
             totalBalance += transaction.amount;
             walletBalance += transaction.amount;
-        } else {
+        } else { // 'expense'
             totalBalance -= transaction.amount;
             walletBalance -= transaction.amount;
         }
 
+        // Simpan saldo baru ke database
         await updateUserData(userId, { totalBalance: totalBalance });
         await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
 
         showSuccessMessage('Transaction saved successfully!');
         e.target.reset(); // Reset form
         
-        // Muat ulang data dan tampilkan lagi
+        // Muat ulang data dan tampilkan lagi untuk sinkronisasi
         allTransactions = await loadTransactions(userId);
         const updatedTransactionsArray = Object.keys(allTransactions).map(key => ({ id: key, ...allTransactions[key] }));
         displayTransactions(updatedTransactionsArray);
