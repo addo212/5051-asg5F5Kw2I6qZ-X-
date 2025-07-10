@@ -94,14 +94,20 @@ export function deleteAccount(userId, accountName, accountType) {
     });
 }
 
-export function saveWallet(userId, walletName) {
+export function saveWallet(userId, walletName, color, icon) { // Tambahkan parameter color & icon
     return get(ref(db, `users/${userId}/wallets`)).then((snapshot) => {
         const wallets = snapshot.val() || {};
         if (Object.values(wallets).some(wallet => wallet.name === walletName)) {
             throw new Error('Wallet with this name already exists.');
         }
         const newWalletRef = push(ref(db, `users/${userId}/wallets`));
-        return set(newWalletRef, { name: walletName, balance: 0 });
+        // Simpan data baru termasuk warna dan ikon
+        return set(newWalletRef, { 
+            name: walletName, 
+            balance: 0,
+            color: color || '#6c5ce7', // Warna default jika tidak ada
+            icon: icon || 'fa-wallet' // Ikon default jika tidak ada
+        });
     });
 }
 
@@ -121,8 +127,12 @@ export async function initializeUserData(userId) {
             income: ['Gaji Addo', 'Gaji Anne', 'Bonus Addo', 'Bonus Anne', 'Other Revenue'],
             expense: ['Other Will', 'Daycare', 'Ayah', 'Save for Emergency', 'Internet', 'Cell Services', 'Diapers', 'Milk', 'Water & Electrics', 'CC Bill', 'Iuran', 'Gas Ad', 'Gas An', 'Food & Groceries', 'Snack Ad', 'Snack An', 'Homecare', 'Parkir Kantor', 'Personal Care', 'Other Expense', 'Transfer', 'Save', 'Save Aldric', 'Cicilan', 'Pajak Kendaraan', 'Pakaian', 'Laundry', 'Medicine', 'Gas Mobil', 'Hiburan - Wisata Dll']
         },
-        wallets: {
-            defaultWallet: { name: "Default Wallet", balance: 0 }
+        defaultWallet: { 
+                name: "Default Wallet", 
+                balance: 0,
+                color: '#4CAF50', // Warna hijau untuk dompet default
+                icon: 'fa-piggy-bank' // Ikon celengan untuk dompet default
+            }
         },
         transactions: {}
     };
