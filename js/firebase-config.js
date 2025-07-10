@@ -1,6 +1,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBSwh3Qj-rmHIbDFP63VY3omfjXa7XFqhw",
   authDomain: "adlan-money-trancker.firebaseapp.com",
+  databaseURL: "https://adlan-money-trancker-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "adlan-money-trancker",
   storageBucket: "adlan-money-trancker.appspot.com",
   messagingSenderId: "686344739681",
