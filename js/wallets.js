@@ -4,7 +4,7 @@
 // Module Imports
 // ============================================================================
 // Impor fungsi dan instance yang dibutuhkan dari file database.js terpusat
-import { auth, db, loadUserData } from './database.js';
+import { auth, db, loadUserData, saveTransaction } from './database.js';
 // Impor fungsi spesifik dari Firebase SDK
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
