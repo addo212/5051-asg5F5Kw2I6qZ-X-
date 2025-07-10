@@ -3,7 +3,6 @@ import firebaseConfig from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { getCurrencySymbol } from './main.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -22,6 +21,18 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "index.html";
     }
 });
+// ============================================================================
+// Get currency symbol
+// ============================================================================
+function getCurrencySymbol(currency) {
+    switch (currency) {
+        case 'USD': return '$';
+        case 'IDR': return 'Rp';
+        case 'EUR': return '€';
+        case 'GBP': return '£';
+        default: return '$';
+    }
+}
 
 // ============================================================================
 // Function to load wallets
