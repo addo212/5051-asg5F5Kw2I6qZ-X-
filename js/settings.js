@@ -1,14 +1,17 @@
 // settings.js
-import firebaseConfig from './firebase-config.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getDatabase, ref, onValue, push, remove, update, get, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { auth, db, loadUserData, saveWallet, deleteWallet, saveAccount, deleteAccount } from './database.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { ref, get, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 let userId;
+const availableIcons = [
+    'fa-wallet', 'fa-piggy-bank', 'fa-university', 'fa-credit-card', 'fa-money-bill-wave',
+    'fa-briefcase', 'fa-car', 'fa-home', 'fa-gift', 'fa-plane'
+];
 
 // ============================================================================
 // Authentication state listener
@@ -18,6 +21,7 @@ onAuthStateChanged(auth, (user) => {
         userId = user.uid;
         loadAccounts();
         loadWallets();
+        populateIconPicker();
     } else {
         window.location.href = "index.html";
     }
@@ -202,7 +206,96 @@ async function deleteWallet(walletId) {
         showError('Failed to delete wallet. Please try again.');
     }
 }
+// ============================================================================
+// Wallet Management Functions
+// ============================================================================
+async function loadWallets() {
+    const walletsListElement = document.getElementById('walletsList');
+    try {
+        const userData = await loadUserData(userId);
+        const wallets = userData.wallets || {};
+        displayWallets(wallets, walletsListElement);
+    } catch (error) {
+        console.error("Error loading wallets:", error);
+    }
+}
 
+function displayWallets(wallets, listElement) {
+    listElement.innerHTML = '';
+    for (const walletId in wallets) {
+        const wallet = wallets[walletId];
+        const li = document.createElement('li');
+        li.style.borderLeft = `5px solid ${wallet.color}`; // Tampilkan warna
+        li.innerHTML = `
+            <i class="fas ${wallet.icon}" style="margin-right: 10px; color: ${wallet.color};"></i>
+            ${wallet.name}
+            <button class="delete-btn" data-wallet-id="${walletId}"><i class="fas fa-trash"></i></button>
+        `;
+        li.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm(`Are you sure you want to delete wallet: ${wallet.name}?`)) {
+                deleteWallet(userId, walletId).then(loadWallets);
+            }
+        });
+        listElement.appendChild(li);
+    }
+}
+
+// ============================================================================
+// Icon Picker Functions
+// ============================================================================
+function populateIconPicker() {
+    const picker = document.getElementById('iconPicker');
+    const selectedIconInput = document.getElementById('selectedWalletIcon');
+    picker.innerHTML = '';
+
+    availableIcons.forEach(iconClass => {
+        const iconElement = document.createElement('i');
+        iconElement.className = `fas ${iconClass} icon-option`;
+        
+        // Tandai ikon default sebagai terpilih
+        if (iconClass === selectedIconInput.value) {
+            iconElement.classList.add('selected');
+        }
+
+        iconElement.addEventListener('click', () => {
+            // Hapus 'selected' dari semua ikon
+            picker.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+            // Tambahkan 'selected' ke ikon yang diklik
+            iconElement.classList.add('selected');
+            // Simpan nilai ikon yang dipilih
+            selectedIconInput.value = iconClass;
+        });
+        picker.appendChild(iconElement);
+    });
+}
+
+// ============================================================================
+// Event Listeners for Forms
+// ============================================================================
+document.getElementById('addWalletForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const walletName = document.getElementById('newWalletName').value;
+    const walletColor = document.getElementById('newWalletColor').value;
+    const walletIcon = document.getElementById('selectedWalletIcon').value;
+
+    if (!walletName.trim()) {
+        alert('Please enter a wallet name.');
+        return;
+    }
+
+    saveWallet(userId, walletName, walletColor, walletIcon)
+        .then(() => {
+            showSuccessMessage('Wallet added successfully!');
+            loadWallets(); // Muat ulang daftar dompet
+            e.target.reset(); // Reset form
+            // Reset pilihan ikon ke default
+            document.getElementById('selectedWalletIcon').value = 'fa-wallet';
+            populateIconPicker();
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+});
 // ============================================================================
 // Event listener for adding a new account
 // ============================================================================
@@ -244,4 +337,10 @@ function showSuccessMessage(message) {
 function showError(message) {
     // Implementasi fungsi showError()
     // ...
+}
+// ============================================================================
+// UI Helper Functions
+// ============================================================================
+function showSuccessMessage(message) {
+    alert(message);
 }
