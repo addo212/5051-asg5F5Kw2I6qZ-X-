@@ -44,6 +44,10 @@ export async function saveTransaction(userId, transaction) {
         // Simpan transaksi bersama dengan ID uniknya (key) di dalam objek itu sendiri
         await set(newTransactionRef, { ...transaction, id: newTransactionRef.key });
         console.log("Transaction saved successfully!");
+        
+        // PERBAIKAN DI SINI: Kembalikan referensi transaksi yang baru dibuat
+        return newTransactionRef;
+
     } catch (error) {
         console.error("Error saving transaction:", error);
         throw error;
