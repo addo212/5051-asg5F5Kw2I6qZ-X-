@@ -3,86 +3,72 @@
 // ============================================================================
 // Module Imports
 // ============================================================================
-// Impor fungsi dan instance yang dibutuhkan dari file database.js terpusat
-import { auth, db, loadUserData, saveTransaction } from './database.js';
-// Impor fungsi spesifik dari Firebase SDK
+import { auth, db, loadUserData, loadTransactions, saveTransaction, deleteTransaction } from './database.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { formatRupiah } from './utils.js';
+import { paginate, renderPaginationControls } from './pagination.js';
 
 // ============================================================================
 // Global Variables
 // ============================================================================
 let userId;
-let userWallets = {}; // Variabel untuk menyimpan data dompet pengguna secara lokal
+let userWallets = {};
+let allTransfers = []; // Array untuk menyimpan riwayat transfer
+let currentTransferPage = 1;
+const TRANSFERS_PER_PAGE = 5; // Tampilkan 5 riwayat transfer per halaman
 
 // ============================================================================
-// Authentication State Listener (Titik Awal Eksekusi)
+// Initialization
 // ============================================================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
-        // Memulai proses memuat data dompet setelah pengguna terautentikasi
         initializeWalletPage(); 
     } else {
-        // Jika tidak ada pengguna, arahkan kembali ke halaman login
         window.location.href = "index.html";
     }
 });
 
-// ============================================================================
-// Main Initialization Function for the Wallet Page
-// ============================================================================
 async function initializeWalletPage() {
     try {
         const userData = await loadUserData(userId);
-        
-        if (!userData) {
-            console.error("User data not found!");
-            document.getElementById('walletsList').innerHTML = '<p class="empty-state error-message">Could not load user data.</p>';
-            return;
-        }
+        if (!userData) throw new Error("Could not load user data.");
 
         userWallets = userData.wallets || {};
-
-        // Memuat dan menampilkan daftar dompet
         displayWallets();
-        // Memuat opsi untuk form transfer
         loadTransferFormOptions(); 
+
+        // Memuat riwayat transfer
+        const allTransactions = await loadTransactions(userId) || {};
+        allTransfers = Object.values(allTransactions)
+            .filter(tx => tx.type === 'transfer')
+            .sort((a, b) => b.timestamp - a.timestamp);
+        
+        displayTransferHistoryPage();
 
     } catch (error) {
         console.error("Error initializing wallet page:", error);
-        document.getElementById('walletsList').innerHTML = '<p class="empty-state error-message">Failed to initialize page.</p>';
+        document.getElementById('walletsList').innerHTML = `<p class="empty-state error-message">${error.message}</p>`;
     }
 }
 
 // ============================================================================
-// Function to Display Wallets on the Page
+// Wallet Display and Form Logic
 // ============================================================================
 function displayWallets() {
     const walletsListElement = document.getElementById('walletsList');
     if (!walletsListElement) return;
-
     const walletIds = Object.keys(userWallets);
-
     if (walletIds.length === 0) {
         walletsListElement.innerHTML = '<p class="empty-state">No wallets found. Add one in Settings.</p>';
         return;
     }
-
     let html = '<ul class="wallet-list-container">'; 
-    
     walletIds.forEach(walletId => {
         const wallet = userWallets[walletId];
-        const currency = localStorage.getItem('currency') || 'USD';
-        const currencySymbol = getCurrencySymbol(currency);
-        
-        // Menggunakan warna flat dari database sebagai background
-        // Jika warna tidak ada, gunakan warna default
         const bgColor = wallet.color || '#6c5ce7'; 
-        // Menggunakan ikon dari database
         const iconClass = wallet.icon || 'fa-wallet'; 
-
         html += `
             <li class="wallet-item" style="background-color: ${bgColor};">
                 <div class="wallet-info">
@@ -90,34 +76,23 @@ function displayWallets() {
                     <h3>${wallet.name}</h3>
                 </div>
                 <p class="wallet-balance">${formatRupiah(wallet.balance)}</p>
-            </li>
-        `;
+            </li>`;
     });
-
     html += '</ul>';
     walletsListElement.innerHTML = html;
 }
 
-// ============================================================================
-// Function to Load Wallet Options for the Transfer Form
-// ============================================================================
 function loadTransferFormOptions() {
     const fromWalletSelect = document.getElementById('fromWallet');
     const toWalletSelect = document.getElementById('toWallet');
-
     fromWalletSelect.innerHTML = '<option value="">Select From Wallet</option>';
     toWalletSelect.innerHTML = '<option value="">Select To Wallet</option>';
-
     for (const walletId in userWallets) {
         const wallet = userWallets[walletId];
-        
-        // Opsi untuk dropdown "From", menampilkan saldo
         const fromOption = document.createElement('option');
         fromOption.value = walletId;
         fromOption.text = `${wallet.name} (${formatRupiah(wallet.balance)})`;
         fromWalletSelect.appendChild(fromOption);
-
-        // Opsi untuk dropdown "To"
         const toOption = document.createElement('option');
         toOption.value = walletId;
         toOption.text = wallet.name;
@@ -126,55 +101,128 @@ function loadTransferFormOptions() {
 }
 
 // ============================================================================
-// Function to Handle the Balance Transfer Logic
+// Transfer History Logic (NEW)
+// ============================================================================
+function displayTransferHistoryPage() {
+    const { paginatedItems, totalPages } = paginate(allTransfers, currentTransferPage, TRANSFERS_PER_PAGE);
+    renderTransferHistoryList(paginatedItems);
+    renderPaginationControls('transferPagination', currentTransferPage, totalPages, handleTransferPageChange);
+}
+
+function handleTransferPageChange(newPage) {
+    currentTransferPage = newPage;
+    displayTransferHistoryPage();
+}
+
+function renderTransferHistoryList(transfersOnPage) {
+    const container = document.getElementById('transferHistory');
+    if (!container) return;
+    if (transfersOnPage.length === 0) {
+        container.innerHTML = '<p class="empty-state">No transfer history found.</p>';
+        return;
+    }
+    let html = '<ul class="transaction-list">';
+    transfersOnPage.forEach(tx => {
+        const formattedDate = new Date(tx.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        html += `
+            <li class="transaction-item">
+                <div class="transaction-icon transfer"><i class="fas fa-exchange-alt"></i></div>
+                <div class="transaction-details">
+                    <div class="transaction-info">
+                        <h4>${tx.fromWallet} <i class="fas fa-long-arrow-alt-right"></i> ${tx.toWallet}</h4>
+                        <p>${formattedDate}</p>
+                    </div>
+                </div>
+                <div class="transaction-amount amount-transfer">${formatRupiah(tx.amount)}</div>
+                <div class="transaction-actions">
+                    <button class="delete-btn" data-transaction-id="${tx.id}"><i class="fas fa-trash"></i></button>
+                </div>
+            </li>`;
+    });
+    html += '</ul>';
+    container.innerHTML = html;
+    attachDeleteListeners();
+}
+
+function attachDeleteListeners() {
+    document.querySelectorAll('#transferHistory .delete-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const transactionId = button.dataset.transactionId;
+            handleDeleteTransferRecord(transactionId);
+        });
+    });
+}
+
+async function handleDeleteTransferRecord(transactionId) {
+    if (!confirm('Are you sure you want to delete this transfer record? This action cannot be undone and will not affect wallet balances.')) {
+        return;
+    }
+    try {
+        showLoading();
+        // Hanya menghapus record transaksi, tidak ada kalkulasi ulang saldo
+        await deleteTransaction(userId, transactionId);
+        
+        // Muat ulang data dan tampilkan kembali
+        const allTransactions = await loadTransactions(userId) || {};
+        allTransfers = Object.values(allTransactions)
+            .filter(tx => tx.type === 'transfer')
+            .sort((a, b) => b.timestamp - a.timestamp);
+        
+        const totalPages = Math.ceil(allTransfers.length / TRANSFERS_PER_PAGE);
+        if (currentTransferPage > totalPages && totalPages > 0) {
+            currentTransferPage = totalPages;
+        }
+
+        displayTransferHistoryPage();
+        showSuccessMessage('Transfer record deleted successfully.');
+    } catch (error) {
+        console.error("Error deleting transfer record:", error);
+        showError("Failed to delete transfer record.");
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================================================
+// Balance Transfer Logic (Updated)
 // ============================================================================
 async function handleBalanceTransfer(fromWalletId, toWalletId, amount) {
     try {
         showLoading();
         const fromWallet = userWallets[fromWalletId];
         const toWallet = userWallets[toWalletId];
+        if (!fromWallet || !toWallet) throw new Error("Invalid wallet selected.");
+        if (fromWallet.balance < amount) throw new Error("Insufficient balance.");
 
-        if (!fromWallet || !toWallet) {
-            throw new Error("Invalid wallet selected. Please try again.");
-        }
-        if (fromWallet.balance < amount) {
-            throw new Error("Insufficient balance in the source wallet.");
-        }
-
-        // 1. Buat objek transaksi untuk riwayat
         const transferTransaction = {
-            date: new Date().toISOString().split('T')[0], // Tanggal hari ini
+            date: new Date().toISOString().split('T')[0],
             type: 'transfer',
             amount: amount,
-            description: `Transfer from ${fromWallet.name} to ${toWallet.name}`,
             fromWallet: fromWallet.name,
             toWallet: toWallet.name,
-            account: 'Transfer', // Menggunakan kategori akun 'Transfer'
+            account: 'Transfer',
             timestamp: new Date().getTime()
         };
-
-        // 2. Simpan transaksi transfer ke database
-        await saveTransaction(userId, transferTransaction);
-
-        // 3. Lanjutkan dengan memperbarui saldo dompet
+        
+        const newTxRef = await saveTransaction(userId, transferTransaction);
+        
         const newFromBalance = fromWallet.balance - amount;
         const newToBalance = toWallet.balance + amount;
-
         const updates = {};
         updates[`/users/${userId}/wallets/${fromWalletId}/balance`] = newFromBalance;
         updates[`/users/${userId}/wallets/${toWalletId}/balance`] = newToBalance;
-
         await update(ref(db), updates);
 
-        // Update data lokal dan tampilkan ulang
+        // Update data lokal
         userWallets[fromWalletId].balance = newFromBalance;
         userWallets[toWalletId].balance = newToBalance;
-        
+        allTransfers.unshift({ id: newTxRef.key, ...transferTransaction }); // Tambahkan ke riwayat lokal
+        allTransfers.sort((a, b) => b.timestamp - a.timestamp);
+
         displayWallets();
         loadTransferFormOptions();
-
-        showSuccessMessage('Transfer successful and recorded in history!');
-
+        displayTransferHistoryPage();
+        showSuccessMessage('Transfer successful and recorded!');
     } catch (error) {
         console.error("Error transferring balance:", error);
         showError(error.message);
@@ -182,33 +230,29 @@ async function handleBalanceTransfer(fromWalletId, toWalletId, amount) {
         hideLoading();
     }
 }
+
 // ============================================================================
 // UI Helper Functions
 // ============================================================================
-function getCurrencySymbol(currency) {
-    switch (currency) {
-        case 'USD': return '$';
-        case 'IDR': return 'Rp';
-        case 'EUR': return '€';
-        case 'GBP': return '£';
-        default: return '$';
-    }
-}
-
-function showSuccessMessage(message) {
-    // Untuk sementara menggunakan alert, bisa diganti dengan notifikasi yang lebih baik
-    alert(message);
-}
-
+function showSuccessMessage(message) { alert(message); }
 function showError(message) {
     const errorElement = document.getElementById('transferError');
     if (errorElement) {
         errorElement.textContent = message;
         errorElement.style.display = 'block';
-        setTimeout(() => {
-            errorElement.style.display = 'none';
-        }, 3000);
+        setTimeout(() => { errorElement.style.display = 'none'; }, 3000);
     }
+}
+function showLoading() {
+    if (document.querySelector('.loading-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = '<div class="loading-spinner"></div>';
+    document.body.appendChild(overlay);
+}
+function hideLoading() {
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) overlay.remove();
 }
 
 // ============================================================================
@@ -216,30 +260,13 @@ function showError(message) {
 // ============================================================================
 document.getElementById('transferForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const fromWalletId = document.getElementById('fromWallet').value;
     const toWalletId = document.getElementById('toWallet').value;
-    const amount = parseFloat(document.getElementById('amount').value);
-
-    // Validasi input
-    if (!fromWalletId || !toWalletId) {
-        showError('Please select both "From" and "To" wallets.');
-        return;
-    }
-    if (isNaN(amount) || amount <= 0) {
-        showError('Please enter a valid positive amount.');
-        return;
-    }
-    if (fromWalletId === toWalletId) {
-        showError('Cannot transfer to the same wallet.');
-        return;
-    }
-
-    // Panggil fungsi logika transfer
+    const amount = parseFloat(document.getElementById('transferAmount').value);
+    if (!fromWalletId || !toWalletId) { showError('Please select both wallets.'); return; }
+    if (isNaN(amount) || amount <= 0) { showError('Please enter a valid amount.'); return; }
+    if (fromWalletId === toWalletId) { showError('Cannot transfer to the same wallet.'); return; }
     await handleBalanceTransfer(fromWalletId, toWalletId, amount);
-    
-    // Reset form setelah transfer
     e.target.reset();
-    // Muat ulang opsi dropdown untuk menampilkan saldo terbaru
     loadTransferFormOptions();
 });
