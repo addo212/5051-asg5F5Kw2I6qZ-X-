@@ -258,15 +258,34 @@ function hideLoading() {
 // ============================================================================
 // Event Listener for the Transfer Form
 // ============================================================================
+// ============================================================================
 document.getElementById('transferForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const fromWalletId = document.getElementById('fromWallet').value;
     const toWalletId = document.getElementById('toWallet').value;
+    // PERBAIKAN DI SINI: Menggunakan id "transferAmount" yang benar sesuai HTML
     const amount = parseFloat(document.getElementById('transferAmount').value);
-    if (!fromWalletId || !toWalletId) { showError('Please select both wallets.'); return; }
-    if (isNaN(amount) || amount <= 0) { showError('Please enter a valid amount.'); return; }
-    if (fromWalletId === toWalletId) { showError('Cannot transfer to the same wallet.'); return; }
+
+    // Validasi input
+    if (!fromWalletId || !toWalletId) {
+        showError('Please select both "From" and "To" wallets.');
+        return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+        showError('Please enter a valid positive amount.');
+        return;
+    }
+    if (fromWalletId === toWalletId) {
+        showError('Cannot transfer to the same wallet.');
+        return;
+    }
+
+    // Panggil fungsi logika transfer
     await handleBalanceTransfer(fromWalletId, toWalletId, amount);
+    
+    // Reset form setelah transfer
     e.target.reset();
+    // Muat ulang opsi dropdown untuk menampilkan saldo terbaru
     loadTransferFormOptions();
 });
