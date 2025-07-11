@@ -162,23 +162,63 @@ function populateSelect(selectId, options, defaultText) {
     });
 }
 
+// ============================================================================
+// Functions to Populate Form Dropdowns
+// ============================================================================
 function loadAccountsForForm(accounts) {
-    const type = document.getElementById('type').value || 'expense';
-    populateSelect('account', accounts[type] || [], 'Select Account');
-}
+    const typeSelect = document.getElementById('type');
+    const accountSelect = document.getElementById('account');
 
-function loadWalletsForForm(wallets) {
-    populateSelect('wallet', Object.values(wallets), 'Select Wallet');
-}
+    if (!typeSelect || !accountSelect) return;
 
+    // 1. Ambil nilai yang SEDANG DIPILIH dari dropdown 'Type'
+    const selectedType = typeSelect.value;
+
+    // 2. Dapatkan daftar akun yang benar berdasarkan tipe yang dipilih
+    const accountList = accounts[selectedType] || [];
+
+    // 3. Kosongkan opsi lama dari dropdown 'Account'
+    accountSelect.innerHTML = '<option value="">Select Account</option>';
+
+    // 4. Isi dengan opsi yang baru dan benar
+    accountList.forEach(account => {
+        const option = document.createElement('option');
+        option.value = account;
+        option.text = account;
+        accountSelect.appendChild(option);
+    });
+}
+// ============================================================================
+// Functions to Populate Edit Form Dropdowns
+// ============================================================================
 function loadAccountsForEditForm(accounts) {
-    const type = document.getElementById('editType').value || 'expense';
-    populateSelect('editAccount', accounts[type] || [], 'Select Account');
+    const typeSelect = document.getElementById('editType');
+    const accountsSelect = document.getElementById('editAccount');
+
+    if (!typeSelect || !accountsSelect) return;
+
+    // 1. Ambil nilai yang SEDANG DIPILIH dari dropdown 'Type' di modal edit
+    const selectedType = typeSelect.value;
+
+    // 2. Dapatkan daftar akun yang benar
+    const accountList = accounts[selectedType] || [];
+
+    // 3. Kosongkan opsi lama
+    accountsSelect.innerHTML = '<option value="">Select Account</option>';
+
+    // 4. Isi dengan opsi yang baru
+    accountList.forEach(account => {
+        const option = document.createElement('option');
+        option.value = account;
+        option.text = account;
+        accountsSelect.appendChild(option);
+    });
 }
 
-function loadWalletsForEditForm(wallets) {
-    populateSelect('editWallet', Object.values(wallets), 'Select Wallet');
-}
+// Event listener ini yang memastikan fungsi di atas dipanggil setiap kali Anda mengubah pilihan
+document.getElementById('type')?.addEventListener('change', () => {
+    loadAccountsForForm(userAccounts);
+});
 
 // ============================================================================
 // Filter Logic
