@@ -3,12 +3,9 @@
 // ============================================================================
 // Module Imports
 // ============================================================================
-// Impor fungsi dan instance yang dibutuhkan dari file database.js terpusat
 import { auth, db, loadUserData, loadTransactions, saveTransaction, deleteTransaction, updateUserData, updateTransaction } from './database.js';
-// Impor fungsi spesifik dari Firebase SDK
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
-// Impor fungsi pagination baru kita
 import { paginate, renderPaginationControls } from './pagination.js';
 import { formatRupiah } from './utils.js';
 
@@ -171,11 +168,21 @@ function closeEditModal() {
 // Functions to Populate Edit Form Dropdowns
 // ============================================================================
 function loadAccountsForEditForm(accounts) {
+    const typeSelect = document.getElementById('editType');
     const accountsSelect = document.getElementById('editAccount');
-    if (!accountsSelect) return;
-    accountsSelect.innerHTML = '<option value="">Select Account</option>';
-    const selectedType = document.getElementById('editType').value || 'income';
+
+    if (!typeSelect || !accountsSelect) return;
+
+    // 1. Ambil nilai yang SEDANG DIPILIH dari dropdown 'Type' di modal edit
+    const selectedType = typeSelect.value;
+
+    // 2. Dapatkan daftar akun yang benar
     const accountList = accounts[selectedType] || [];
+
+    // 3. Kosongkan opsi lama
+    accountsSelect.innerHTML = '<option value="">Select Account</option>';
+
+    // 4. Isi dengan opsi yang baru
     accountList.forEach(account => {
         const option = document.createElement('option');
         option.value = account;
@@ -347,16 +354,26 @@ function handlePageChange(newPage) {
 // Functions to Populate Form Dropdowns
 // ============================================================================
 function loadAccountsForForm(accounts) {
-    const accountsSelect = document.getElementById('account');
-    if (!accountsSelect) return;
-    accountsSelect.innerHTML = '<option value="">Select Account</option>';
-    const selectedType = document.getElementById('type').value || 'income';
+    const typeSelect = document.getElementById('type');
+    const accountSelect = document.getElementById('account');
+
+    if (!typeSelect || !accountSelect) return;
+
+    // 1. Ambil nilai yang SEDANG DIPILIH dari dropdown 'Type'
+    const selectedType = typeSelect.value;
+
+    // 2. Dapatkan daftar akun yang benar berdasarkan tipe yang dipilih
     const accountList = accounts[selectedType] || [];
+
+    // 3. Kosongkan opsi lama dari dropdown 'Account'
+    accountSelect.innerHTML = '<option value="">Select Account</option>';
+
+    // 4. Isi dengan opsi yang baru dan benar
     accountList.forEach(account => {
         const option = document.createElement('option');
         option.value = account;
         option.text = account;
-        accountsSelect.appendChild(option);
+        accountSelect.appendChild(option);
     });
 }
 
