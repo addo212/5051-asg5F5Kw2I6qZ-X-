@@ -50,29 +50,42 @@
                 <div class="form-group">
                     <label for="fromWallet">From Wallet:</label>
                     <select id="fromWallet" required>
-                        <option value="">Select From Wallet</option>
-                        <!-- Wallets will be loaded here -->
+                        <!-- Opsi dimuat oleh JS -->
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="toWallet">To Wallet:</label>
                     <select id="toWallet" required>
-                        <option value="">Select To Wallet</option>
-                        <!-- Wallets will be loaded here -->
+                        <!-- Opsi dimuat oleh JS -->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="amount">Amount:</label>
-                    <input type="number" id="amount" placeholder="Enter amount" step="0.01" min="0.01" required>
+                    <label for="transferAmount">Amount:</label>
+                    <input type="number" id="transferAmount" placeholder="Enter amount" required>
                 </div>
                 <button type="submit" class="btn-primary">Transfer</button>
                 <p id="transferError" class="status-message" style="color: var(--danger-color); display: none;"></p>
             </form>
-        </div>
 
-        <script type="module" src="js/auth.js"></script>
-        <script type="module" src="js/wallets.js"></script>
-        <script src="js/theme.js"></script>
-        <script src="js/dropdown.js"></script>
-    </body>
+            <!-- ================= BAGIAN BARU: RIWAYAT TRANSFER ================= -->
+            <h2 style="margin-top: 2rem;"><i class="fas fa-history"></i> Transfer History</h2>
+            <div id="transferHistory">
+                <!-- Riwayat transfer akan dimuat di sini oleh JavaScript -->
+                <p class="empty-state">Loading transfer history...</p>
+            </div>
+            <div id="transferPagination" class="pagination-container">
+                <!-- Kontrol pagination untuk riwayat transfer akan dimuat di sini -->
+            </div>
+            <!-- =============================================================== -->
+
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/wallets.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/pagination.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/dropdown.js"></script>
+</body>
 </html>
