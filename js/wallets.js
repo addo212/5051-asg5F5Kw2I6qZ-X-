@@ -154,15 +154,42 @@ function attachDeleteListeners() {
 }
 
 async function handleDeleteTransferRecord(transactionId) {
-    if (!confirm('Are you sure you want to delete this transfer record? This action cannot be undone and will not affect wallet balances.')) {
+    if (!confirm('Are you sure you want to delete this transfer record? This will also revert the wallet balances to their previous state.')) {
         return;
     }
     try {
         showLoading();
-        // Hanya menghapus record transaksi, tidak ada kalkulasi ulang saldo
-        await deleteTransaction(userId, transactionId);
         
-        // Muat ulang data dan tampilkan kembali
+        // 1. Ambil data transaksi yang akan dihapus
+        const transferToDelete = allTransfers.find(tx => tx.id === transactionId);
+        if (!transferToDelete) throw new Error("Transfer record not found");
+        
+        // 2. Ambil data wallet terkini
+        const userData = await loadUserData(userId);
+        const wallets = userData.wallets || {};
+        
+        // 3. Temukan wallet yang terlibat berdasarkan nama
+        const fromWalletId = Object.keys(wallets).find(id => wallets[id].name === transferToDelete.fromWallet);
+        const toWalletId = Object.keys(wallets).find(id => wallets[id].name === transferToDelete.toWallet);
+        
+        if (!fromWalletId || !toWalletId) {
+            throw new Error("One or both wallets involved in this transfer no longer exist");
+        }
+        
+        // 4. Kembalikan saldo ke nilai semula
+        const updates = {};
+        updates[`/users/${userId}/wallets/${fromWalletId}/balance`] = wallets[fromWalletId].balance + transferToDelete.amount;
+        updates[`/users/${userId}/wallets/${toWalletId}/balance`] = wallets[toWalletId].balance - transferToDelete.amount;
+        
+        // 5. Hapus transaksi dan perbarui saldo dalam satu operasi
+        updates[`/users/${userId}/transactions/${transactionId}`] = null;
+        await update(ref(db), updates);
+        
+        // 6. Perbarui data lokal
+        userWallets[fromWalletId].balance += transferToDelete.amount;
+        userWallets[toWalletId].balance -= transferToDelete.amount;
+        
+        // 7. Muat ulang data transaksi dan tampilkan kembali
         const allTransactions = await loadTransactions(userId) || {};
         allTransfers = Object.values(allTransactions)
             .filter(tx => tx.type === 'transfer')
@@ -173,11 +200,15 @@ async function handleDeleteTransferRecord(transactionId) {
             currentTransferPage = totalPages;
         }
 
+        // 8. Perbarui tampilan
+        displayWallets();
+        loadTransferFormOptions();
         displayTransferHistoryPage();
-        showSuccessMessage('Transfer record deleted successfully.');
+        
+        showSuccessMessage('Transfer record deleted and wallet balances reverted successfully.');
     } catch (error) {
         console.error("Error deleting transfer record:", error);
-        showError("Failed to delete transfer record.");
+        showError(error.message || "Failed to delete transfer record.");
     } finally {
         hideLoading();
     }
