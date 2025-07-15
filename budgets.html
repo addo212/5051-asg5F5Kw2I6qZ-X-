@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budgets - Finance Tracker</title>
+
+    <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } catch (e) {}
+        })();
+    </script>
+    
+    <!-- Impor Pustaka Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="icon" href="images/logo.jpeg">
-    <script>
-        // Menerapkan tema yang tersimpan
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        });
-    </script>
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -75,12 +82,40 @@
             <div class="current-period-indicator">
                 <h3>Showing Budget for: <span id="currentPeriodDisplay">Current Month</span></h3>
             </div>
-            
-            <!-- BAGIAN UNTUK MENAMPILKAN BUDGET YANG ADA (YANG SEBELUMNYA HILANG) -->
+
+            <!-- BAGIAN UNTUK MENAMPILKAN BUDGET YANG ADA -->
             <h2 style="margin-top: 2rem;"><i class="fas fa-tasks"></i> Your Budgets for This Period</h2>
-            <div id="budgetList" class="budget-grid">
-                <!-- Kartu budget akan dimuat di sini oleh JS -->
-                <p class="empty-state">Loading budgets...</p>
+
+            <!-- Container untuk chart -->
+            <div class="budget-visualization">
+                <div class="chart-container">
+                    <canvas id="budgetPieChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="budgetBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabel budget yang baru -->
+            <div class="budget-table-container">
+                <table class="budget-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Limit</th>
+                            <th>Spent</th>
+                            <th>Remaining</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budgetTableBody">
+                        <!-- Data budget akan dimuat di sini oleh JS -->
+                        <tr>
+                            <td colspan="6" class="empty-state">Loading budgets...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- BAGIAN UNTUK MEMBUAT BUDGET BARU -->
