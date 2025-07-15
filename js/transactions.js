@@ -66,6 +66,7 @@ function setupEventListeners() {
     document.getElementById('applyFilters')?.addEventListener('click', displayPage);
     document.getElementById('resetFilters')?.addEventListener('click', resetFilters);
     document.getElementById('transactionSearch')?.addEventListener('input', displayPage);
+    
 
     // Setup sorter untuk setiap kolom tabel
     document.querySelectorAll('.sortable').forEach(header => {
@@ -77,9 +78,27 @@ function setupEventListeners() {
                 sortColumn = column;
                 sortDirection = 'desc'; // Default ke desc untuk kolom baru
             }
+            const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+            const filterPanel = document.getElementById('filterPanel');
+            if (toggleFilterBtn && filterPanel) {
+                toggleFilterBtn.addEventListener('click', () => {
+                filterPanel.classList.toggle('show');
+                });
+            }
             displayPage();
         });
     });
+
+    document.getElementById('applyFilters')?.addEventListener('click', () => {
+        displayPage();
+        filterPanel.classList.remove('show');
+    });
+
+    document.getElementById('resetFilters')?.addEventListener('click', () => {
+        resetFilters();
+        filterPanel.classList.remove('show');
+    });
+}
 
     // Event listener untuk form transaksi
     document.getElementById('transactionForm')?.addEventListener('submit', handleTransactionFormSubmit);
