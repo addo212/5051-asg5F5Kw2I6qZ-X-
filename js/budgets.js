@@ -55,7 +55,10 @@ async function initializeBudgetsPage() {
 
     } catch (error) {
         console.error("Error initializing budgets page:", error);
-        document.getElementById('budgetTableBody').innerHTML = `<tr><td colspan="6" class="empty-state">${error.message}</td></tr>`;
+        const tableBody = document.getElementById('budgetTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">${error.message}</td></tr>`;
+        }
     }
 }
 
@@ -87,10 +90,13 @@ function populateYearDropdowns() {
 }
 
 function updateCurrentPeriodDisplay(period) {
+    const displayElement = document.getElementById('currentPeriodDisplay');
+    if (!displayElement) return;
+    
     const [year, month] = period.split('-');
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthName = monthNames[parseInt(month) - 1];
-    document.getElementById('currentPeriodDisplay').textContent = `${monthName} ${year}`;
+    displayElement.textContent = `${monthName} ${year}`;
 }
 
 async function loadAndDisplayBudgetsForPeriod(period) {
@@ -104,7 +110,10 @@ async function loadAndDisplayBudgetsForPeriod(period) {
         displayBudgets(processedBudgets, period);
     } catch (error) {
         console.error("Error loading budgets for period:", error);
-        document.getElementById('budgetTableBody').innerHTML = `<tr><td colspan="6" class="empty-state">Error loading budgets: ${error.message}</td></tr>`;
+        const tableBody = document.getElementById('budgetTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">Error loading budgets: ${error.message}</td></tr>`;
+        }
     }
 }
 
@@ -114,32 +123,47 @@ async function loadAndDisplayBudgetsForPeriod(period) {
 function processBudgets(budgets, transactions, period) {
     const [year, month] = period.split('-').map(Number);
     
-    for (const category in budgets) {
-        budgets[category].spent = 0;
+    // Buat salinan objek budgets agar tidak mengubah data asli
+    const processedBudgets = JSON.parse(JSON.stringify(budgets));
+    
+    // Reset semua nilai spent
+    for (const category in processedBudgets) {
+        processedBudgets[category].spent = 0;
     }
     
+    // Hitung pengeluaran untuk setiap kategori
     for (const txId in transactions) {
         const tx = transactions[txId];
+        if (!tx.timestamp) continue;
+        
         const txDate = new Date(tx.timestamp);
         
-        if (tx.type === 'expense' && txDate.getFullYear() === year && txDate.getMonth() + 1 === month) {
-            if (budgets[tx.account]) {
-                budgets[tx.account].spent += tx.amount;
+        if (tx.type === 'expense' && 
+            txDate.getFullYear() === year && 
+            txDate.getMonth() + 1 === month) {
+            
+            if (processedBudgets[tx.account]) {
+                processedBudgets[tx.account].spent += tx.amount;
             }
         }
     }
     
-    return budgets;
+    return processedBudgets;
 }
 
 // ============================================================================
-// UI Display Functions (PERUBAHAN UTAMA DI SINI)
+// UI Display Functions
 // ============================================================================
 function populateCategoryDropdown(expenseAccounts) {
     const select = document.getElementById('budgetCategory');
     if (!select) return;
+    
     select.innerHTML = '<option value="">Select a category...</option>';
-    expenseAccounts.forEach(account => {
+    
+    // Urutkan kategori secara alfabetis untuk kemudahan penggunaan
+    const sortedAccounts = [...expenseAccounts].sort();
+    
+    sortedAccounts.forEach(account => {
         const option = document.createElement('option');
         option.value = account;
         option.text = account;
@@ -160,18 +184,29 @@ function displayBudgets(budgets, period) {
  */
 function displayBudgetTable(budgets, period) {
     const tableBody = document.getElementById('budgetTableBody');
-    if (!tableBody) return;
+    if (!tableBody) {
+        console.error("Budget table body not found!");
+        return;
+    }
 
     if (Object.keys(budgets).length === 0) {
         tableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No budgets found for this period.</td></tr>';
         return;
     }
 
-    const sortedBudgets = Object.values(budgets).sort((a, b) => (b.spent / b.limit) - (a.spent / a.limit));
+    // Konversi objek budgets menjadi array dan tambahkan properti percentage
+    const budgetsArray = Object.entries(budgets).map(([category, budget]) => ({
+        category,
+        ...budget,
+        percentage: budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0
+    }));
+
+    // Urutkan berdasarkan persentase penggunaan (dari tertinggi ke terendah)
+    const sortedBudgets = budgetsArray.sort((a, b) => b.percentage - a.percentage);
 
     let html = '';
     sortedBudgets.forEach(budget => {
-        const percentage = budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0;
+        const percentage = budget.percentage;
         const remaining = budget.limit - budget.spent;
 
         let progressBarClass = 'safe';
@@ -207,113 +242,230 @@ function displayBudgetTable(budgets, period) {
  * Fungsi untuk merender data budget ke dalam chart.
  */
 function displayBudgetCharts(budgets) {
-    const categories = Object.keys(budgets);
-    const spentData = categories.map(cat => budgets[cat].spent);
-    const limitData = categories.map(cat => budgets[cat].limit);
+    if (Object.keys(budgets).length === 0) {
+        // Jika tidak ada data, bersihkan chart yang ada
+        if (budgetPieChart) budgetPieChart.destroy();
+        if (budgetBarChart) budgetBarChart.destroy();
+        budgetPieChart = null;
+        budgetBarChart = null;
+        return;
+    }
 
-    const pieCtx = document.getElementById('budgetPieChart').getContext('2d');
-    const barCtx = document.getElementById('budgetBarChart').getContext('2d');
+    // Siapkan data untuk chart
+    const budgetsArray = Object.entries(budgets)
+        .map(([category, budget]) => ({
+            category,
+            ...budget,
+            percentage: budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0
+        }))
+        .sort((a, b) => b.spent - a.spent); // Urutkan berdasarkan jumlah pengeluaran
 
-    const chartColors = ['#3498db', '#e74c3c', '#9b59b6', '#2ecc71', '#f1c40f', '#1abc9c', '#e67e22', '#34495e'];
+    const categories = budgetsArray.map(b => b.category);
+    const spentData = budgetsArray.map(b => b.spent);
+    const limitData = budgetsArray.map(b => b.limit);
 
-    // Hancurkan chart lama sebelum membuat yang baru
-    if (budgetPieChart) budgetPieChart.destroy();
-    if (budgetBarChart) budgetBarChart.destroy();
+    // Warna untuk chart
+    const chartColors = [
+        '#3498db', '#e74c3c', '#9b59b6', '#2ecc71', '#f1c40f', 
+        '#1abc9c', '#e67e22', '#34495e', '#16a085', '#d35400',
+        '#8e44ad', '#27ae60', '#f39c12', '#2980b9', '#c0392b'
+    ];
 
-    // Pie Chart untuk distribusi pengeluaran
-    budgetPieChart = new Chart(pieCtx, {
-        type: 'doughnut',
-        data: {
-            labels: categories,
-            datasets: [{
-                data: spentData,
-                backgroundColor: chartColors,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Spending Distribution' }
-            }
-        }
-    });
-
-    // Bar Chart untuk perbandingan limit vs pengeluaran
-    budgetBarChart = new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: categories,
-            datasets: [
-                {
-                    label: 'Spent',
-                    data: spentData,
-                    backgroundColor: 'rgba(231, 76, 60, 0.7)',
+    try {
+        // Pie Chart untuk distribusi pengeluaran
+        const pieCtx = document.getElementById('budgetPieChart');
+        if (pieCtx) {
+            // Hancurkan chart lama jika ada
+            if (budgetPieChart) budgetPieChart.destroy();
+            
+            budgetPieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: spentData,
+                        backgroundColor: chartColors.slice(0, categories.length),
+                        borderWidth: 1
+                    }]
                 },
-                {
-                    label: 'Limit',
-                    data: limitData,
-                    backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'right',
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                            }
+                        },
+                        title: { 
+                            display: true, 
+                            text: 'Spending Distribution',
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    return `${label}: ${formatRupiah(value)}`;
+                                }
+                            }
+                        }
+                    }
                 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true } },
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Budget vs. Actual Spending' }
-            }
+            });
         }
-    });
+
+        // Bar Chart untuk perbandingan limit vs pengeluaran
+        const barCtx = document.getElementById('budgetBarChart');
+        if (barCtx) {
+            // Hancurkan chart lama jika ada
+            if (budgetBarChart) budgetBarChart.destroy();
+            
+            budgetBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [
+                        {
+                            label: 'Budget Limit',
+                            data: limitData,
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Spent',
+                            data: spentData,
+                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatRupiah(value);
+                                },
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary')
+                            },
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary')
+                            },
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Budget vs Actual Spending',
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.raw || 0;
+                                    return `${label}: ${formatRupiah(value)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Error rendering charts:", error);
+    }
 }
 
 // ============================================================================
 // Event Listeners
 // ============================================================================
 function setupEventListeners() {
-    document.getElementById('viewBudgetPeriodBtn')?.addEventListener('click', () => {
-        const month = document.getElementById('budgetPeriodMonth').value;
-        const year = document.getElementById('budgetPeriodYear').value;
-        currentPeriod = `${year}-${month}`;
-        updateCurrentPeriodDisplay(currentPeriod);
-        loadAndDisplayBudgetsForPeriod(currentPeriod);
-    });
+    const viewButton = document.getElementById('viewBudgetPeriodBtn');
+    if (viewButton) {
+        viewButton.addEventListener('click', () => {
+            const month = document.getElementById('budgetPeriodMonth').value;
+            const year = document.getElementById('budgetPeriodYear').value;
+            currentPeriod = `${year}-${month}`;
+            updateCurrentPeriodDisplay(currentPeriod);
+            loadAndDisplayBudgetsForPeriod(currentPeriod);
+        });
+    }
     
-    document.getElementById('newBudgetPeriod')?.addEventListener('change', (e) => {
-        document.getElementById('customPeriodFields').style.display = e.target.value === 'custom' ? 'block' : 'none';
-    });
+    const periodSelect = document.getElementById('newBudgetPeriod');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', (e) => {
+            const customFields = document.getElementById('customPeriodFields');
+            if (customFields) {
+                customFields.style.display = e.target.value === 'custom' ? 'block' : 'none';
+            }
+        });
+    }
     
-    document.getElementById('addBudgetForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        let period = currentPeriod;
-        if (document.getElementById('newBudgetPeriod').value === 'custom') {
-            const month = document.getElementById('customBudgetMonth').value;
-            const year = document.getElementById('customBudgetYear').value;
-            period = `${year}-${month}`;
-        }
-        
-        const category = document.getElementById('budgetCategory').value;
-        const limit = parseFloat(document.getElementById('budgetLimit').value);
+    const budgetForm = document.getElementById('addBudgetForm');
+    if (budgetForm) {
+        budgetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let period = currentPeriod;
+            if (document.getElementById('newBudgetPeriod').value === 'custom') {
+                const month = document.getElementById('customBudgetMonth').value;
+                const year = document.getElementById('customBudgetYear').value;
+                period = `${year}-${month}`;
+            }
+            
+            const category = document.getElementById('budgetCategory').value;
+            const limit = parseFloat(document.getElementById('budgetLimit').value);
 
-        if (!category || isNaN(limit) || limit <= 0) {
-            showError("Please select a category and enter a valid limit.");
-            return;
-        }
+            if (!category || isNaN(limit) || limit <= 0) {
+                showError("Please select a category and enter a valid limit.");
+                return;
+            }
 
-        try {
-            await saveBudget(userId, period, category, limit);
-            showSuccessMessage("Budget created successfully!");
-            e.target.reset();
-            if (!availablePeriods.includes(period)) availablePeriods.push(period);
-            if (period === currentPeriod) await loadAndDisplayBudgetsForPeriod(currentPeriod);
-        } catch (error) {
-            console.error("Error saving budget:", error);
-            showError("Failed to save budget.");
-        }
-    });
+            try {
+                await saveBudget(userId, period, category, limit);
+                showSuccessMessage("Budget created successfully!");
+                e.target.reset();
+                
+                // Reset custom period fields display
+                document.getElementById('customPeriodFields').style.display = 'none';
+                
+                // Add period to available periods if it's new
+                if (!availablePeriods.includes(period)) {
+                    availablePeriods.push(period);
+                }
+                
+                // If we're adding to the current displayed period, refresh the view
+                if (period === currentPeriod) {
+                    await loadAndDisplayBudgetsForPeriod(currentPeriod);
+                }
+            } catch (error) {
+                console.error("Error saving budget:", error);
+                showError("Failed to save budget.");
+            }
+        });
+    }
 }
 
 function attachDeleteListeners() {
@@ -345,6 +497,8 @@ function showError(message) {
         errorEl.textContent = message;
         errorEl.style.display = 'block';
         setTimeout(() => { errorEl.style.display = 'none'; }, 3000);
+    } else {
+        console.error("Error element not found:", message);
     }
 }
 
