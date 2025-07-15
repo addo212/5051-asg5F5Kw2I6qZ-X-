@@ -47,53 +47,61 @@
 
         <!-- ================= KONTEN UTAMA ================= -->
         <div class="content-container">
-            <!-- FORM UNTUK MENAMBAH TRANSAKSI -->
-            <h2><i class="fas fa-plus-circle"></i> Add Transaction</h2>
-            <form id="transactionForm">
-                <div class="form-group">
-                    <label for="date">Date:</label>
-                    <input type="date" id="date" name="date" required>
-                </div>
-                <div class="form-group">
-                    <label for="type">Type:</label>
-                    <select id="type" name="type" required>
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="account">Account:</label>
-                    <select id="account" name="account" required>
-                        <!-- Opsi akun akan dimuat oleh JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="description">Description:</label>
-                    <input type="text" id="description" name="description" placeholder="Enter description" required>
-                </div>
-                <div class="form-group">
-                    <label for="wallet">Wallet:</label>
-                    <select id="wallet" name="wallet" required>
-                        <!-- Opsi dompet akan dimuat oleh JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="amount">Amount:</label>
-                    <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
-                </div>
-                <button type="submit" class="btn-primary">Save Transaction</button>
-                <p id="formError" class="status-message" style="color: var(--danger-color); display: none;"></p>
-                <div id="successMessage" style="color: var(--income-color); margin-top: 1rem; display: none;"></div> 
-            </form>
-
-            <!-- BAGIAN FILTER TRANSAKSI (DENGAN TAMBAHAN SEARCH) -->
-            <h2 style="margin-top: 2rem;"><i class="fas fa-filter"></i> Filter & Search</h2>
-            <div class="filter-panel">
-                <div class="filter-controls">
-                    <div class="form-group search-group">
-                        <label for="transactionSearch">Search Description</label>
-                        <input type="text" id="transactionSearch" placeholder="e.g., Groceries, Salary...">
+            <!-- FORM TAMBAH TRANSAKSI (BISA DILIPAT) -->
+            <details class="collapsible-section" open>
+                <summary class="collapsible-header">
+                    <h2><i class="fas fa-plus-circle"></i> Add Transaction</h2>
+                    <i class="fas fa-chevron-down collapse-icon"></i>
+                </summary>
+                <form id="transactionForm" class="collapsible-content">
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" required>
                     </div>
+                    <div class="form-group">
+                        <label for="type">Type:</label>
+                        <select id="type" name="type" required>
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account">Account:</label>
+                        <select id="account" name="account" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <input type="text" id="description" name="description" placeholder="Enter description" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="wallet">Wallet:</label>
+                        <select id="wallet" name="wallet" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Transaction</button>
+                    <p id="formError" class="status-message" style="color: var(--danger-color); display: none;"></p>
+                    <div id="successMessage" style="color: var(--income-color); margin-top: 1rem; display: none;"></div> 
+                </form>
+            </details>
+
+            <!-- TOOLBAR KONTROL TABEL -->
+            <div class="table-header-controls">
+                <h2><i class="fas fa-history"></i> Transaction History</h2>
+                <div class="table-actions">
+                    <div class="search-container">
+                        <input type="text" id="transactionSearch" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <button id="toggleFilterBtn" class="btn-filter"><i class="fas fa-filter"></i> Filters</button>
+                </div>
+            </div>
+
+            <!-- PANEL FILTER (BISA DILIPAT) -->
+            <div id="filterPanel" class="filter-panel collapsible">
+                <div class="filter-controls">
                     <div class="form-group">
                         <label for="filterStartDate">Start Date</label>
                         <input type="date" id="filterStartDate">
@@ -117,8 +125,7 @@
                 </div>
             </div>
 
-            <!-- BAGIAN RIWAYAT TRANSAKSI (STRUKTUR TABEL BARU) -->
-            <h2 style="margin-top: 2rem;"><i class="fas fa-history"></i> Transaction History</h2>
+            <!-- TABEL RIWAYAT TRANSAKSI -->
             <div class="table-container">
                 <table class="transaction-table">
                     <thead>
@@ -133,15 +140,12 @@
                         </tr>
                     </thead>
                     <tbody id="transactionHistoryBody">
-                        <!-- Baris tabel akan dimuat di sini oleh JavaScript -->
-                        <tr>
-                            <td colspan="7" class="empty-state">Loading transactions...</td>
-                        </tr>
+                        <tr><td colspan="7" class="empty-state">Loading transactions...</td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- BAGIAN PAGINATION -->
+            <!-- PAGINATION -->
             <div id="pagination-container" class="pagination-container"></div>
         </div>
     </div>
