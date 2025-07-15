@@ -13,14 +13,13 @@ import { formatRupiah } from './utils.js';
 // Global Variables & Constants
 // ============================================================================
 let userId;
-let allTransactions = []; // Data transaksi disimpan sebagai array
+let allTransactions = [];
 let userAccounts = {};
 let userWallets = {};
 let currentPage = 1;
 const ITEMS_PER_PAGE = 10;
 let editingTransactionId = null;
 
-// Variabel untuk sorting
 let sortColumn = 'timestamp';
 let sortDirection = 'desc';
 
@@ -59,18 +58,10 @@ onAuthStateChanged(auth, async (user) => {
 // Event Listeners
 // ============================================================================
 function setupEventListeners() {
-    // Event listener untuk form transaksi
     document.getElementById('transactionForm')?.addEventListener('submit', handleTransactionFormSubmit);
-    
-    // Event listener untuk perubahan tipe transaksi
-    document.getElementById('type')?.addEventListener('change', () => {
-        loadAccountsForForm(userAccounts);
-    });
-
-    // Event listener untuk pencarian
+    document.getElementById('type')?.addEventListener('change', () => loadAccountsForForm(userAccounts));
     document.getElementById('transactionSearch')?.addEventListener('input', displayPage);
 
-    // Setup sorter untuk setiap kolom tabel
     document.querySelectorAll('.sortable').forEach(header => {
         header.addEventListener('click', () => {
             const column = header.dataset.column;
@@ -84,31 +75,21 @@ function setupEventListeners() {
         });
     });
 
-    // Logika untuk panel filter yang bisa disembunyikan
     const toggleFilterBtn = document.getElementById('toggleFilterBtn');
     const filterPanel = document.getElementById('filterPanel');
 
     if (toggleFilterBtn && filterPanel) {
-        toggleFilterBtn.addEventListener('click', () => {
-            filterPanel.classList.toggle('show');
-        });
+        toggleFilterBtn.addEventListener('click', () => filterPanel.classList.toggle('show'));
     }
 
-    // Event listener untuk tombol Apply Filters
     document.getElementById('applyFilters')?.addEventListener('click', () => {
         displayPage();
-        if (filterPanel) filterPanel.classList.remove('show');
+        filterPanel?.classList.remove('show');
     });
 
-    // Event listener untuk tombol Reset Filters
     document.getElementById('resetFilters')?.addEventListener('click', () => {
         resetFilters();
-        if (filterPanel) filterPanel.classList.remove('show');
-    });
-
-    // Tambahkan event listener untuk filter tipe transaksi
-    document.getElementById('filterType')?.addEventListener('change', () => {
-        displayPage();
+        filterPanel?.classList.remove('show');
     });
 }
 
@@ -116,7 +97,6 @@ function setupEventListeners() {
 // Filtering and Sorting
 // ============================================================================
 function getFilteredAndSortedTransactions() {
-    // Ambil semua nilai filter
     const filterStartDate = document.getElementById('filterStartDate')?.value;
     const filterEndDate = document.getElementById('filterEndDate')?.value;
     const filterWallet = document.getElementById('filterWallet')?.value;
@@ -124,48 +104,31 @@ function getFilteredAndSortedTransactions() {
     const filterType = document.getElementById('filterType')?.value;
     const searchTerm = document.getElementById('transactionSearch')?.value?.toLowerCase() || '';
 
-    // Konversi tanggal ke timestamp untuk perbandingan
     const startDate = filterStartDate ? new Date(filterStartDate).getTime() : null;
     const endDate = filterEndDate ? new Date(filterEndDate).setHours(23, 59, 59, 999) : null;
 
-    // Filter transaksi berdasarkan semua kriteria
     let filtered = allTransactions.filter(tx => {
-        // Filter tanggal
-        const matchesDate = (!startDate || tx.timestamp >= startDate) && 
-                           (!endDate || tx.timestamp <= endDate);
-        
-        // Filter wallet
+        const matchesDate = (!startDate || tx.timestamp >= startDate) && (!endDate || tx.timestamp <= endDate);
         const matchesWallet = !filterWallet || tx.wallet === filterWallet;
-        
-        // Filter account
         const matchesAccount = !filterAccount || tx.account === filterAccount;
-        
-        // Filter tipe transaksi
         const matchesType = !filterType || tx.type === filterType;
         
-        // Filter pencarian (mencari di deskripsi, akun, dan dompet)
         const matchesSearch = !searchTerm || 
             (tx.description && tx.description.toLowerCase().includes(searchTerm)) ||
             (tx.account && tx.account.toLowerCase().includes(searchTerm)) ||
             (tx.wallet && tx.wallet.toLowerCase().includes(searchTerm));
         
-        // Transaksi harus memenuhi SEMUA kriteria filter
         return matchesDate && matchesWallet && matchesAccount && matchesType && matchesSearch;
     });
 
-    // Urutkan transaksi berdasarkan kolom dan arah yang dipilih
     filtered.sort((a, b) => {
         let valA = a[sortColumn];
         let valB = b[sortColumn];
-        
-        // Konversi ke lowercase untuk perbandingan string yang case-insensitive
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
-        
         let comparison = 0;
         if (valA > valB) comparison = 1;
         else if (valA < valB) comparison = -1;
-        
         return sortDirection === 'asc' ? comparison : -comparison;
     });
 
@@ -173,15 +136,12 @@ function getFilteredAndSortedTransactions() {
 }
 
 function resetFilters() {
-    // Reset semua filter ke nilai default
     document.getElementById('filterStartDate').value = '';
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterWallet').value = '';
     document.getElementById('filterAccount').value = '';
     document.getElementById('filterType').value = '';
     document.getElementById('transactionSearch').value = '';
-    
-    // Tampilkan ulang data tanpa filter
     displayPage();
 }
 
@@ -217,7 +177,7 @@ function displayTransactionsInTable(transactionsOnPage) {
     let html = '';
     transactionsOnPage.forEach(tx => {
         const date = new Date(tx.timestamp);
-        const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        const formattedDate = date.toLocaleDateString('en-CA');
 
         html += `
             <tr>
@@ -290,7 +250,6 @@ function loadWalletsForForm(wallets) {
 function loadFilters(accounts, wallets) {
     loadFilterWallets(wallets);
     loadFilterAccounts(accounts);
-    loadFilterTypes();
 }
 
 function loadFilterWallets(wallets) {
@@ -319,18 +278,8 @@ function loadFilterAccounts(accounts) {
     });
 }
 
-function loadFilterTypes() {
-    const filterTypeSelect = document.getElementById('filterType');
-    if (!filterTypeSelect) return;
-    filterTypeSelect.innerHTML = `
-        <option value="">All Types</option>
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-    `;
-}
-
 // ============================================================================
-// CRUD Operations (Create, Read, Update, Delete)
+// CRUD Operations
 // ============================================================================
 async function handleTransactionFormSubmit(e) {
     e.preventDefault();
@@ -519,6 +468,9 @@ function loadWalletsForEditForm(wallets) {
     });
 }
 
+// ============================================================================
+// FUNGSI EDIT TRANSAKSI YANG DIPERBAIKI
+// ============================================================================
 async function handleEditFormSubmit(e) {
     e.preventDefault();
     if (!editingTransactionId) return showEditError('No transaction selected.');
@@ -540,47 +492,85 @@ async function handleEditFormSubmit(e) {
         return showEditError('Please fill all fields with valid data.');
     }
     
+    // Periksa apakah ada perubahan pada transaksi
+    const hasChanges = 
+        oldTransaction.date !== updatedData.date ||
+        oldTransaction.type !== updatedData.type ||
+        oldTransaction.account !== updatedData.account ||
+        oldTransaction.description !== updatedData.description ||
+        oldTransaction.wallet !== updatedData.wallet ||
+        oldTransaction.amount !== updatedData.amount;
+    
+    // Jika tidak ada perubahan, tutup modal dan keluar dari fungsi
+    if (!hasChanges) {
+        closeEditModal();
+        return showSuccessMessage('No changes were made.');
+    }
+    
     try {
         showLoading();
+        
         const userData = await loadUserData(userId);
         let totalBalance = userData.totalBalance || 0;
         
-        // Revert old transaction effect
-        if (oldTransaction.type === 'income') totalBalance -= oldTransaction.amount;
-        else totalBalance += oldTransaction.amount;
+        // Hitung dampak saldo dari transaksi lama dan baru
+        const oldImpact = oldTransaction.type === 'income' ? oldTransaction.amount : -oldTransaction.amount;
+        const newImpact = updatedData.type === 'income' ? updatedData.amount : -updatedData.amount;
         
+        // Hitung perubahan bersih pada total saldo
+        const netBalanceChange = newImpact - oldImpact;
+        totalBalance += netBalanceChange;
+        
+        // Siapkan update untuk dompet
+        const walletUpdates = {};
+        
+        // Identifikasi dompet lama dan baru
         const oldWalletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === oldTransaction.wallet);
-        if (oldWalletId) {
-            let oldWalletBalance = userData.wallets[oldWalletId].balance || 0;
-            if (oldTransaction.type === 'income') oldWalletBalance -= oldTransaction.amount;
-            else oldWalletBalance += oldTransaction.amount;
-            await update(ref(db, `users/${userId}/wallets/${oldWalletId}`), { balance: oldWalletBalance });
-        }
-        
-        // Apply new transaction effect
-        if (updatedData.type === 'income') totalBalance += updatedData.amount;
-        else totalBalance -= updatedData.amount;
-        
         const newWalletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === updatedData.wallet);
-        if (newWalletId) {
-            let newWalletBalance = userData.wallets[newWalletId].balance || 0;
-            if (updatedData.type === 'income') newWalletBalance += updatedData.amount;
-            else newWalletBalance -= updatedData.amount;
-            await update(ref(db, `users/${userId}/wallets/${newWalletId}`), { balance: newWalletBalance });
+        
+        if (oldWalletId === newWalletId) {
+            // Kasus 1: Dompet sama - hanya perlu menghitung perubahan bersih
+            if (oldWalletId) {
+                const currentBalance = userData.wallets[oldWalletId].balance || 0;
+                walletUpdates[oldWalletId] = currentBalance + netBalanceChange;
+            }
+        } else {
+            // Kasus 2: Dompet berbeda - perlu memperbarui kedua dompet
+            if (oldWalletId) {
+                const oldWalletBalance = userData.wallets[oldWalletId].balance || 0;
+                // Batalkan efek transaksi lama pada dompet lama
+                walletUpdates[oldWalletId] = oldWalletBalance - oldImpact;
+            }
+            
+            if (newWalletId) {
+                const newWalletBalance = userData.wallets[newWalletId].balance || 0;
+                // Terapkan efek transaksi baru pada dompet baru
+                walletUpdates[newWalletId] = newWalletBalance + newImpact;
+            }
         }
         
-        await updateUserData(userId, { totalBalance });
+        // Perbarui transaksi
         await updateTransaction(userId, editingTransactionId, updatedData);
         
+        // Perbarui total saldo
+        await updateUserData(userId, { totalBalance });
+        
+        // Perbarui saldo dompet
+        for (const [walletId, newBalance] of Object.entries(walletUpdates)) {
+            await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: newBalance });
+        }
+        
+        // Muat ulang data transaksi
         const transactionsData = await loadTransactions(userId) || {};
         allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
         
+        // Perbarui tampilan
         displayPage();
         closeEditModal();
         showSuccessMessage('Transaction updated successfully!');
     } catch (error) {
         console.error("Error updating transaction:", error);
-        showEditError('Failed to update transaction.');
+        showEditError('Failed to update transaction: ' + error.message);
     } finally {
         hideLoading();
     }
