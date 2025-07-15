@@ -1049,7 +1049,7 @@ body:not(.dashboard-body) {
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
 
-.wallet-icon {
+.wallet-card .wallet-icon {
     position: absolute;
     top: 1rem;
     right: 1rem;
@@ -1132,7 +1132,7 @@ body:not(.dashboard-body) {
 }
 
 /* ============================================================================ */
-/* TRANSACTIONS PAGE - ENHANCED LAYOUT
+/* TRANSACTIONS PAGE (transactions.html)
 /* ============================================================================ */
 
 /* Collapsible Section (untuk form 'Add Transaction') */
@@ -1197,16 +1197,19 @@ details[open] > summary .collapse-icon {
     align-items: center;
 }
 
-.search-container {
+.table-actions .search-container {
     position: relative;
 }
 
-.search-container input {
-    padding-right: 2.5rem;
+.table-actions .search-container input {
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
     min-width: 250px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
 }
 
-.search-container .fa-search {
+.table-actions .search-container .fa-search {
     position: absolute;
     right: 15px;
     top: 50%;
@@ -1229,6 +1232,83 @@ details[open] > summary .collapse-icon {
     max-height: 500px; /* Nilai yang cukup besar untuk menampung konten */
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+}
+
+.filter-panel .filter-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-panel .filter-actions {
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Memungkinkan scroll horizontal di layar kecil */
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 1rem;
+}
+
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap; /* Mencegah teks membungkus di dalam sel */
+}
+
+.transaction-table th,
+.transaction-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-table thead th {
+    background-color: var(--bg-primary);
+    font-weight: 600;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.transaction-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.transaction-table th.sortable:hover {
+    background-color: var(--border-color);
+}
+
+.sort-icon {
+    margin-left: 8px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.transaction-table tbody tr:hover {
+    background-color: var(--bg-primary);
+}
+
+.transaction-table .type-cell span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.type-cell .income {
+    background-color: var(--income-color);
+}
+
+.type-cell .expense {
+    background-color: var(--expense-color);
 }
 
 /* Pagination */
@@ -1305,7 +1385,7 @@ details[open] > summary .collapse-icon {
     gap: 1rem;
 }
 
-.wallet-icon {
+.wallet-item .wallet-icon {
     font-size: 1.5rem;
     color: rgba(255, 255, 255, 0.7);
 }
@@ -1317,7 +1397,7 @@ details[open] > summary .collapse-icon {
     color: white;
 }
 
-.wallet-balance {
+.wallet-item .wallet-balance {
     margin: 0;
     font-size: 1.8rem;
     font-weight: 700;
@@ -1933,3 +2013,4 @@ details[open] > summary .collapse-icon {
     overflow: hidden;
     cursor: pointer;
 }
+
