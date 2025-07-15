@@ -20,6 +20,7 @@ let availablePeriods = [];
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
+        console.log("User authenticated:", userId);
         initializeBudgetsPage();
     } else {
         window.location.href = "index.html";
@@ -28,9 +29,12 @@ onAuthStateChanged(auth, (user) => {
 
 async function initializeBudgetsPage() {
     try {
+        console.log("Initializing budgets page...");
+        
         // Set current period to current month
         const now = new Date();
         currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        console.log("Current period set to:", currentPeriod);
         
         // Populate year dropdowns with reasonable range
         populateYearDropdowns();
@@ -41,14 +45,18 @@ async function initializeBudgetsPage() {
         
         // Load user data
         const userData = await loadUserData(userId);
+        console.log("User data loaded:", userData);
+        
         if (!userData) throw new Error("User data not found.");
 
         // Load expense accounts for category dropdown
         const expenseAccounts = userData.accounts?.expense || [];
+        console.log("Expense accounts:", expenseAccounts);
         populateCategoryDropdown(expenseAccounts);
         
         // Load available budget periods
         availablePeriods = await loadBudgetPeriods(userId);
+        console.log("Available budget periods:", availablePeriods);
         
         // Load transactions and budgets for current period
         await loadAndDisplayBudgetsForPeriod(currentPeriod);
@@ -58,6 +66,7 @@ async function initializeBudgetsPage() {
         
         // Setup event listeners
         setupEventListeners();
+        console.log("Budgets page initialized successfully");
 
     } catch (error) {
         console.error("Error initializing budgets page:", error);
@@ -77,7 +86,10 @@ function populateYearDropdowns() {
     
     yearDropdowns.forEach(dropdownId => {
         const dropdown = document.getElementById(dropdownId);
-        if (!dropdown) return;
+        if (!dropdown) {
+            console.warn(`Dropdown with ID ${dropdownId} not found`);
+            return;
+        }
         
         dropdown.innerHTML = '';
         for (let year = startYear; year <= endYear; year++) {
@@ -90,9 +102,16 @@ function populateYearDropdowns() {
             dropdown.appendChild(option);
         }
     });
+    console.log("Year dropdowns populated");
 }
 
 function updateCurrentPeriodDisplay(period) {
+    const displayElement = document.getElementById('currentPeriodDisplay');
+    if (!displayElement) {
+        console.warn("Current period display element not found");
+        return;
+    }
+    
     const [year, month] = period.split('-');
     const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -100,24 +119,33 @@ function updateCurrentPeriodDisplay(period) {
     ];
     
     const monthName = monthNames[parseInt(month) - 1];
-    document.getElementById('currentPeriodDisplay').textContent = `${monthName} ${year}`;
+    displayElement.textContent = `${monthName} ${year}`;
+    console.log("Period display updated to:", `${monthName} ${year}`);
 }
 
 async function loadAndDisplayBudgetsForPeriod(period) {
     try {
+        console.log("Loading budgets for period:", period);
         const userData = await loadUserData(userId);
+        console.log("User data loaded:", userData);
+        
         if (!userData || !userData.budgets) {
+            console.log("No budgets data found in user data");
             document.getElementById('budgetList').innerHTML = '<p class="empty-state">No budgets found for this period.</p>';
             return;
         }
         
+        console.log("All budgets:", userData.budgets);
         const periodBudgets = userData.budgets[period] || {};
+        console.log("Budgets for this period:", periodBudgets);
         
         // Load transactions for this period
         const allTransactions = await loadTransactions(userId) || {};
+        console.log("Transactions loaded:", Object.keys(allTransactions).length);
         
         // Process budgets with transactions
         const processedBudgets = processBudgets(periodBudgets, allTransactions, period);
+        console.log("Processed budgets:", processedBudgets);
         
         // Display budgets
         displayBudgets(processedBudgets, period);
@@ -131,31 +159,44 @@ async function loadAndDisplayBudgetsForPeriod(period) {
 // Data Processing
 // ============================================================================
 function processBudgets(budgets, transactions, period) {
+    console.log("Processing budgets for period:", period);
     // Extract year and month from period
     const [year, month] = period.split('-').map(Number);
+    console.log(`Year: ${year}, Month: ${month}`);
+    
+    // Buat salinan objek budgets agar tidak mengubah data asli
+    const processedBudgets = JSON.parse(JSON.stringify(budgets));
     
     // Reset 'spent' amount for all budgets
-    for (const category in budgets) {
-        budgets[category].spent = 0;
+    for (const category in processedBudgets) {
+        processedBudgets[category].spent = 0;
     }
     
     // Calculate spent amount for each category from transactions in this period
+    let matchCount = 0;
     for (const txId in transactions) {
         const tx = transactions[txId];
+        if (!tx.timestamp) {
+            console.log("Transaction missing timestamp:", tx);
+            continue;
+        }
+        
         const txDate = new Date(tx.timestamp);
+        const txYear = txDate.getFullYear();
+        const txMonth = txDate.getMonth() + 1; // JavaScript months are 0-indexed
         
         // Check if transaction is in the selected period
-        if (tx.type === 'expense' && 
-            txDate.getFullYear() === year && 
-            txDate.getMonth() + 1 === month) {
-            
-            if (budgets[tx.account]) {
-                budgets[tx.account].spent += tx.amount;
+        if (tx.type === 'expense' && txYear === year && txMonth === month) {
+            matchCount++;
+            if (processedBudgets[tx.account]) {
+                processedBudgets[tx.account].spent += tx.amount;
+                console.log(`Added ${tx.amount} to ${tx.account}, new total: ${processedBudgets[tx.account].spent}`);
             }
         }
     }
     
-    return budgets;
+    console.log(`Found ${matchCount} matching transactions for period ${year}-${month}`);
+    return processedBudgets;
 }
 
 // ============================================================================
@@ -163,7 +204,11 @@ function processBudgets(budgets, transactions, period) {
 // ============================================================================
 function populateCategoryDropdown(expenseAccounts) {
     const select = document.getElementById('budgetCategory');
-    if (!select) return;
+    if (!select) {
+        console.warn("Budget category select element not found");
+        return;
+    }
+    
     select.innerHTML = '<option value="">Select a category...</option>';
     expenseAccounts.forEach(account => {
         const option = document.createElement('option');
@@ -171,11 +216,18 @@ function populateCategoryDropdown(expenseAccounts) {
         option.text = account;
         select.appendChild(option);
     });
+    console.log("Category dropdown populated with", expenseAccounts.length, "options");
 }
 
 function displayBudgets(budgets, period) {
     const container = document.getElementById('budgetList');
-    if (!container) return;
+    if (!container) {
+        console.error("Budget list container not found!");
+        return;
+    }
+
+    console.log("Displaying budgets:", budgets);
+    console.log("Number of budgets:", Object.keys(budgets).length);
 
     if (Object.keys(budgets).length === 0) {
         container.innerHTML = '<p class="empty-state">No budgets found for this period.</p>';
@@ -212,6 +264,7 @@ function displayBudgets(budgets, period) {
         `;
     }
     container.innerHTML = html;
+    console.log("Budget HTML generated:", html.substring(0, 100) + "...");
     attachDeleteListeners();
 }
 
@@ -220,67 +273,83 @@ function displayBudgets(budgets, period) {
 // ============================================================================
 function setupEventListeners() {
     // View budget for selected period
-    document.getElementById('viewBudgetPeriodBtn')?.addEventListener('click', () => {
-        const month = document.getElementById('budgetPeriodMonth').value;
-        const year = document.getElementById('budgetPeriodYear').value;
-        const period = `${year}-${month}`;
-        
-        currentPeriod = period;
-        updateCurrentPeriodDisplay(period);
-        loadAndDisplayBudgetsForPeriod(period);
-    });
+    const viewButton = document.getElementById('viewBudgetPeriodBtn');
+    if (viewButton) {
+        viewButton.addEventListener('click', () => {
+            console.log("View Period button clicked");
+            const month = document.getElementById('budgetPeriodMonth').value;
+            const year = document.getElementById('budgetPeriodYear').value;
+            const period = `${year}-${month}`;
+            
+            console.log(`Selected period: ${period}`);
+            currentPeriod = period;
+            updateCurrentPeriodDisplay(period);
+            loadAndDisplayBudgetsForPeriod(period);
+        });
+    } else {
+        console.error("View Period button not found!");
+    }
     
     // Toggle custom period fields
-    document.getElementById('newBudgetPeriod')?.addEventListener('change', (e) => {
-        const customFields = document.getElementById('customPeriodFields');
-        if (e.target.value === 'custom') {
-            customFields.style.display = 'block';
-        } else {
-            customFields.style.display = 'none';
-        }
-    });
+    const periodSelect = document.getElementById('newBudgetPeriod');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', (e) => {
+            const customFields = document.getElementById('customPeriodFields');
+            if (customFields) {
+                customFields.style.display = e.target.value === 'custom' ? 'block' : 'none';
+            }
+        });
+    }
     
     // Add budget form submission
-    document.getElementById('addBudgetForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Get period
-        let period = currentPeriod;
-        const periodType = document.getElementById('newBudgetPeriod').value;
-        
-        if (periodType === 'custom') {
-            const month = document.getElementById('customBudgetMonth').value;
-            const year = document.getElementById('customBudgetYear').value;
-            period = `${year}-${month}`;
-        }
-        
-        const category = document.getElementById('budgetCategory').value;
-        const limit = parseFloat(document.getElementById('budgetLimit').value);
-
-        if (!category || isNaN(limit) || limit <= 0) {
-            showError("Please select a category and enter a valid limit.");
-            return;
-        }
-
-        try {
-            await saveBudget(userId, period, category, limit);
-            showSuccessMessage("Budget created successfully!");
-            e.target.reset();
+    const budgetForm = document.getElementById('addBudgetForm');
+    if (budgetForm) {
+        budgetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log("Budget form submitted");
             
-            // Add period to available periods if it's new
-            if (!availablePeriods.includes(period)) {
-                availablePeriods.push(period);
+            // Get period
+            let period = currentPeriod;
+            const periodType = document.getElementById('newBudgetPeriod').value;
+            
+            if (periodType === 'custom') {
+                const month = document.getElementById('customBudgetMonth').value;
+                const year = document.getElementById('customBudgetYear').value;
+                period = `${year}-${month}`;
             }
             
-            // If we're adding to the current displayed period, refresh the view
-            if (period === currentPeriod) {
-                await loadAndDisplayBudgetsForPeriod(currentPeriod);
+            const category = document.getElementById('budgetCategory').value;
+            const limit = parseFloat(document.getElementById('budgetLimit').value);
+            
+            console.log(`Creating budget: period=${period}, category=${category}, limit=${limit}`);
+
+            if (!category || isNaN(limit) || limit <= 0) {
+                showError("Please select a category and enter a valid limit.");
+                return;
             }
-        } catch (error) {
-            console.error("Error saving budget:", error);
-            showError("Failed to save budget.");
-        }
-    });
+
+            try {
+                await saveBudget(userId, period, category, limit);
+                showSuccessMessage("Budget created successfully!");
+                e.target.reset();
+                
+                // Add period to available periods if it's new
+                if (!availablePeriods.includes(period)) {
+                    availablePeriods.push(period);
+                }
+                
+                // If we're adding to the current displayed period, refresh the view
+                if (period === currentPeriod) {
+                    await loadAndDisplayBudgetsForPeriod(currentPeriod);
+                }
+            } catch (error) {
+                console.error("Error saving budget:", error);
+                showError("Failed to save budget.");
+            }
+        });
+    } else {
+        console.error("Budget form not found!");
+    }
 }
 
 function attachDeleteListeners() {
@@ -288,6 +357,8 @@ function attachDeleteListeners() {
         button.addEventListener('click', async () => {
             const period = button.dataset.period;
             const category = button.dataset.category;
+            
+            console.log(`Delete button clicked for ${category} in period ${period}`);
             
             if (confirm(`Are you sure you want to delete the budget for "${category}"?`)) {
                 try {
@@ -312,6 +383,8 @@ function showError(message) {
         errorEl.textContent = message;
         errorEl.style.display = 'block';
         setTimeout(() => { errorEl.style.display = 'none'; }, 3000);
+    } else {
+        console.error("Error element not found, message was:", message);
     }
 }
 
