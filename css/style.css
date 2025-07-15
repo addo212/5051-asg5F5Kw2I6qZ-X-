@@ -694,13 +694,50 @@ body:not(.dashboard-body) {
 }
 
 .stat-card {
-    background: var(--bg-secondary);
-    padding: 1.8rem;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
     position: relative;
     overflow: hidden;
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.stat-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+.trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trend.positive { color: var(--income-color); }
+.trend.negative { color: var(--expense-color); }
+
+.period {
+    color: var(--text-secondary);
 }
 
 .stat-card::before {
