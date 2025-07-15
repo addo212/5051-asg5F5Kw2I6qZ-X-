@@ -55,13 +55,23 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ============================================================================
-// Event Listeners
+// Event Listeners (FUNGSI YANG DIPERBAIKI)
 // ============================================================================
 function setupEventListeners() {
+    // Form submission
     document.getElementById('transactionForm')?.addEventListener('submit', handleTransactionFormSubmit);
     document.getElementById('type')?.addEventListener('change', () => loadAccountsForForm(userAccounts));
-    document.getElementById('transactionSearch')?.addEventListener('input', displayPage);
 
+    // --- FILTER LIVE ---
+    // Setiap kali ada perubahan pada filter ini, panggil displayPage()
+    document.getElementById('transactionSearch')?.addEventListener('input', displayPage);
+    document.getElementById('filterStartDate')?.addEventListener('change', displayPage);
+    document.getElementById('filterEndDate')?.addEventListener('change', displayPage);
+    document.getElementById('filterWallet')?.addEventListener('change', displayPage);
+    document.getElementById('filterAccount')?.addEventListener('change', displayPage);
+    document.getElementById('filterType')?.addEventListener('change', displayPage);
+
+    // Sorting
     document.querySelectorAll('.sortable').forEach(header => {
         header.addEventListener('click', () => {
             const column = header.dataset.column;
@@ -75,18 +85,14 @@ function setupEventListeners() {
         });
     });
 
+    // Panel filter collapsible
     const toggleFilterBtn = document.getElementById('toggleFilterBtn');
     const filterPanel = document.getElementById('filterPanel');
-
     if (toggleFilterBtn && filterPanel) {
         toggleFilterBtn.addEventListener('click', () => filterPanel.classList.toggle('show'));
     }
 
-    document.getElementById('applyFilters')?.addEventListener('click', () => {
-        displayPage();
-        filterPanel?.classList.remove('show');
-    });
-
+    // Tombol Reset
     document.getElementById('resetFilters')?.addEventListener('click', () => {
         resetFilters();
         filterPanel?.classList.remove('show');
@@ -149,6 +155,8 @@ function resetFilters() {
 // Core Display Logic
 // ============================================================================
 function displayPage() {
+    // Selalu reset ke halaman pertama saat filter berubah
+    currentPage = 1; 
     const processedTransactions = getFilteredAndSortedTransactions();
     const { paginatedItems, totalPages } = paginate(processedTransactions, currentPage, ITEMS_PER_PAGE);
     
@@ -159,7 +167,11 @@ function displayPage() {
 
 function handlePageChange(newPage) {
     currentPage = newPage;
-    displayPage();
+    // Saat mengganti halaman, kita tidak perlu memfilter ulang, hanya paginasi ulang
+    const processedTransactions = getFilteredAndSortedTransactions();
+    const { paginatedItems, totalPages } = paginate(processedTransactions, currentPage, ITEMS_PER_PAGE);
+    displayTransactionsInTable(paginatedItems);
+    renderPaginationControls('pagination-container', currentPage, totalPages, handlePageChange);
 }
 
 // ============================================================================
@@ -324,7 +336,6 @@ async function handleTransactionFormSubmit(e) {
         const transactionsData = await loadTransactions(userId) || {};
         allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
         
-        currentPage = 1;
         displayPage();
         showSuccessMessage('Transaction saved successfully!');
     } catch (error) {
@@ -468,9 +479,6 @@ function loadWalletsForEditForm(wallets) {
     });
 }
 
-// ============================================================================
-// FUNGSI EDIT TRANSAKSI YANG DIPERBAIKI
-// ============================================================================
 async function handleEditFormSubmit(e) {
     e.preventDefault();
     if (!editingTransactionId) return showEditError('No transaction selected.');
@@ -492,7 +500,6 @@ async function handleEditFormSubmit(e) {
         return showEditError('Please fill all fields with valid data.');
     }
     
-    // Periksa apakah ada perubahan pada transaksi
     const hasChanges = 
         oldTransaction.date !== updatedData.date ||
         oldTransaction.type !== updatedData.type ||
@@ -501,7 +508,6 @@ async function handleEditFormSubmit(e) {
         oldTransaction.wallet !== updatedData.wallet ||
         oldTransaction.amount !== updatedData.amount;
     
-    // Jika tidak ada perubahan, tutup modal dan keluar dari fungsi
     if (!hasChanges) {
         closeEditModal();
         return showSuccessMessage('No changes were made.');
@@ -513,58 +519,44 @@ async function handleEditFormSubmit(e) {
         const userData = await loadUserData(userId);
         let totalBalance = userData.totalBalance || 0;
         
-        // Hitung dampak saldo dari transaksi lama dan baru
         const oldImpact = oldTransaction.type === 'income' ? oldTransaction.amount : -oldTransaction.amount;
         const newImpact = updatedData.type === 'income' ? updatedData.amount : -updatedData.amount;
         
-        // Hitung perubahan bersih pada total saldo
         const netBalanceChange = newImpact - oldImpact;
         totalBalance += netBalanceChange;
         
-        // Siapkan update untuk dompet
         const walletUpdates = {};
         
-        // Identifikasi dompet lama dan baru
         const oldWalletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === oldTransaction.wallet);
         const newWalletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === updatedData.wallet);
         
         if (oldWalletId === newWalletId) {
-            // Kasus 1: Dompet sama - hanya perlu menghitung perubahan bersih
             if (oldWalletId) {
                 const currentBalance = userData.wallets[oldWalletId].balance || 0;
                 walletUpdates[oldWalletId] = currentBalance + netBalanceChange;
             }
         } else {
-            // Kasus 2: Dompet berbeda - perlu memperbarui kedua dompet
             if (oldWalletId) {
                 const oldWalletBalance = userData.wallets[oldWalletId].balance || 0;
-                // Batalkan efek transaksi lama pada dompet lama
                 walletUpdates[oldWalletId] = oldWalletBalance - oldImpact;
             }
             
             if (newWalletId) {
                 const newWalletBalance = userData.wallets[newWalletId].balance || 0;
-                // Terapkan efek transaksi baru pada dompet baru
                 walletUpdates[newWalletId] = newWalletBalance + newImpact;
             }
         }
         
-        // Perbarui transaksi
         await updateTransaction(userId, editingTransactionId, updatedData);
-        
-        // Perbarui total saldo
         await updateUserData(userId, { totalBalance });
         
-        // Perbarui saldo dompet
         for (const [walletId, newBalance] of Object.entries(walletUpdates)) {
             await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: newBalance });
         }
         
-        // Muat ulang data transaksi
         const transactionsData = await loadTransactions(userId) || {};
         allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
         
-        // Perbarui tampilan
         displayPage();
         closeEditModal();
         showSuccessMessage('Transaction updated successfully!');
@@ -584,7 +576,6 @@ function showEditError(message) {
         setTimeout(() => { errorElement.style.display = 'none'; }, 3000);
     }
 }
-
 // ============================================================================
 // UI Helper Functions
 // ============================================================================
