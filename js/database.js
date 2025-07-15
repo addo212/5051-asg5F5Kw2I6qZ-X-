@@ -130,6 +130,23 @@ export function saveWallet(userId, walletName, color, icon) {
 export function deleteWallet(userId, walletId) {
     return remove(ref(db, `users/${userId}/wallets/${walletId}`));
 }
+// ============================================================================
+// Budget Operations
+// ============================================================================
+export function saveBudget(userId, category, limit) {
+    // Path ke budget spesifik berdasarkan kategori
+    const budgetRef = ref(db, `users/${userId}/budgets/${category}`);
+    return set(budgetRef, {
+        category: category,
+        limit: limit,
+        spent: 0 // Selalu mulai dari 0
+    });
+}
+
+export function deleteBudget(userId, category) {
+    const budgetRef = ref(db, `users/${userId}/budgets/${category}`);
+    return remove(budgetRef);
+}
 
 // ============================================================================
 // Initial Data Setup
@@ -152,7 +169,8 @@ export async function initializeUserData(userId) {
                 icon: 'fa-piggy-bank' // Ikon celengan untuk dompet default
             }
         },
-        transactions: {}
+        transactions: {},
+        budgets: {}
     };
     try {
         await set(ref(db, `users/${userId}`), initialData);
