@@ -1687,3 +1687,56 @@ css
 [data-theme="dark"] .chart-container canvas {
     filter: brightness(0.9);
 }
+/* Budget Summary Styles */
+.budget-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+}
+
+.summary-item p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.summary-item p.safe { color: var(--income-color); }
+.summary-item p.warning { color: #f9a825; }
+.summary-item p.danger { color: var(--expense-color); }
+
+.summary-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-progress .table-progress-bar {
+    width: 80%;
+    height: 10px;
+}
+
+.budget-total-row {
+    background-color: var(--bg-primary);
+    font-weight: bold;
+}
+
+.budget-total-row td {
+    border-top: 2px solid var(--border-color);
+}
