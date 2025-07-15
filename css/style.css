@@ -1510,6 +1510,51 @@ css
     font-weight: 600;
 }
 /* ============================================================================ */
+/* BUDGET PERIOD FILTER STYLES
+/* ============================================================================ */
+
+.period-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    background-color: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.period-filter .form-group {
+    margin-bottom: 0;
+    min-width: 150px;
+}
+
+.current-period-indicator {
+    margin-bottom: 2rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.current-period-indicator h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.current-period-indicator span {
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.form-group-inline {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group-inline .form-group {
+    flex: 1;
+}
+/* ============================================================================ */
 /* 6. REPORTS PAGE STYLES
 /* ============================================================================ */
 
