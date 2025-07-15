@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transactions - Finance Tracker</title>
 
-    <!-- ================= PERUBAHAN DI SINI ================= -->
     <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
     <script>
         (function() {
@@ -15,7 +14,6 @@
             } catch (e) {}
         })();
     </script>
-    <!-- ===================================================== -->
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -88,10 +86,14 @@
                 <div id="successMessage" style="color: var(--income-color); margin-top: 1rem; display: none;"></div> 
             </form>
 
-            <!-- BAGIAN FILTER TRANSAKSI -->
-            <h2 style="margin-top: 2rem;"><i class="fas fa-filter"></i> Filter Transactions</h2>
+            <!-- BAGIAN FILTER TRANSAKSI (DENGAN TAMBAHAN SEARCH) -->
+            <h2 style="margin-top: 2rem;"><i class="fas fa-filter"></i> Filter & Search</h2>
             <div class="filter-panel">
                 <div class="filter-controls">
+                    <div class="form-group search-group">
+                        <label for="transactionSearch">Search Description</label>
+                        <input type="text" id="transactionSearch" placeholder="e.g., Groceries, Salary...">
+                    </div>
                     <div class="form-group">
                         <label for="filterStartDate">Start Date</label>
                         <input type="date" id="filterStartDate">
@@ -102,15 +104,11 @@
                     </div>
                     <div class="form-group">
                         <label for="filterWallet">Wallet</label>
-                        <select id="filterWallet">
-                            <!-- Opsi dompet akan dimuat oleh JavaScript -->
-                        </select>
+                        <select id="filterWallet"></select>
                     </div>
                     <div class="form-group">
                         <label for="filterAccount">Account</label>
-                        <select id="filterAccount">
-                            <!-- Opsi akun akan dimuat oleh JavaScript -->
-                        </select>
+                        <select id="filterAccount"></select>
                     </div>
                 </div>
                 <div class="filter-actions">
@@ -119,11 +117,28 @@
                 </div>
             </div>
 
-            <!-- BAGIAN RIWAYAT TRANSAKSI -->
+            <!-- BAGIAN RIWAYAT TRANSAKSI (STRUKTUR TABEL BARU) -->
             <h2 style="margin-top: 2rem;"><i class="fas fa-history"></i> Transaction History</h2>
-            <div id="transactionHistory">
-                <!-- Riwayat transaksi akan dimuat di sini oleh JavaScript -->
-                <p class="empty-state">Loading transactions...</p>
+            <div class="table-container">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="timestamp">Date <i class="fas fa-sort sort-icon"></i></th>
+                            <th class="sortable" data-column="description">Description <i class="fas fa-sort sort-icon"></i></th>
+                            <th class="sortable" data-column="account">Account <i class="fas fa-sort sort-icon"></i></th>
+                            <th class="sortable" data-column="wallet">Wallet <i class="fas fa-sort sort-icon"></i></th>
+                            <th class="sortable" data-column="type">Type <i class="fas fa-sort sort-icon"></i></th>
+                            <th class="sortable" data-column="amount">Amount <i class="fas fa-sort sort-icon"></i></th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionHistoryBody">
+                        <!-- Baris tabel akan dimuat di sini oleh JavaScript -->
+                        <tr>
+                            <td colspan="7" class="empty-state">Loading transactions...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- BAGIAN PAGINATION -->
