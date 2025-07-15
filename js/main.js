@@ -1,13 +1,11 @@
-javascript
-
-
 // main.js
 
 // ============================================================================
 // Module Imports
 // ============================================================================
 import { auth, loadUserData, loadTransactions } from './database.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+// PERUBAHAN: Menambahkan 'signOut' dari Firebase Auth SDK
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { formatRupiah } from './utils.js';
 
 // ============================================================================
@@ -22,11 +20,38 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
         initializeDashboard();
+        // Memasang event listener setelah pengguna dipastikan login
+        setupEventListeners();
     } else {
         // Jika tidak ada pengguna, arahkan kembali ke halaman login
         window.location.href = "index.html";
     }
 });
+
+// ============================================================================
+// Event Listeners (BARU)
+// ============================================================================
+/**
+ * Fungsi untuk memasang semua event listener yang dibutuhkan di halaman dashboard.
+ */
+function setupEventListeners() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await signOut(auth);
+                    // onAuthStateChanged akan secara otomatis mendeteksi perubahan
+                    // dan mengarahkan ke halaman login.
+                    console.log('User signed out successfully.');
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                    alert('Failed to sign out. Please try again.');
+                }
+            }
+        });
+    }
+}
 
 // ============================================================================
 // Core Dashboard Logic
@@ -55,7 +80,6 @@ async function initializeDashboard() {
 
     } catch (error) {
         console.error("Error initializing dashboard:", error);
-        // Anda bisa menambahkan pesan error di UI di sini jika diperlukan
     }
 }
 
@@ -83,7 +107,6 @@ function calculateMonthlySummary(transactions) {
         const tx = transactions[key];
         const txDate = new Date(tx.timestamp);
 
-        // Hanya proses transaksi dari bulan dan tahun saat ini
         if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
             if (tx.type === 'income') {
                 monthlyIncome += tx.amount;
@@ -137,9 +160,8 @@ function displayRecentTransactions(transactions) {
         return;
     }
 
-    // Ubah objek menjadi array, filter selain 'transfer', urutkan, dan ambil 5 teratas
     const recentTransactions = Object.values(transactions)
-        .filter(tx => tx.type !== 'transfer') // Menyaring transaksi tipe 'transfer'
+        .filter(tx => tx.type !== 'transfer')
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, 5);
 
