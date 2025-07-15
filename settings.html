@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Finance Tracker</title>
+    
+    <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } catch (e) {}
+        })();
+    </script>
+    
     <link rel="stylesheet" href="css/style.css">
     <!-- Font Awesome untuk ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script>
-        // Apply saved theme
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        });
-    </script>
+    <link rel="icon" href="images/logo.jpeg">
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -42,10 +47,11 @@
         
         <!-- SETTINGS CONTENT -->
         <div class="settings-container">
-            <h2><i class="fas fa-palette"></i> Theme Settings</h2>
+            <h2><i class="fas fa-cog"></i> Settings</h2>
             
+            <!-- THEME SETTINGS SECTION -->
             <div class="settings-section">
-                <h3>Choose Theme</h3>
+                <h3><i class="fas fa-palette"></i> Theme Settings</h3>
                 <div class="theme-options">
                     <div class="theme-option" data-theme="light">
                         <div class="theme-preview light-theme">
@@ -85,19 +91,35 @@
                 </div>
             </div>
 
-            <!-- STRUKTUR BARU UNTUK PENGATURAN AKUN DAN DOMPET -->
+            <!-- ACCOUNT & WALLET MANAGEMENT SECTION -->
             <div class="settings-management-grid">
-
                 <!-- KARTU PENGATURAN AKUN -->
                 <div class="item-management-card">
                     <div class="item-list-header">
                         <i class="fas fa-list"></i>
                         <h3>Account Settings</h3>
                     </div>
-                    <div class="settings-grid">
-                        <ul id="incomeAccountsList" class="item-list"></ul>
-                        <ul id="expenseAccountsList" class="item-list"></ul>
+                    
+                    <div class="search-container">
+                        <input type="text" id="accountSearch" class="search-input" placeholder="Search accounts...">
+                        <i class="fas fa-search search-icon"></i>
                     </div>
+                    
+                    <div class="settings-grid">
+                        <div class="account-column">
+                            <h4><i class="fas fa-arrow-down"></i> Income Accounts</h4>
+                            <ul id="incomeAccountsList" class="item-list">
+                                <li class="empty-state">Loading income accounts...</li>
+                            </ul>
+                        </div>
+                        <div class="account-column">
+                            <h4><i class="fas fa-arrow-up"></i> Expense Accounts</h4>
+                            <ul id="expenseAccountsList" class="item-list">
+                                <li class="empty-state">Loading expense accounts...</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
                     <form id="addAccountForm" class="add-item-form">
                         <div class="form-group">
                             <input type="text" id="newAccountName" placeholder="New Account Name" required>
@@ -107,7 +129,7 @@
                                 <option value="income">Income</option>
                                 <option value="expense">Expense</option>
                             </select>
-                            <button type="submit" class="btn-primary-small">Add</button>
+                            <button type="submit" class="btn-primary-small">Add Account</button>
                         </div>
                     </form>
                 </div>
@@ -118,28 +140,39 @@
                         <i class="fas fa-wallet"></i>
                         <h3>Wallet Settings</h3>
                     </div>
-                    <ul id="walletsList" class="item-list"></ul>
+                    
+                    <div class="search-container">
+                        <input type="text" id="walletSearch" class="search-input" placeholder="Search wallets...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <ul id="walletsList" class="item-list wallet-list">
+                        <li class="empty-state">Loading wallets...</li>
+                    </ul>
+                    
                     <form id="addWalletForm" class="add-item-form">
                         <div class="form-group">
                             <input type="text" id="newWalletName" placeholder="New Wallet Name" required>
                         </div>
-                        <div class="form-group-inline">
+                        <div class="form-group">
+                            <label for="newWalletColor">Wallet Color:</label>
                             <input type="color" id="newWalletColor" value="#6c5ce7" class="color-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="iconPicker">Wallet Icon:</label>
                             <div class="icon-picker" id="iconPicker"></div>
                             <input type="hidden" id="selectedWalletIcon" value="fa-wallet">
-                            <button type="submit" class="btn-primary-small">Add</button>
                         </div>
+                        <button type="submit" class="btn-primary-small">Add Wallet</button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script type="module" src="js/auth.js"></script>
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/settings.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/dropdown.js"></script>
-    <script type="module" src="js/settings.js"></script>
 </body>
 </html>
