@@ -13,7 +13,7 @@ import { formatRupiah } from './utils.js';
 // Global Variables & Constants
 // ============================================================================
 let userId;
-let allTransactions = []; // Sekarang menjadi array
+let allTransactions = []; // Data transaksi disimpan sebagai array
 let userAccounts = {};
 let userWallets = {};
 let currentPage = 1;
@@ -41,11 +41,7 @@ onAuthStateChanged(auth, async (user) => {
             }
             
             const transactionsData = await loadTransactions(userId) || {};
-            // Konversi objek transaksi menjadi array dengan ID sebagai properti
-            allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({
-                id,
-                ...tx
-            }));
+            allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
             
             displayPage();
             initEditModal();
@@ -63,10 +59,16 @@ onAuthStateChanged(auth, async (user) => {
 // Event Listeners
 // ============================================================================
 function setupEventListeners() {
-    document.getElementById('applyFilters')?.addEventListener('click', displayPage);
-    document.getElementById('resetFilters')?.addEventListener('click', resetFilters);
-    document.getElementById('transactionSearch')?.addEventListener('input', displayPage);
+    // Event listener untuk form transaksi
+    document.getElementById('transactionForm')?.addEventListener('submit', handleTransactionFormSubmit);
     
+    // Event listener untuk perubahan tipe transaksi
+    document.getElementById('type')?.addEventListener('change', () => {
+        loadAccountsForForm(userAccounts);
+    });
+
+    // Event listener untuk pencarian
+    document.getElementById('transactionSearch')?.addEventListener('input', displayPage);
 
     // Setup sorter untuk setiap kolom tabel
     document.querySelectorAll('.sortable').forEach(header => {
@@ -76,44 +78,44 @@ function setupEventListeners() {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 sortColumn = column;
-                sortDirection = 'desc'; // Default ke desc untuk kolom baru
-            }
-            const toggleFilterBtn = document.getElementById('toggleFilterBtn');
-            const filterPanel = document.getElementById('filterPanel');
-            if (toggleFilterBtn && filterPanel) {
-                toggleFilterBtn.addEventListener('click', () => {
-                filterPanel.classList.toggle('show');
-                });
+                sortDirection = 'desc';
             }
             displayPage();
         });
     });
 
-    document.getElementById('applyFilters')?.addEventListener('click', () => {
-        displayPage();
-        filterPanel.classList.remove('show');
-    });
+    // --- PERUBAHAN UTAMA DI SINI ---
+    // Logika untuk panel filter yang bisa disembunyikan
+    const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+    const filterPanel = document.getElementById('filterPanel');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const resetFiltersBtn = document.getElementById('resetFilters');
 
-    document.getElementById('resetFilters')?.addEventListener('click', () => {
-        resetFilters();
-        filterPanel.classList.remove('show');
-    });
-}
+    if (toggleFilterBtn && filterPanel) {
+        toggleFilterBtn.addEventListener('click', () => {
+            filterPanel.classList.toggle('show');
+        });
+    }
 
-    // Event listener untuk form transaksi
-    document.getElementById('transactionForm')?.addEventListener('submit', handleTransactionFormSubmit);
-    
-    // Event listener untuk perubahan tipe transaksi
-    document.getElementById('type')?.addEventListener('change', () => {
-        loadAccountsForForm(userAccounts);
-    });
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+            displayPage();
+            filterPanel.classList.remove('show'); // Sembunyikan panel setelah apply
+        });
+    }
+
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            resetFilters();
+            filterPanel.classList.remove('show'); // Sembunyikan panel setelah reset
+        });
+    }
 }
 
 // ============================================================================
 // Filtering and Sorting
 // ============================================================================
 function getFilteredAndSortedTransactions() {
-    // 1. Filtering
     const filterStartDate = document.getElementById('filterStartDate').value;
     const filterEndDate = document.getElementById('filterEndDate').value;
     const filterWallet = document.getElementById('filterWallet').value;
@@ -135,22 +137,14 @@ function getFilteredAndSortedTransactions() {
         return matchesDate && matchesWallet && matchesAccount && matchesSearch;
     });
 
-    // 2. Sorting
     filtered.sort((a, b) => {
         let valA = a[sortColumn];
         let valB = b[sortColumn];
-
-        // Konversi ke huruf kecil jika string untuk sorting yang case-insensitive
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
-
         let comparison = 0;
-        if (valA > valB) {
-            comparison = 1;
-        } else if (valA < valB) {
-            comparison = -1;
-        }
-        
+        if (valA > valB) comparison = 1;
+        else if (valA < valB) comparison = -1;
         return sortDirection === 'asc' ? comparison : -comparison;
     });
 
@@ -162,8 +156,7 @@ function resetFilters() {
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterWallet').value = '';
     document.getElementById('filterAccount').value = '';
-    document.getElementById('transactionSearch').value = '';
-    displayPage();
+    displayPage(); // Panggil displayPage untuk menerapkan reset
 }
 
 // ============================================================================
@@ -184,21 +177,21 @@ function handlePageChange(newPage) {
 }
 
 // ============================================================================
-// UI Rendering (REWRITTEN FOR TABLE)
+// UI Rendering
 // ============================================================================
 function displayTransactionsInTable(transactionsOnPage) {
     const tableBody = document.getElementById('transactionHistoryBody');
     if (!tableBody) return;
 
     if (!transactionsOnPage || transactionsOnPage.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="empty-state">No transactions found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" class="empty-state">No transactions found for the selected criteria.</td></tr>';
         return;
     }
 
     let html = '';
     transactionsOnPage.forEach(tx => {
         const date = new Date(tx.timestamp);
-        const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+        const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
 
         html += `
             <tr>
@@ -217,7 +210,6 @@ function displayTransactionsInTable(transactionsOnPage) {
     });
     tableBody.innerHTML = html;
 
-    // Re-attach event listeners for edit/delete buttons
     tableBody.querySelectorAll('.edit-btn').forEach(button => {
         button.addEventListener('click', () => openEditModal(button.dataset.transactionId));
     });
@@ -230,13 +222,9 @@ function updateSortIcons() {
     document.querySelectorAll('.sortable').forEach(header => {
         const icon = header.querySelector('.sort-icon');
         const column = header.dataset.column;
-        icon.className = 'fas sort-icon'; // Reset
+        icon.className = 'fas sort-icon';
         if (column === sortColumn) {
-            if (sortDirection === 'asc') {
-                icon.classList.add('fa-sort-up');
-            } else {
-                icon.classList.add('fa-sort-down');
-            }
+            icon.classList.add(sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
         } else {
             icon.classList.add('fa-sort');
         }
@@ -244,17 +232,14 @@ function updateSortIcons() {
 }
 
 // ============================================================================
-// Form Functions
+// Form and Filter Population
 // ============================================================================
 function loadAccountsForForm(accounts) {
     const typeSelect = document.getElementById('type');
     const accountSelect = document.getElementById('account');
-
     if (!typeSelect || !accountSelect) return;
-
     const selectedType = typeSelect.value;
     const accountList = accounts[selectedType] || [];
-
     accountSelect.innerHTML = '<option value="">Select Account</option>';
     accountList.forEach(account => {
         const option = document.createElement('option');
@@ -268,8 +253,7 @@ function loadWalletsForForm(wallets) {
     const walletsSelect = document.getElementById('wallet');
     if (!walletsSelect) return;
     walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
-    Object.keys(wallets).forEach(walletId => {
-        const wallet = wallets[walletId];
+    Object.values(wallets).forEach(wallet => {
         const option = document.createElement('option');
         option.value = wallet.name;
         option.text = wallet.name;
@@ -277,9 +261,6 @@ function loadWalletsForForm(wallets) {
     });
 }
 
-// ============================================================================
-// Filter Functions
-// ============================================================================
 function loadFilters(accounts, wallets) {
     loadFilterWallets(wallets);
     loadFilterAccounts(accounts);
@@ -289,8 +270,7 @@ function loadFilterWallets(wallets) {
     const filterWalletSelect = document.getElementById('filterWallet');
     if (!filterWalletSelect) return;
     filterWalletSelect.innerHTML = '<option value="">All Wallets</option>';
-    Object.keys(wallets).forEach(walletId => {
-        const wallet = wallets[walletId];
+    Object.values(wallets).forEach(wallet => {
         const option = document.createElement('option');
         option.value = wallet.name;
         option.text = wallet.name;
@@ -313,7 +293,7 @@ function loadFilterAccounts(accounts) {
 }
 
 // ============================================================================
-// Transaction Form Submission
+// CRUD Operations (Create, Read, Update, Delete)
 // ============================================================================
 async function handleTransactionFormSubmit(e) {
     e.preventDefault();
@@ -329,15 +309,7 @@ async function handleTransactionFormSubmit(e) {
         return;
     }
 
-    const transaction = { 
-        date, 
-        type, 
-        account, 
-        description, 
-        wallet, 
-        amount, 
-        timestamp: new Date(date).getTime() 
-    };
+    const transaction = { date, type, account, description, wallet, amount, timestamp: new Date(date).getTime() };
 
     try {
         showLoading();
@@ -358,19 +330,15 @@ async function handleTransactionFormSubmit(e) {
             walletBalance -= transaction.amount;
         }
 
-        await updateUserData(userId, { totalBalance: totalBalance });
+        await updateUserData(userId, { totalBalance });
         await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
 
         e.target.reset();
         
-        // Reload transactions data
         const transactionsData = await loadTransactions(userId) || {};
-        allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({
-            id,
-            ...tx
-        }));
+        allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
         
-        currentPage = 1; // Selalu kembali ke halaman pertama setelah menambah data baru
+        currentPage = 1;
         displayPage();
         showSuccessMessage('Transaction saved successfully!');
     } catch (error) {
@@ -381,9 +349,6 @@ async function handleTransactionFormSubmit(e) {
     }
 }
 
-// ============================================================================
-// Delete Transaction
-// ============================================================================
 async function handleDeleteTransaction(transactionId) {
     if (confirm('Are you sure you want to delete this transaction?')) {
         try {
@@ -396,27 +361,23 @@ async function handleDeleteTransaction(transactionId) {
             const userData = await loadUserData(userId);
             let totalBalance = userData.totalBalance || 0;
             const walletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === deletedTransaction.wallet);
-            let walletBalance = userData.wallets[walletId]?.balance || 0;
+            let walletBalance = walletId ? (userData.wallets[walletId]?.balance || 0) : 0;
 
             if (deletedTransaction.type === 'income') {
                 totalBalance -= deletedTransaction.amount;
-                walletBalance -= deletedTransaction.amount;
+                if (walletId) walletBalance -= deletedTransaction.amount;
             } else {
                 totalBalance += deletedTransaction.amount;
-                walletBalance += deletedTransaction.amount;
+                if (walletId) walletBalance += deletedTransaction.amount;
             }
 
-            await updateUserData(userId, { totalBalance: totalBalance });
+            await updateUserData(userId, { totalBalance });
             if (walletId) {
                 await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: walletBalance });
             }
             
-            // Reload transactions data
             const transactionsData = await loadTransactions(userId) || {};
-            allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({
-                id,
-                ...tx
-            }));
+            allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
 
             const totalPages = Math.ceil(allTransactions.length / ITEMS_PER_PAGE);
             if (currentPage > totalPages && totalPages > 0) {
@@ -435,73 +396,36 @@ async function handleDeleteTransaction(transactionId) {
 }
 
 // ============================================================================
-// Edit Transaction Modal
+// Edit Transaction Modal Logic
 // ============================================================================
 function initEditModal() {
-    if (!document.getElementById('editTransactionModal')) {
-        const modalHTML = `
-            <div id="editTransactionModal" class="modal">
-                <div class="modal-content">
-                    <span class="close-modal">×</span>
-                    <h2><i class="fas fa-edit"></i> Edit Transaction</h2>
-                    <form id="editTransactionForm">
-                        <div class="form-group">
-                            <label for="editDate">Date:</label>
-                            <input type="date" id="editDate" name="editDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editType">Type:</label>
-                            <select id="editType" name="editType" required>
-                                <option value="income">Income</option>
-                                <option value="expense">Expense</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="editAccount">Account:</label>
-                            <select id="editAccount" name="editAccount" required>
-                                <!-- Accounts will be loaded here -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="editDescription">Description:</label>
-                            <input type="text" id="editDescription" name="editDescription" placeholder="Enter description" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editWallet">Wallet:</label>
-                            <select id="editWallet" name="editWallet" required>
-                                <!-- Wallets will be loaded here -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="editAmount">Amount:</label>
-                            <input type="number" id="editAmount" name="editAmount" placeholder="Enter amount" step="0.01" min="0.01" required>
-                        </div>
-                        <button type="submit" class="btn-primary">Save Changes</button>
-                        <p id="editFormError" class="status-message" style="display: none;"></p>
-                    </form>
-                </div>
+    if (document.getElementById('editTransactionModal')) return;
+    const modalHTML = `
+        <div id="editTransactionModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">×</span>
+                <h2><i class="fas fa-edit"></i> Edit Transaction</h2>
+                <form id="editTransactionForm">
+                    <div class="form-group"><label for="editDate">Date:</label><input type="date" id="editDate" required></div>
+                    <div class="form-group"><label for="editType">Type:</label><select id="editType" required><option value="income">Income</option><option value="expense">Expense</option></select></div>
+                    <div class="form-group"><label for="editAccount">Account:</label><select id="editAccount" required></select></div>
+                    <div class="form-group"><label for="editDescription">Description:</label><input type="text" id="editDescription" required></div>
+                    <div class="form-group"><label for="editWallet">Wallet:</label><select id="editWallet" required></select></div>
+                    <div class="form-group"><label for="editAmount">Amount:</label><input type="number" id="editAmount" required></div>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                    <p id="editFormError" class="status-message" style="display: none;"></p>
+                </form>
             </div>
-        `;
-        
-        const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalHTML;
-        document.body.appendChild(modalContainer.firstElementChild);
-        
-        document.querySelector('.close-modal').addEventListener('click', closeEditModal);
-        
-        window.addEventListener('click', (event) => {
-            const modal = document.getElementById('editTransactionModal');
-            if (event.target === modal) {
-                closeEditModal();
-            }
-        });
-        
-        document.getElementById('editTransactionForm').addEventListener('submit', handleEditFormSubmit);
-        
-        document.getElementById('editType').addEventListener('change', () => {
-            loadAccountsForEditForm(userAccounts);
-        });
-    }
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    document.querySelector('.close-modal').addEventListener('click', closeEditModal);
+    window.addEventListener('click', (event) => {
+        if (event.target === document.getElementById('editTransactionModal')) closeEditModal();
+    });
+    document.getElementById('editTransactionForm').addEventListener('submit', handleEditFormSubmit);
+    document.getElementById('editType').addEventListener('change', () => loadAccountsForEditForm(userAccounts));
 }
 
 function openEditModal(transactionId) {
@@ -534,12 +458,9 @@ function closeEditModal() {
 function loadAccountsForEditForm(accounts) {
     const typeSelect = document.getElementById('editType');
     const accountsSelect = document.getElementById('editAccount');
-
     if (!typeSelect || !accountsSelect) return;
-
     const selectedType = typeSelect.value;
     const accountList = accounts[selectedType] || [];
-
     accountsSelect.innerHTML = '<option value="">Select Account</option>';
     accountList.forEach(account => {
         const option = document.createElement('option');
@@ -553,8 +474,7 @@ function loadWalletsForEditForm(wallets) {
     const walletsSelect = document.getElementById('editWallet');
     if (!walletsSelect) return;
     walletsSelect.innerHTML = '<option value="">Select Wallet</option>';
-    Object.keys(wallets).forEach(walletId => {
-        const wallet = wallets[walletId];
+    Object.values(wallets).forEach(wallet => {
         const option = document.createElement('option');
         option.value = wallet.name;
         option.text = wallet.name;
@@ -564,112 +484,66 @@ function loadWalletsForEditForm(wallets) {
 
 async function handleEditFormSubmit(e) {
     e.preventDefault();
-    
-    if (!editingTransactionId) {
-        showEditError('No transaction selected for editing.');
-        return;
-    }
+    if (!editingTransactionId) return showEditError('No transaction selected.');
     
     const oldTransaction = allTransactions.find(tx => tx.id === editingTransactionId);
-    if (!oldTransaction) {
-        showEditError('Transaction not found.');
-        return;
-    }
+    if (!oldTransaction) return showEditError('Transaction not found.');
     
-    const date = document.getElementById('editDate').value;
-    const type = document.getElementById('editType').value;
-    const account = document.getElementById('editAccount').value;
-    const description = document.getElementById('editDescription').value;
-    const wallet = document.getElementById('editWallet').value;
-    let amount = parseFloat(document.getElementById('editAmount').value);
-    
-    if (!date || !type || !account || !description || !wallet || isNaN(amount) || amount <= 0) {
-        showEditError('Please fill all fields with valid data.');
-        return;
-    }
-    
-    const updatedTransaction = {
-        date,
-        type,
-        account,
-        description,
-        wallet,
-        amount,
-        timestamp: new Date(date).getTime(),
-        id: editingTransactionId
+    const updatedData = {
+        date: document.getElementById('editDate').value,
+        type: document.getElementById('editType').value,
+        account: document.getElementById('editAccount').value,
+        description: document.getElementById('editDescription').value,
+        wallet: document.getElementById('editWallet').value,
+        amount: parseFloat(document.getElementById('editAmount').value),
     };
+    updatedData.timestamp = new Date(updatedData.date).getTime();
+    
+    if (Object.values(updatedData).some(val => !val) || isNaN(updatedData.amount) || updatedData.amount <= 0) {
+        return showEditError('Please fill all fields with valid data.');
+    }
     
     try {
         showLoading();
-        
-        // Hitung perubahan saldo
         const userData = await loadUserData(userId);
         let totalBalance = userData.totalBalance || 0;
         
-        // 1. Batalkan efek transaksi lama
-        if (oldTransaction.type === 'income') {
-            totalBalance -= oldTransaction.amount;
-        } else {
-            totalBalance += oldTransaction.amount;
-        }
+        // Revert old transaction effect
+        if (oldTransaction.type === 'income') totalBalance -= oldTransaction.amount;
+        else totalBalance += oldTransaction.amount;
         
-        // Cari wallet lama dan batalkan efeknya
-        const oldWalletId = Object.keys(userData.wallets).find(key => 
-            userData.wallets[key].name === oldTransaction.wallet
-        );
-        
+        const oldWalletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === oldTransaction.wallet);
         if (oldWalletId) {
             let oldWalletBalance = userData.wallets[oldWalletId].balance || 0;
-            if (oldTransaction.type === 'income') {
-                oldWalletBalance -= oldTransaction.amount;
-            } else {
-                oldWalletBalance += oldTransaction.amount;
-            }
+            if (oldTransaction.type === 'income') oldWalletBalance -= oldTransaction.amount;
+            else oldWalletBalance += oldTransaction.amount;
             await update(ref(db, `users/${userId}/wallets/${oldWalletId}`), { balance: oldWalletBalance });
         }
         
-        // 2. Terapkan efek transaksi baru
-        if (updatedTransaction.type === 'income') {
-            totalBalance += updatedTransaction.amount;
-        } else {
-            totalBalance -= updatedTransaction.amount;
-        }
+        // Apply new transaction effect
+        if (updatedData.type === 'income') totalBalance += updatedData.amount;
+        else totalBalance -= updatedData.amount;
         
-        // Cari wallet baru dan terapkan efeknya
-        const newWalletId = Object.keys(userData.wallets).find(key => 
-            userData.wallets[key].name === updatedTransaction.wallet
-        );
-        
+        const newWalletId = Object.keys(userData.wallets).find(key => userData.wallets[key].name === updatedData.wallet);
         if (newWalletId) {
             let newWalletBalance = userData.wallets[newWalletId].balance || 0;
-            if (updatedTransaction.type === 'income') {
-                newWalletBalance += updatedTransaction.amount;
-            } else {
-                newWalletBalance -= updatedTransaction.amount;
-            }
+            if (updatedData.type === 'income') newWalletBalance += updatedData.amount;
+            else newWalletBalance -= updatedData.amount;
             await update(ref(db, `users/${userId}/wallets/${newWalletId}`), { balance: newWalletBalance });
         }
         
-        // Update total balance
         await updateUserData(userId, { totalBalance });
+        await updateTransaction(userId, editingTransactionId, updatedData);
         
-        // Update transaksi
-        await updateTransaction(userId, editingTransactionId, updatedTransaction);
-        
-        // Reload data
         const transactionsData = await loadTransactions(userId) || {};
-        allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({
-            id,
-            ...tx
-        }));
+        allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
         
         displayPage();
         closeEditModal();
         showSuccessMessage('Transaction updated successfully!');
-        
     } catch (error) {
         console.error("Error updating transaction:", error);
-        showEditError('Failed to update transaction. Please try again.');
+        showEditError('Failed to update transaction.');
     } finally {
         hideLoading();
     }
@@ -693,8 +567,6 @@ function showSuccessMessage(message) {
         successElement.textContent = message;
         successElement.style.display = 'block';
         setTimeout(() => { successElement.style.display = 'none'; }, 3000);
-    } else {
-        alert(message);
     }
 }
 
@@ -704,8 +576,6 @@ function showError(message) {
         errorElement.textContent = message;
         errorElement.style.display = 'block';
         setTimeout(() => { errorElement.style.display = 'none'; }, 3000);
-    } else {
-        alert(message);
     }
 }
 
