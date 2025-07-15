@@ -4,7 +4,6 @@
 // Module Imports
 // ============================================================================
 import { auth, loadUserData, loadTransactions } from './database.js';
-// PERUBAHAN: Menambahkan 'signOut' dari Firebase Auth SDK
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { formatRupiah } from './utils.js';
 
@@ -19,6 +18,7 @@ let userId;
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
+        // Memulai semua proses untuk dashboard
         initializeDashboard();
         // Memasang event listener setelah pengguna dipastikan login
         setupEventListeners();
@@ -29,7 +29,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ============================================================================
-// Event Listeners (BARU)
+// Event Listeners
 // ============================================================================
 /**
  * Fungsi untuk memasang semua event listener yang dibutuhkan di halaman dashboard.
@@ -41,8 +41,6 @@ function setupEventListeners() {
             if (confirm('Are you sure you want to logout?')) {
                 try {
                     await signOut(auth);
-                    // onAuthStateChanged akan secara otomatis mendeteksi perubahan
-                    // dan mengarahkan ke halaman login.
                     console.log('User signed out successfully.');
                 } catch (error) {
                     console.error('Error signing out:', error);
@@ -56,16 +54,19 @@ function setupEventListeners() {
 // ============================================================================
 // Core Dashboard Logic
 // ============================================================================
+/**
+ * Fungsi utama untuk menginisialisasi semua data dan tampilan di dashboard.
+ */
 async function initializeDashboard() {
     try {
-        // Memuat data pengguna dan transaksi secara bersamaan
+        // Memuat data pengguna dan transaksi secara bersamaan untuk efisiensi
         const [userData, allTransactions] = await Promise.all([
             loadUserData(userId),
             loadTransactions(userId)
         ]);
 
         if (!userData) {
-            console.error("User data not found!");
+            console.error("User data not found! Cannot initialize dashboard.");
             return;
         }
 
@@ -80,6 +81,8 @@ async function initializeDashboard() {
 
     } catch (error) {
         console.error("Error initializing dashboard:", error);
+        // Tampilkan pesan error di UI jika perlu
+        document.getElementById('recentTransactionsList').innerHTML = '<p class="empty-state">Could not load dashboard data.</p>';
     }
 }
 
@@ -88,8 +91,6 @@ async function initializeDashboard() {
 // ============================================================================
 /**
  * Menghitung total pemasukan dan pengeluaran untuk bulan berjalan.
- * @param {object} transactions - Objek berisi semua transaksi pengguna.
- * @returns {object} - Objek dengan properti monthlyIncome dan monthlyExpenses.
  */
 function calculateMonthlySummary(transactions) {
     let monthlyIncome = 0;
@@ -124,29 +125,19 @@ function calculateMonthlySummary(transactions) {
 // ============================================================================
 /**
  * Memperbarui nilai pada kartu ringkasan di dashboard.
- * @param {number} totalBalance - Saldo total pengguna.
- * @param {number} monthlyIncome - Pemasukan bulan ini.
- * @param {number} monthlyExpenses - Pengeluaran bulan ini.
  */
 function updateDashboardCards(totalBalance, monthlyIncome, monthlyExpenses) {
     const totalBalanceElement = document.getElementById('totalBalance');
     const monthlyIncomeElement = document.getElementById('monthlyIncome');
     const monthlyExpensesElement = document.getElementById('monthlyExpenses');
 
-    if (totalBalanceElement) {
-        totalBalanceElement.textContent = formatRupiah(totalBalance || 0);
-    }
-    if (monthlyIncomeElement) {
-        monthlyIncomeElement.textContent = formatRupiah(monthlyIncome || 0);
-    }
-    if (monthlyExpensesElement) {
-        monthlyExpensesElement.textContent = formatRupiah(monthlyExpenses || 0);
-    }
+    if (totalBalanceElement) totalBalanceElement.textContent = formatRupiah(totalBalance || 0);
+    if (monthlyIncomeElement) monthlyIncomeElement.textContent = formatRupiah(monthlyIncome || 0);
+    if (monthlyExpensesElement) monthlyExpensesElement.textContent = formatRupiah(monthlyExpenses || 0);
 }
 
 /**
  * Menampilkan 5 transaksi terakhir (selain transfer) di dashboard.
- * @param {object} transactions - Objek berisi semua transaksi pengguna.
  */
 function displayRecentTransactions(transactions) {
     const container = document.getElementById('recentTransactionsList');
@@ -156,10 +147,11 @@ function displayRecentTransactions(transactions) {
     }
 
     if (!transactions || Object.keys(transactions).length === 0) {
-        container.innerHTML = '<p class="empty-state">No recent transactions found.</p>';
+        container.innerHTML = '<p class="empty-state">No transactions have been recorded yet.</p>';
         return;
     }
 
+    // Ubah objek menjadi array, filter selain 'transfer', urutkan, dan ambil 5 teratas
     const recentTransactions = Object.values(transactions)
         .filter(tx => tx.type !== 'transfer')
         .sort((a, b) => b.timestamp - a.timestamp)
