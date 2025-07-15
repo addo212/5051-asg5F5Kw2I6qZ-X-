@@ -1211,7 +1211,7 @@ details[open] > summary .collapse-icon {
 
 .table-actions .search-container .fa-search {
     position: absolute;
-    right: 15px;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
