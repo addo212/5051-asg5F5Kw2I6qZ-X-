@@ -1191,29 +1191,33 @@ details[open] > summary .collapse-icon {
     margin: 0;
 }
 
+/* Ini adalah wadah untuk semua kontrol di atas tabel */
 .table-actions {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.5rem; 
     align-items: center;
 }
 
+/* 1. WADAH UNTUK INPUT DAN IKON */
 .table-actions .search-container {
-    position: relative;
+    position: relative; /* KUNCI #1: Ini menciptakan "konteks posisi" untuk ikon di dalamnya. */
 }
 
+/* 2. INPUT PENCARIAN ITU SENDIRI */
 .table-actions .search-container input {
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    padding: 0.75rem 2.5rem 0.75rem 1rem; /* KUNCI #2: Padding di sebelah kanan (2.5rem) memberikan ruang agar ikon tidak menimpa teks. */
     min-width: 250px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-secondary);
 }
 
+/* 3. IKON PENCARIAN */
 .table-actions .search-container .fa-search {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: absolute; /* KUNCI #3: Mengeluarkan ikon dari alur normal dokumen. */
+    right: 15px;       /* Memposisikan ikon 15px dari tepi kanan wadah (.search-container). */
+    top: 50%;          /* Memposisikan bagian atas ikon di tengah secara vertikal. */
+    transform: translateY(-50%); /* Trik untuk centering vertikal sempurna dengan menggeser ikon ke atas sebesar 50% dari tingginya sendiri. */
     color: var(--text-secondary);
 }
 
