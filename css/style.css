@@ -1428,3 +1428,84 @@ css
 .transaction-item .transaction-details {
     flex-grow: 1;
 }
+
+
+/* ============================================================================ */
+/* BUDGETS PAGE STYLES
+/* ============================================================================ */
+
+.budget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.budget-card {
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.budget-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.budget-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.delete-btn.small {
+    padding: 5px 8px;
+    font-size: 0.9rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: var(--bg-primary);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-bar-fill.safe {
+    background-color: var(--income-color);
+}
+
+.progress-bar-fill.warning {
+    background-color: #f9a825; /* Kuning */
+}
+
+.progress-bar-fill.danger {
+    background-color: var(--expense-color);
+}
+
+.budget-details {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.budget-details p {
+    margin: 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.budget-details p span:first-child {
+    font-weight: 600;
+}
