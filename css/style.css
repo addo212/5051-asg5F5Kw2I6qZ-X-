@@ -638,31 +638,47 @@ header {
 /* LOGIN PAGE (index.html)
 /* ============================================================================ */
 
+/* Pastikan body untuk halaman non-dashboard terpusat */
 body:not(.dashboard-body) {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .auth-container {
     background: var(--bg-secondary);
     padding: 2.5rem;
-    border-radius: 12px;
+    border-radius: 16px; /* Lebih bulat */
     box-shadow: var(--card-shadow);
-    width: 350px;
+    width: 100%; /* Fleksibel di layar kecil */
+    max-width: 400px; /* Batas lebar maksimum */
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .auth-container:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.auth-container h1 {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
 }
 
 .logo {
     width: 80px;
-    height: auto;
-    margin-bottom: 15px;
+    height: 80px;
+    border-radius: 50%; /* Membuat logo bulat */
+    object-fit: cover; /* Memastikan gambar tidak terdistorsi */
+    margin-bottom: 1.5rem;
+    border: 4px solid var(--bg-primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 /* ============================================================================ */
