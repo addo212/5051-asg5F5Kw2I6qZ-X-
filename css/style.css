@@ -886,7 +886,79 @@ body:not(.dashboard-body) {
     opacity: 0.5;
     cursor: not-allowed;
 }
+/* ============================================================================ */
+/* TRANSACTIONS PAGE - TABLE STYLES
+/* ============================================================================ */
 
+.filter-panel .search-group {
+    flex-grow: 2; /* Membuat kolom search lebih lebar */
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Memungkinkan scroll horizontal di layar kecil */
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 1rem;
+}
+
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap; /* Mencegah teks membungkus di dalam sel */
+}
+
+.transaction-table th,
+.transaction-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-table thead th {
+    background-color: var(--bg-primary);
+    font-weight: 600;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.transaction-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.transaction-table th.sortable:hover {
+    background-color: var(--border-color);
+}
+
+.sort-icon {
+    margin-left: 8px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.transaction-table tbody tr:hover {
+    background-color: var(--bg-primary);
+}
+
+.transaction-table .type-cell span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.type-cell .income {
+    background-color: var(--income-color);
+}
+
+.type-cell .expense {
+    background-color: var(--expense-color);
+}
 /* ============================================================================ */
 /* WALLETS PAGE (wallets.html)
 /* ============================================================================ */
