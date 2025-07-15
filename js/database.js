@@ -45,7 +45,7 @@ export async function saveTransaction(userId, transaction) {
         await set(newTransactionRef, { ...transaction, id: newTransactionRef.key });
         console.log("Transaction saved successfully!");
         
-        // PERBAIKAN DI SINI: Kembalikan referensi transaksi yang baru dibuat
+        // Kembalikan referensi transaksi yang baru dibuat
         return newTransactionRef;
 
     } catch (error) {
@@ -68,7 +68,6 @@ export function loadTransactions(userId) {
 
 export async function deleteTransaction(userId, transactionId) {
     try {
-        // Path untuk menghapus transaksi sekarang sudah benar
         await remove(ref(db, `users/${userId}/transactions/${transactionId}`));
         console.log("Transaction deleted successfully!");
     } catch (error) {
@@ -76,7 +75,7 @@ export async function deleteTransaction(userId, transactionId) {
         throw error;
     }
 }
-// Function to update a transaction
+
 export async function updateTransaction(userId, transactionId, updates) {
     try {
         await set(ref(db, `users/${userId}/transactions/${transactionId}`), updates);
@@ -109,7 +108,6 @@ export function deleteAccount(userId, accountName, accountType) {
     });
 }
 
-// Fungsi ini sekarang menerima parameter color dan icon
 export function saveWallet(userId, walletName, color, icon) {
     return get(ref(db, `users/${userId}/wallets`)).then((snapshot) => {
         const wallets = snapshot.val() || {};
@@ -117,7 +115,6 @@ export function saveWallet(userId, walletName, color, icon) {
             throw new Error('Wallet with this name already exists.');
         }
         const newWalletRef = push(ref(db, `users/${userId}/wallets`));
-        // Simpan data baru termasuk warna dan ikon dengan nilai default
         return set(newWalletRef, { 
             name: walletName, 
             balance: 0,
@@ -130,10 +127,12 @@ export function saveWallet(userId, walletName, color, icon) {
 export function deleteWallet(userId, walletId) {
     return remove(ref(db, `users/${userId}/wallets/${walletId}`));
 }
+
 // ============================================================================
 // Budget Operations
 // ============================================================================
 export function saveBudget(userId, period, category, limit) {
+    console.log(`Saving budget: period=${period}, category=${category}, limit=${limit}`);
     // Format periode: "YYYY-MM" (contoh: "2023-07" untuk Juli 2023)
     const budgetRef = ref(db, `users/${userId}/budgets/${period}/${category}`);
     return set(budgetRef, {
@@ -141,22 +140,41 @@ export function saveBudget(userId, period, category, limit) {
         limit: limit,
         spent: 0,
         period: period
+    }).then(() => {
+        console.log("Budget saved successfully at path:", `users/${userId}/budgets/${period}/${category}`);
+    }).catch(error => {
+        console.error("Error saving budget:", error);
+        throw error;
     });
 }
 
 export function deleteBudget(userId, period, category) {
+    console.log(`Deleting budget: period=${period}, category=${category}`);
     const budgetRef = ref(db, `users/${userId}/budgets/${period}/${category}`);
-    return remove(budgetRef);
+    return remove(budgetRef).then(() => {
+        console.log("Budget deleted successfully");
+    }).catch(error => {
+        console.error("Error deleting budget:", error);
+        throw error;
+    });
 }
 
 export function loadBudgetPeriods(userId) {
+    console.log("Loading budget periods for user:", userId);
     return get(ref(db, `users/${userId}/budgets`)).then(snapshot => {
         if (snapshot.exists()) {
-            return Object.keys(snapshot.val());
+            const periods = Object.keys(snapshot.val());
+            console.log("Found budget periods:", periods);
+            return periods;
         }
+        console.log("No budget periods found");
         return [];
+    }).catch(error => {
+        console.error("Error loading budget periods:", error);
+        throw error;
     });
 }
+
 // ============================================================================
 // Initial Data Setup
 // ============================================================================
@@ -169,7 +187,6 @@ export async function initializeUserData(userId) {
             income: ['Gaji Addo', 'Gaji Anne', 'Bonus Addo', 'Bonus Anne', 'Other Revenue'],
             expense: ['Transfer','Other Will', 'Daycare', 'Ayah', 'Save for Emergency', 'Internet', 'Cell Services', 'Diapers', 'Milk', 'Water & Electrics', 'CC Bill', 'Iuran', 'Gas Ad', 'Gas An', 'Food & Groceries', 'Snack Ad', 'Snack An', 'Homecare', 'Parkir Kantor', 'Personal Care', 'Other Expense', 'Transfer', 'Save', 'Save Aldric', 'Cicilan', 'Pajak Kendaraan', 'Pakaian', 'Laundry', 'Medicine', 'Gas Mobil', 'Hiburan - Wisata Dll']
         },
-        // PERBAIKAN: Objek 'wallets' sekarang menjadi induk dari 'defaultWallet'
         wallets: {
             defaultWallet: { 
                 name: "Default Wallet", 
@@ -187,5 +204,39 @@ export async function initializeUserData(userId) {
     } catch (error) {
         console.error("Error creating initial data:", error);
         throw error;
+    }
+}
+
+// ============================================================================
+// Debug Helper Functions
+// ============================================================================
+export async function debugViewUserData(userId) {
+    try {
+        const userData = await loadUserData(userId);
+        console.log("=== USER DATA DEBUG VIEW ===");
+        console.log("User ID:", userId);
+        console.log("Total Balance:", userData.totalBalance);
+        
+        console.log("\n=== WALLETS ===");
+        const wallets = userData.wallets || {};
+        Object.keys(wallets).forEach(walletId => {
+            console.log(`Wallet: ${wallets[walletId].name}, Balance: ${wallets[walletId].balance}`);
+        });
+        
+        console.log("\n=== BUDGETS ===");
+        const budgets = userData.budgets || {};
+        Object.keys(budgets).forEach(period => {
+            console.log(`\nPeriod: ${period}`);
+            const periodBudgets = budgets[period];
+            Object.keys(periodBudgets).forEach(category => {
+                const budget = periodBudgets[category];
+                console.log(`  Category: ${category}, Limit: ${budget.limit}, Spent: ${budget.spent}`);
+            });
+        });
+        
+        return userData;
+    } catch (error) {
+        console.error("Error in debug view:", error);
+        return null;
     }
 }
