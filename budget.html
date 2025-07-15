@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgets - Finance Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="icon" href="images/logo.jpeg">
+    <script>
+        // Menerapkan tema yang tersimpan
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- ================= HEADER ================= -->
+        <header>
+            <div class="header-left">
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <h1>Finance Tracker</h1>
+            </div>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </header>
+
+        <!-- ================= NAVIGASI ================= -->
+        <nav class="main-nav">
+            <div class="dropdown">
+                <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a>
+                    <a href="wallets.html"><i class="fas fa-wallet"></i> Wallets</a>
+                    <a href="budgets.html" class="active"><i class="fas fa-chart-pie"></i> Budgets</a>
+                    <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
+                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ================= KONTEN UTAMA ================= -->
+        <div class="content-container">
+            <!-- BAGIAN UNTUK MEMBUAT BUDGET BARU -->
+            <h2><i class="fas fa-plus-circle"></i> Create New Budget</h2>
+            <form id="addBudgetForm" class="add-item-form">
+                <div class="form-group">
+                    <label for="budgetCategory">Category (Expense Account)</label>
+                    <select id="budgetCategory" required>
+                        <!-- Opsi kategori pengeluaran akan dimuat oleh JS -->
+                        <option value="">Select a category...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="budgetLimit">Monthly Limit</label>
+                    <input type="number" id="budgetLimit" placeholder="e.g., 2000000" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Budget</button>
+                <p id="budgetError" class="status-message" style="color: var(--danger-color); display: none;"></p>
+            </form>
+
+            <!-- BAGIAN UNTUK MENAMPILKAN BUDGET YANG ADA -->
+            <h2 style="margin-top: 2rem;"><i class="fas fa-tasks"></i> Your Budgets for This Month</h2>
+            <div id="budgetList" class="budget-grid">
+                <!-- Kartu budget akan dimuat di sini oleh JS -->
+                <p class="empty-state">Loading budgets...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPTS ================= -->
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/budgets.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/dropdown.js"></script>
+</body>
+</html>
