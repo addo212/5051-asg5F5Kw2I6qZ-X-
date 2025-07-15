@@ -4,9 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Finance Tracker</title>
+    
+    <!-- ================= PERUBAHAN DI SINI ================= -->
+    <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } catch (e) {}
+        })();
+    </script>
+    <!-- ===================================================== -->
+    
     <link rel="stylesheet" href="css/style.css">
-    <!-- Font Awesome untuk ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="icon" href="images/logo.jpeg">
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
@@ -17,8 +30,7 @@
             </div>
             <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </header>
-        
-        <!-- MENU NAVIGASI DENGAN DROPDOWN -->
+
         <nav class="main-nav">
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
@@ -32,43 +44,34 @@
                 </div>
             </div>
         </nav>
-        
+
         <div class="stats-summary">
             <div class="stat-card">
                 <h3>Total Balance</h3>
-                <p id="totalBalance">$0.00</p>
+                <p id="totalBalance">Rp 0</p>
             </div>
             <div class="stat-card">
                 <h3>Monthly Income</h3>
-                <p id="monthlyIncome">$0.00</p>
+                <p id="monthlyIncome">Rp 0</p>
             </div>
             <div class="stat-card">
                 <h3>Monthly Expenses</h3>
-                <p id="monthlyExpenses">$0.00</p>
+                <p id="monthlyExpenses">Rp 0</p>
             </div>
         </div>
-        
-        <!-- RECENT TRANSACTIONS SECTION -->
-        <section class="recent-transactions">
-            <h2><i class="fas fa-history"></i> Recent Transactions</h2>
-            <div class="transaction-list" id="recentTransactions">
-                <!-- Will be filled by JavaScript -->
-                <p class="empty-state">No recent transactions</p>
-            </div>
-        </section>
-    </div>
-    
-    <script>
-    // Apply saved theme
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        });
-    </script>
 
-   <script type="module" src="js/auth.js"></script>
-   <script type="module" src="js/main.js"></script>
-   <script src="js/theme.js"></script>
-   <script src="js/dropdown.js"></script>
+        <div class="recent-transactions">
+            <h2><i class="fas fa-history"></i> Recent Transactions</h2>
+            <div id="recentTransactionsList" class="transaction-list">
+                <p class="empty-state">Loading recent transactions...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/dropdown.js"></script>
 </body>
 </html>
