@@ -1429,133 +1429,8 @@ css
     flex-grow: 1;
 }
 
-
 /* ============================================================================ */
-/* BUDGETS PAGE STYLES
-/* ============================================================================ */
-
-.budget-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.budget-card {
-    background-color: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.budget-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.75rem;
-}
-
-.budget-card-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: var(--text-primary);
-}
-
-.delete-btn.small {
-    padding: 5px 8px;
-    font-size: 0.9rem;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: var(--bg-primary);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    border-radius: 5px;
-    transition: width 0.5s ease-in-out;
-}
-
-.progress-bar-fill.safe {
-    background-color: var(--income-color);
-}
-
-.progress-bar-fill.warning {
-    background-color: #f9a825; /* Kuning */
-}
-
-.progress-bar-fill.danger {
-    background-color: var(--expense-color);
-}
-
-.budget-details {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-.budget-details p {
-    margin: 0.5rem 0;
-    display: flex;
-    justify-content: space-between;
-}
-
-.budget-details p span:first-child {
-    font-weight: 600;
-}
-/* ============================================================================ */
-/* BUDGET PERIOD FILTER STYLES
-/* ============================================================================ */
-
-.period-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
-    background-color: var(--bg-primary);
-    padding: 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-}
-
-.period-filter .form-group {
-    margin-bottom: 0;
-    min-width: 150px;
-}
-
-.current-period-indicator {
-    margin-bottom: 2rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.current-period-indicator h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: var(--text-primary);
-}
-
-.current-period-indicator span {
-    font-weight: 600;
-    color: var(--accent-color);
-}
-
-.form-group-inline {
-    display: flex;
-    gap: 1rem;
-}
-
-.form-group-inline .form-group {
-    flex: 1;
-}
-/* ============================================================================ */
-/* 6. REPORTS PAGE STYLES
+/* REPORTS PAGE STYLES
 /* ============================================================================ */
 
 .report-filters {
@@ -1636,4 +1511,179 @@ css
 .report-table th {
     background-color: var(--bg-primary);
     font-weight: 600;
+}
+
+/* ============================================================================ */
+/* BUDGET TABLE & CHART STYLES
+/* ============================================================================ */
+
+/* Chart container */
+.budget-visualization {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Budget table styles */
+.budget-table-container {
+    overflow-x: auto;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+}
+
+.budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.budget-table th,
+.budget-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.budget-table th {
+    background-color: var(--bg-primary);
+    font-weight: 600;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.budget-table tbody tr:hover {
+    background-color: var(--bg-primary);
+}
+
+.budget-table td.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Progress bar in table */
+.table-progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-primary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.table-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+
+.table-progress-fill.safe { background-color: var(--income-color); }
+.table-progress-fill.warning { background-color: #f9a825; }
+.table-progress-fill.danger { background-color: var(--expense-color); }
+
+/* Action buttons in table */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.table-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.table-actions button:hover {
+    background-color: var(--bg-primary);
+}
+
+.table-actions .delete-btn {
+    color: var(--danger-color);
+}
+
+/* Period filter styles */
+.period-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    background-color: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.period-filter .form-group {
+    margin-bottom: 0;
+    min-width: 150px;
+}
+
+.current-period-indicator {
+    margin-bottom: 2rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.current-period-indicator h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.current-period-indicator span {
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.form-group-inline {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group-inline .form-group {
+    flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .budget-table th,
+    .budget-table td {
+        padding: 0.5rem;
+    }
+    
+    .budget-table {
+        font-size: 0.85rem;
+    }
+    
+    .budget-visualization {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}
+
+/* Dark theme adjustments for charts */
+[data-theme="dark"] .chart-container canvas {
+    filter: brightness(0.9);
 }
