@@ -44,31 +44,89 @@
         <!-- ================= KONTEN UTAMA ================= -->
         <div class="content-container">
             <!-- BAGIAN UNTUK MEMBUAT BUDGET BARU -->
-            <h2><i class="fas fa-plus-circle"></i> Create New Budget</h2>
-            <form id="addBudgetForm" class="add-item-form">
-                <div class="form-group">
-                    <label for="budgetCategory">Category (Expense Account)</label>
-                    <select id="budgetCategory" required>
-                        <!-- Opsi kategori pengeluaran akan dimuat oleh JS -->
-                        <option value="">Select a category...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="budgetLimit">Monthly Limit</label>
-                    <input type="number" id="budgetLimit" placeholder="e.g., 2000000" required>
-                </div>
-                <button type="submit" class="btn-primary">Create Budget</button>
-                <p id="budgetError" class="status-message" style="color: var(--danger-color); display: none;"></p>
-            </form>
-
-            <!-- BAGIAN UNTUK MENAMPILKAN BUDGET YANG ADA -->
-            <h2 style="margin-top: 2rem;"><i class="fas fa-tasks"></i> Your Budgets for This Month</h2>
-            <div id="budgetList" class="budget-grid">
-                <!-- Kartu budget akan dimuat di sini oleh JS -->
-                <p class="empty-state">Loading budgets...</p>
+<h2><i class="fas fa-plus-circle"></i> Create New Budget</h2>
+<form id="addBudgetForm" class="add-item-form">
+    <div class="form-group">
+        <label for="newBudgetPeriod">Period</label>
+        <select id="newBudgetPeriod" required>
+            <option value="current">Current Month</option>
+            <option value="custom">Custom Period</option>
+        </select>
+    </div>
+    <div id="customPeriodFields" style="display: none;">
+        <div class="form-group-inline">
+            <div class="form-group">
+                <label for="customBudgetMonth">Month</label>
+                <select id="customBudgetMonth" required>
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="customBudgetYear">Year</label>
+                <select id="customBudgetYear">
+                    <!-- Years will be populated by JavaScript -->
+                </select>
             </div>
         </div>
     </div>
+    <div class="form-group">
+        <label for="budgetCategory">Category (Expense Account)</label>
+        <select id="budgetCategory" required>
+            <!-- Opsi kategori pengeluaran akan dimuat oleh JS -->
+            <option value="">Select a category...</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="budgetLimit">Monthly Limit</label>
+        <input type="number" id="budgetLimit" placeholder="e.g., 2000000" required>
+    </div>
+    <button type="submit" class="btn-primary">Create Budget</button>
+    <p id="budgetError" class="status-message" style="color: var(--danger-color); display: none;"></p>
+</form>
+
+            <!-- FILTER PERIODE -->
+<div class="period-filter">
+    <div class="form-group">
+        <label for="budgetPeriodMonth">Month</label>
+        <select id="budgetPeriodMonth" required>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="budgetPeriodYear">Year</label>
+        <select id="budgetPeriodYear">
+            <!-- Years will be populated by JavaScript -->
+        </select>
+    </div>
+    <button id="viewBudgetPeriodBtn" class="btn-filter apply">View Period</button>
+</div>
+
+<!-- INDIKATOR PERIODE YANG SEDANG DITAMPILKAN -->
+<div class="current-period-indicator">
+    <h3>Showing Budget for: <span id="currentPeriodDisplay">Current Month</span></h3>
+</div>
 
     <!-- ================= SCRIPTS ================= -->
     <script type="module" src="js/auth.js"></script>
