@@ -13,6 +13,9 @@ import { formatRupiah } from './utils.js';
 let userId;
 let currentPeriod = ''; // Format: "YYYY-MM"
 let availablePeriods = [];
+// Variabel global untuk menyimpan instance chart
+let budgetPieChart = null;
+let budgetBarChart = null;
 
 // ============================================================================
 // Main Initialization
@@ -20,7 +23,6 @@ let availablePeriods = [];
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
-        console.log("User authenticated:", userId);
         initializeBudgetsPage();
     } else {
         window.location.href = "index.html";
@@ -29,48 +31,31 @@ onAuthStateChanged(auth, (user) => {
 
 async function initializeBudgetsPage() {
     try {
-        console.log("Initializing budgets page...");
-        
-        // Set current period to current month
         const now = new Date();
         currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        console.log("Current period set to:", currentPeriod);
         
-        // Populate year dropdowns with reasonable range
         populateYearDropdowns();
         
-        // Set current month and year in filter
         document.getElementById('budgetPeriodMonth').value = currentPeriod.split('-')[1];
         document.getElementById('budgetPeriodYear').value = currentPeriod.split('-')[0];
         
-        // Load user data
         const userData = await loadUserData(userId);
-        console.log("User data loaded:", userData);
-        
         if (!userData) throw new Error("User data not found.");
 
-        // Load expense accounts for category dropdown
         const expenseAccounts = userData.accounts?.expense || [];
-        console.log("Expense accounts:", expenseAccounts);
         populateCategoryDropdown(expenseAccounts);
         
-        // Load available budget periods
         availablePeriods = await loadBudgetPeriods(userId);
-        console.log("Available budget periods:", availablePeriods);
         
-        // Load transactions and budgets for current period
         await loadAndDisplayBudgetsForPeriod(currentPeriod);
         
-        // Update period display
         updateCurrentPeriodDisplay(currentPeriod);
         
-        // Setup event listeners
         setupEventListeners();
-        console.log("Budgets page initialized successfully");
 
     } catch (error) {
         console.error("Error initializing budgets page:", error);
-        document.getElementById('budgetList').innerHTML = `<p class="empty-state">${error.message}</p>`;
+        document.getElementById('budgetTableBody').innerHTML = `<tr><td colspan="6" class="empty-state">${error.message}</td></tr>`;
     }
 }
 
@@ -79,17 +64,14 @@ async function initializeBudgetsPage() {
 // ============================================================================
 function populateYearDropdowns() {
     const currentYear = new Date().getFullYear();
-    const startYear = currentYear - 5; // 5 years back
-    const endYear = currentYear + 1;   // 1 year ahead
+    const startYear = currentYear - 5;
+    const endYear = currentYear + 1;
     
     const yearDropdowns = ['budgetPeriodYear', 'customBudgetYear'];
     
     yearDropdowns.forEach(dropdownId => {
         const dropdown = document.getElementById(dropdownId);
-        if (!dropdown) {
-            console.warn(`Dropdown with ID ${dropdownId} not found`);
-            return;
-        }
+        if (!dropdown) return;
         
         dropdown.innerHTML = '';
         for (let year = startYear; year <= endYear; year++) {
@@ -102,56 +84,27 @@ function populateYearDropdowns() {
             dropdown.appendChild(option);
         }
     });
-    console.log("Year dropdowns populated");
 }
 
 function updateCurrentPeriodDisplay(period) {
-    const displayElement = document.getElementById('currentPeriodDisplay');
-    if (!displayElement) {
-        console.warn("Current period display element not found");
-        return;
-    }
-    
     const [year, month] = period.split('-');
-    const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthName = monthNames[parseInt(month) - 1];
-    displayElement.textContent = `${monthName} ${year}`;
-    console.log("Period display updated to:", `${monthName} ${year}`);
+    document.getElementById('currentPeriodDisplay').textContent = `${monthName} ${year}`;
 }
 
 async function loadAndDisplayBudgetsForPeriod(period) {
     try {
-        console.log("Loading budgets for period:", period);
         const userData = await loadUserData(userId);
-        console.log("User data loaded:", userData);
-        
-        if (!userData || !userData.budgets) {
-            console.log("No budgets data found in user data");
-            document.getElementById('budgetList').innerHTML = '<p class="empty-state">No budgets found for this period.</p>';
-            return;
-        }
-        
-        console.log("All budgets:", userData.budgets);
-        const periodBudgets = userData.budgets[period] || {};
-        console.log("Budgets for this period:", periodBudgets);
-        
-        // Load transactions for this period
+        const periodBudgets = userData?.budgets?.[period] || {};
         const allTransactions = await loadTransactions(userId) || {};
-        console.log("Transactions loaded:", Object.keys(allTransactions).length);
         
-        // Process budgets with transactions
         const processedBudgets = processBudgets(periodBudgets, allTransactions, period);
-        console.log("Processed budgets:", processedBudgets);
         
-        // Display budgets
         displayBudgets(processedBudgets, period);
     } catch (error) {
         console.error("Error loading budgets for period:", error);
-        document.getElementById('budgetList').innerHTML = `<p class="empty-state">Error loading budgets: ${error.message}</p>`;
+        document.getElementById('budgetTableBody').innerHTML = `<tr><td colspan="6" class="empty-state">Error loading budgets: ${error.message}</td></tr>`;
     }
 }
 
@@ -159,56 +112,32 @@ async function loadAndDisplayBudgetsForPeriod(period) {
 // Data Processing
 // ============================================================================
 function processBudgets(budgets, transactions, period) {
-    console.log("Processing budgets for period:", period);
-    // Extract year and month from period
     const [year, month] = period.split('-').map(Number);
-    console.log(`Year: ${year}, Month: ${month}`);
     
-    // Buat salinan objek budgets agar tidak mengubah data asli
-    const processedBudgets = JSON.parse(JSON.stringify(budgets));
-    
-    // Reset 'spent' amount for all budgets
-    for (const category in processedBudgets) {
-        processedBudgets[category].spent = 0;
+    for (const category in budgets) {
+        budgets[category].spent = 0;
     }
     
-    // Calculate spent amount for each category from transactions in this period
-    let matchCount = 0;
     for (const txId in transactions) {
         const tx = transactions[txId];
-        if (!tx.timestamp) {
-            console.log("Transaction missing timestamp:", tx);
-            continue;
-        }
-        
         const txDate = new Date(tx.timestamp);
-        const txYear = txDate.getFullYear();
-        const txMonth = txDate.getMonth() + 1; // JavaScript months are 0-indexed
         
-        // Check if transaction is in the selected period
-        if (tx.type === 'expense' && txYear === year && txMonth === month) {
-            matchCount++;
-            if (processedBudgets[tx.account]) {
-                processedBudgets[tx.account].spent += tx.amount;
-                console.log(`Added ${tx.amount} to ${tx.account}, new total: ${processedBudgets[tx.account].spent}`);
+        if (tx.type === 'expense' && txDate.getFullYear() === year && txDate.getMonth() + 1 === month) {
+            if (budgets[tx.account]) {
+                budgets[tx.account].spent += tx.amount;
             }
         }
     }
     
-    console.log(`Found ${matchCount} matching transactions for period ${year}-${month}`);
-    return processedBudgets;
+    return budgets;
 }
 
 // ============================================================================
-// UI Display Functions
+// UI Display Functions (PERUBAHAN UTAMA DI SINI)
 // ============================================================================
 function populateCategoryDropdown(expenseAccounts) {
     const select = document.getElementById('budgetCategory');
-    if (!select) {
-        console.warn("Budget category select element not found");
-        return;
-    }
-    
+    if (!select) return;
     select.innerHTML = '<option value="">Select a category...</option>';
     expenseAccounts.forEach(account => {
         const option = document.createElement('option');
@@ -216,28 +145,33 @@ function populateCategoryDropdown(expenseAccounts) {
         option.text = account;
         select.appendChild(option);
     });
-    console.log("Category dropdown populated with", expenseAccounts.length, "options");
 }
 
+/**
+ * Fungsi utama untuk menampilkan semua visualisasi budget.
+ */
 function displayBudgets(budgets, period) {
-    const container = document.getElementById('budgetList');
-    if (!container) {
-        console.error("Budget list container not found!");
-        return;
-    }
+    displayBudgetTable(budgets, period);
+    displayBudgetCharts(budgets);
+}
 
-    console.log("Displaying budgets:", budgets);
-    console.log("Number of budgets:", Object.keys(budgets).length);
+/**
+ * Fungsi untuk merender data budget ke dalam tabel.
+ */
+function displayBudgetTable(budgets, period) {
+    const tableBody = document.getElementById('budgetTableBody');
+    if (!tableBody) return;
 
     if (Object.keys(budgets).length === 0) {
-        container.innerHTML = '<p class="empty-state">No budgets found for this period.</p>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No budgets found for this period.</td></tr>';
         return;
     }
 
+    const sortedBudgets = Object.values(budgets).sort((a, b) => (b.spent / b.limit) - (a.spent / a.limit));
+
     let html = '';
-    for (const category in budgets) {
-        const budget = budgets[category];
-        const percentage = (budget.spent / budget.limit) * 100;
+    sortedBudgets.forEach(budget => {
+        const percentage = budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0;
         const remaining = budget.limit - budget.spent;
 
         let progressBarClass = 'safe';
@@ -245,111 +179,141 @@ function displayBudgets(budgets, period) {
         if (percentage >= 100) progressBarClass = 'danger';
 
         html += `
-            <div class="budget-card">
-                <div class="budget-card-header">
-                    <h3>${budget.category}</h3>
-                    <button class="delete-btn small" data-period="${period}" data-category="${budget.category}">
+            <tr>
+                <td>${budget.category}</td>
+                <td>${formatRupiah(budget.limit)}</td>
+                <td>${formatRupiah(budget.spent)}</td>
+                <td>${formatRupiah(remaining)}</td>
+                <td>
+                    <div class="table-progress-bar">
+                        <div class="table-progress-fill ${progressBarClass}" style="width: ${Math.min(percentage, 100)}%;"></div>
+                    </div>
+                    <small>${percentage.toFixed(1)}%</small>
+                </td>
+                <td class="table-actions">
+                    <button class="delete-btn" data-period="${period}" data-category="${budget.category}">
                         <i class="fas fa-trash"></i>
                     </button>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-bar-fill ${progressBarClass}" style="width: ${Math.min(percentage, 100)}%;"></div>
-                </div>
-                <div class="budget-details">
-                    <p><span>Spent:</span> ${formatRupiah(budget.spent)}</p>
-                    <p><span>Limit:</span> ${formatRupiah(budget.limit)}</p>
-                    <p><span>Remaining:</span> ${formatRupiah(remaining)}</p>
-                </div>
-            </div>
+                </td>
+            </tr>
         `;
-    }
-    container.innerHTML = html;
-    console.log("Budget HTML generated:", html.substring(0, 100) + "...");
+    });
+
+    tableBody.innerHTML = html;
     attachDeleteListeners();
+}
+
+/**
+ * Fungsi untuk merender data budget ke dalam chart.
+ */
+function displayBudgetCharts(budgets) {
+    const categories = Object.keys(budgets);
+    const spentData = categories.map(cat => budgets[cat].spent);
+    const limitData = categories.map(cat => budgets[cat].limit);
+
+    const pieCtx = document.getElementById('budgetPieChart').getContext('2d');
+    const barCtx = document.getElementById('budgetBarChart').getContext('2d');
+
+    const chartColors = ['#3498db', '#e74c3c', '#9b59b6', '#2ecc71', '#f1c40f', '#1abc9c', '#e67e22', '#34495e'];
+
+    // Hancurkan chart lama sebelum membuat yang baru
+    if (budgetPieChart) budgetPieChart.destroy();
+    if (budgetBarChart) budgetBarChart.destroy();
+
+    // Pie Chart untuk distribusi pengeluaran
+    budgetPieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: spentData,
+                backgroundColor: chartColors,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Spending Distribution' }
+            }
+        }
+    });
+
+    // Bar Chart untuk perbandingan limit vs pengeluaran
+    budgetBarChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: [
+                {
+                    label: 'Spent',
+                    data: spentData,
+                    backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                },
+                {
+                    label: 'Limit',
+                    data: limitData,
+                    backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Budget vs. Actual Spending' }
+            }
+        }
+    });
 }
 
 // ============================================================================
 // Event Listeners
 // ============================================================================
 function setupEventListeners() {
-    // View budget for selected period
-    const viewButton = document.getElementById('viewBudgetPeriodBtn');
-    if (viewButton) {
-        viewButton.addEventListener('click', () => {
-            console.log("View Period button clicked");
-            const month = document.getElementById('budgetPeriodMonth').value;
-            const year = document.getElementById('budgetPeriodYear').value;
-            const period = `${year}-${month}`;
-            
-            console.log(`Selected period: ${period}`);
-            currentPeriod = period;
-            updateCurrentPeriodDisplay(period);
-            loadAndDisplayBudgetsForPeriod(period);
-        });
-    } else {
-        console.error("View Period button not found!");
-    }
+    document.getElementById('viewBudgetPeriodBtn')?.addEventListener('click', () => {
+        const month = document.getElementById('budgetPeriodMonth').value;
+        const year = document.getElementById('budgetPeriodYear').value;
+        currentPeriod = `${year}-${month}`;
+        updateCurrentPeriodDisplay(currentPeriod);
+        loadAndDisplayBudgetsForPeriod(currentPeriod);
+    });
     
-    // Toggle custom period fields
-    const periodSelect = document.getElementById('newBudgetPeriod');
-    if (periodSelect) {
-        periodSelect.addEventListener('change', (e) => {
-            const customFields = document.getElementById('customPeriodFields');
-            if (customFields) {
-                customFields.style.display = e.target.value === 'custom' ? 'block' : 'none';
-            }
-        });
-    }
+    document.getElementById('newBudgetPeriod')?.addEventListener('change', (e) => {
+        document.getElementById('customPeriodFields').style.display = e.target.value === 'custom' ? 'block' : 'none';
+    });
     
-    // Add budget form submission
-    const budgetForm = document.getElementById('addBudgetForm');
-    if (budgetForm) {
-        budgetForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            console.log("Budget form submitted");
-            
-            // Get period
-            let period = currentPeriod;
-            const periodType = document.getElementById('newBudgetPeriod').value;
-            
-            if (periodType === 'custom') {
-                const month = document.getElementById('customBudgetMonth').value;
-                const year = document.getElementById('customBudgetYear').value;
-                period = `${year}-${month}`;
-            }
-            
-            const category = document.getElementById('budgetCategory').value;
-            const limit = parseFloat(document.getElementById('budgetLimit').value);
-            
-            console.log(`Creating budget: period=${period}, category=${category}, limit=${limit}`);
+    document.getElementById('addBudgetForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let period = currentPeriod;
+        if (document.getElementById('newBudgetPeriod').value === 'custom') {
+            const month = document.getElementById('customBudgetMonth').value;
+            const year = document.getElementById('customBudgetYear').value;
+            period = `${year}-${month}`;
+        }
+        
+        const category = document.getElementById('budgetCategory').value;
+        const limit = parseFloat(document.getElementById('budgetLimit').value);
 
-            if (!category || isNaN(limit) || limit <= 0) {
-                showError("Please select a category and enter a valid limit.");
-                return;
-            }
+        if (!category || isNaN(limit) || limit <= 0) {
+            showError("Please select a category and enter a valid limit.");
+            return;
+        }
 
-            try {
-                await saveBudget(userId, period, category, limit);
-                showSuccessMessage("Budget created successfully!");
-                e.target.reset();
-                
-                // Add period to available periods if it's new
-                if (!availablePeriods.includes(period)) {
-                    availablePeriods.push(period);
-                }
-                
-                // If we're adding to the current displayed period, refresh the view
-                if (period === currentPeriod) {
-                    await loadAndDisplayBudgetsForPeriod(currentPeriod);
-                }
-            } catch (error) {
-                console.error("Error saving budget:", error);
-                showError("Failed to save budget.");
-            }
-        });
-    } else {
-        console.error("Budget form not found!");
-    }
+        try {
+            await saveBudget(userId, period, category, limit);
+            showSuccessMessage("Budget created successfully!");
+            e.target.reset();
+            if (!availablePeriods.includes(period)) availablePeriods.push(period);
+            if (period === currentPeriod) await loadAndDisplayBudgetsForPeriod(currentPeriod);
+        } catch (error) {
+            console.error("Error saving budget:", error);
+            showError("Failed to save budget.");
+        }
+    });
 }
 
 function attachDeleteListeners() {
@@ -357,8 +321,6 @@ function attachDeleteListeners() {
         button.addEventListener('click', async () => {
             const period = button.dataset.period;
             const category = button.dataset.category;
-            
-            console.log(`Delete button clicked for ${category} in period ${period}`);
             
             if (confirm(`Are you sure you want to delete the budget for "${category}"?`)) {
                 try {
@@ -383,8 +345,6 @@ function showError(message) {
         errorEl.textContent = message;
         errorEl.style.display = 'block';
         setTimeout(() => { errorEl.style.display = 'none'; }, 3000);
-    } else {
-        console.error("Error element not found, message was:", message);
     }
 }
 
