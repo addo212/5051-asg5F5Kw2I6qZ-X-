@@ -175,14 +175,77 @@ function populateCategoryDropdown(expenseAccounts) {
  * Fungsi utama untuk menampilkan semua visualisasi budget.
  */
 function displayBudgets(budgets, period) {
-    displayBudgetTable(budgets, period);
+    // Hitung total budget dan pengeluaran
+    let totalLimit = 0;
+    let totalSpent = 0;
+    
+    Object.values(budgets).forEach(budget => {
+        totalLimit += budget.limit;
+        totalSpent += budget.spent;
+    });
+    
+    // Tampilkan total di bagian atas visualisasi
+    displayBudgetSummary(totalLimit, totalSpent);
+    
+    // Tampilkan tabel dan chart
+    displayBudgetTable(budgets, period, totalLimit, totalSpent);
     displayBudgetCharts(budgets);
+}
+
+/**
+ * Fungsi untuk menampilkan ringkasan budget
+ */
+function displayBudgetSummary(totalLimit, totalSpent) {
+    // Cek apakah elemen ringkasan sudah ada, jika belum, buat baru
+    let summaryElement = document.getElementById('budgetSummary');
+    if (!summaryElement) {
+        const visualizationContainer = document.querySelector('.budget-visualization');
+        if (visualizationContainer) {
+            summaryElement = document.createElement('div');
+            summaryElement.id = 'budgetSummary';
+            summaryElement.className = 'budget-summary';
+            visualizationContainer.parentNode.insertBefore(summaryElement, visualizationContainer);
+        }
+    }
+    
+    if (summaryElement) {
+        const remaining = totalLimit - totalSpent;
+        const percentage = totalLimit > 0 ? (totalSpent / totalLimit) * 100 : 0;
+        
+        let statusClass = 'safe';
+        if (percentage > 75) statusClass = 'warning';
+        if (percentage >= 100) statusClass = 'danger';
+        
+        summaryElement.innerHTML = `
+            <div class="summary-item">
+                <h3>Total Budget</h3>
+                <p>${formatRupiah(totalLimit)}</p>
+            </div>
+            <div class="summary-item">
+                <h3>Total Spent</h3>
+                <p>${formatRupiah(totalSpent)}</p>
+            </div>
+            <div class="summary-item">
+                <h3>Remaining</h3>
+                <p class="${statusClass}">${formatRupiah(remaining)}</p>
+            </div>
+            <div class="summary-item">
+                <h3>Progress</h3>
+                <div class="summary-progress">
+                    <div class="table-progress-bar">
+                        <div class="table-progress-fill ${statusClass}" style="width: ${Math.min(percentage, 100)}%;"></div>
+                    </div>
+                    <span>${percentage.toFixed(1)}%</span>
+                </div>
+            </div>
+        `;
+    }
 }
 
 /**
  * Fungsi untuk merender data budget ke dalam tabel.
  */
-function displayBudgetTable(budgets, period) {
+function displayBudgetTable(budgets, period, totalLimit, totalSpent) {
     const tableBody = document.getElementById('budgetTableBody');
     if (!tableBody) {
         console.error("Budget table body not found!");
@@ -233,6 +296,30 @@ function displayBudgetTable(budgets, period) {
             </tr>
         `;
     });
+    
+    // Tambahkan baris total di bagian bawah tabel
+    const totalRemaining = totalLimit - totalSpent;
+    const totalPercentage = totalLimit > 0 ? (totalSpent / totalLimit) * 100 : 0;
+    
+    let totalProgressClass = 'safe';
+    if (totalPercentage > 75) totalProgressClass = 'warning';
+    if (totalPercentage >= 100) totalProgressClass = 'danger';
+    
+    html += `
+        <tr class="budget-total-row">
+            <td><strong>TOTAL</strong></td>
+            <td><strong>${formatRupiah(totalLimit)}</strong></td>
+            <td><strong>${formatRupiah(totalSpent)}</strong></td>
+            <td><strong>${formatRupiah(totalRemaining)}</strong></td>
+            <td>
+                <div class="table-progress-bar">
+                    <div class="table-progress-fill ${totalProgressClass}" style="width: ${Math.min(totalPercentage, 100)}%;"></div>
+                </div>
+                <small>${totalPercentage.toFixed(1)}%</small>
+            </td>
+            <td></td>
+        </tr>
+    `;
 
     tableBody.innerHTML = html;
     attachDeleteListeners();
