@@ -4,19 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wallets - Finance Tracker</title>
+
+    <!-- ================= PERUBAHAN DI SINI ================= -->
+    <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } catch (e) {}
+        })();
+    </script>
+    <!-- ===================================================== -->
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="icon" href="images/logo.jpeg">
-    <script>
-        // Apply saved theme
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        });
-    </script>
 </head>
 <body class="dashboard-body">
     <div class="dashboard-container">
+        <!-- ================= HEADER ================= -->
         <header>
             <div class="header-left">
                 <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
@@ -25,6 +32,7 @@
             <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </header>
 
+        <!-- ================= NAVIGASI ================= -->
         <nav class="main-nav">
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
@@ -39,6 +47,7 @@
             </div>
         </nav>
 
+        <!-- ================= KONTEN UTAMA ================= -->
         <div class="content-container">
             <h2><i class="fas fa-wallet"></i> My Wallets</h2>
             <div id="walletsList">
@@ -67,7 +76,7 @@
                 <p id="transferError" class="status-message" style="color: var(--danger-color); display: none;"></p>
             </form>
 
-            <!-- ================= BAGIAN BARU: RIWAYAT TRANSFER ================= -->
+            <!-- BAGIAN RIWAYAT TRANSFER -->
             <h2 style="margin-top: 2rem;"><i class="fas fa-history"></i> Transfer History</h2>
             <div id="transferHistory">
                 <!-- Riwayat transfer akan dimuat di sini oleh JavaScript -->
@@ -76,11 +85,10 @@
             <div id="transferPagination" class="pagination-container">
                 <!-- Kontrol pagination untuk riwayat transfer akan dimuat di sini -->
             </div>
-            <!-- =============================================================== -->
-
         </div>
     </div>
 
+    <!-- ================= SCRIPTS ================= -->
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/wallets.js"></script>
     <script type="module" src="js/utils.js"></script>
