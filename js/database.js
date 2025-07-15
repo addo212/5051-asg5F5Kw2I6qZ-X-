@@ -133,21 +133,30 @@ export function deleteWallet(userId, walletId) {
 // ============================================================================
 // Budget Operations
 // ============================================================================
-export function saveBudget(userId, category, limit) {
-    // Path ke budget spesifik berdasarkan kategori
-    const budgetRef = ref(db, `users/${userId}/budgets/${category}`);
+export function saveBudget(userId, period, category, limit) {
+    // Format periode: "YYYY-MM" (contoh: "2023-07" untuk Juli 2023)
+    const budgetRef = ref(db, `users/${userId}/budgets/${period}/${category}`);
     return set(budgetRef, {
         category: category,
         limit: limit,
-        spent: 0 // Selalu mulai dari 0
+        spent: 0,
+        period: period
     });
 }
 
-export function deleteBudget(userId, category) {
-    const budgetRef = ref(db, `users/${userId}/budgets/${category}`);
+export function deleteBudget(userId, period, category) {
+    const budgetRef = ref(db, `users/${userId}/budgets/${period}/${category}`);
     return remove(budgetRef);
 }
 
+export function loadBudgetPeriods(userId) {
+    return get(ref(db, `users/${userId}/budgets`)).then(snapshot => {
+        if (snapshot.exists()) {
+            return Object.keys(snapshot.val());
+        }
+        return [];
+    });
+}
 // ============================================================================
 // Initial Data Setup
 // ============================================================================
