@@ -672,8 +672,8 @@ body:not(.dashboard-body) {
 }
 
 .logo {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%; /* Membuat logo bulat */
     object-fit: cover; /* Memastikan gambar tidak terdistorsi */
     margin-bottom: 1.5rem;
