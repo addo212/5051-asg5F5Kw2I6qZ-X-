@@ -84,12 +84,9 @@ function setupEventListeners() {
         });
     });
 
-    // --- PERUBAHAN UTAMA DI SINI ---
     // Logika untuk panel filter yang bisa disembunyikan
     const toggleFilterBtn = document.getElementById('toggleFilterBtn');
     const filterPanel = document.getElementById('filterPanel');
-    const applyFiltersBtn = document.getElementById('applyFilters');
-    const resetFiltersBtn = document.getElementById('resetFilters');
 
     if (toggleFilterBtn && filterPanel) {
         toggleFilterBtn.addEventListener('click', () => {
@@ -97,54 +94,78 @@ function setupEventListeners() {
         });
     }
 
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', () => {
-            displayPage();
-            filterPanel.classList.remove('show'); // Sembunyikan panel setelah apply
-        });
-    }
+    // Event listener untuk tombol Apply Filters
+    document.getElementById('applyFilters')?.addEventListener('click', () => {
+        displayPage();
+        if (filterPanel) filterPanel.classList.remove('show');
+    });
 
-    if (resetFiltersBtn) {
-        resetFiltersBtn.addEventListener('click', () => {
-            resetFilters();
-            filterPanel.classList.remove('show'); // Sembunyikan panel setelah reset
-        });
-    }
+    // Event listener untuk tombol Reset Filters
+    document.getElementById('resetFilters')?.addEventListener('click', () => {
+        resetFilters();
+        if (filterPanel) filterPanel.classList.remove('show');
+    });
+
+    // Tambahkan event listener untuk filter tipe transaksi
+    document.getElementById('filterType')?.addEventListener('change', () => {
+        displayPage();
+    });
 }
 
 // ============================================================================
 // Filtering and Sorting
 // ============================================================================
 function getFilteredAndSortedTransactions() {
-    const filterStartDate = document.getElementById('filterStartDate').value;
-    const filterEndDate = document.getElementById('filterEndDate').value;
-    const filterWallet = document.getElementById('filterWallet').value;
-    const filterAccount = document.getElementById('filterAccount').value;
-    const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
+    // Ambil semua nilai filter
+    const filterStartDate = document.getElementById('filterStartDate')?.value;
+    const filterEndDate = document.getElementById('filterEndDate')?.value;
+    const filterWallet = document.getElementById('filterWallet')?.value;
+    const filterAccount = document.getElementById('filterAccount')?.value;
+    const filterType = document.getElementById('filterType')?.value;
+    const searchTerm = document.getElementById('transactionSearch')?.value?.toLowerCase() || '';
 
+    // Konversi tanggal ke timestamp untuk perbandingan
     const startDate = filterStartDate ? new Date(filterStartDate).getTime() : null;
     const endDate = filterEndDate ? new Date(filterEndDate).setHours(23, 59, 59, 999) : null;
 
+    // Filter transaksi berdasarkan semua kriteria
     let filtered = allTransactions.filter(tx => {
-        const matchesDate = (!startDate || tx.timestamp >= startDate) && (!endDate || tx.timestamp <= endDate);
+        // Filter tanggal
+        const matchesDate = (!startDate || tx.timestamp >= startDate) && 
+                           (!endDate || tx.timestamp <= endDate);
+        
+        // Filter wallet
         const matchesWallet = !filterWallet || tx.wallet === filterWallet;
+        
+        // Filter account
         const matchesAccount = !filterAccount || tx.account === filterAccount;
+        
+        // Filter tipe transaksi
+        const matchesType = !filterType || tx.type === filterType;
+        
+        // Filter pencarian (mencari di deskripsi, akun, dan dompet)
         const matchesSearch = !searchTerm || 
             (tx.description && tx.description.toLowerCase().includes(searchTerm)) ||
             (tx.account && tx.account.toLowerCase().includes(searchTerm)) ||
             (tx.wallet && tx.wallet.toLowerCase().includes(searchTerm));
         
-        return matchesDate && matchesWallet && matchesAccount && matchesSearch;
+        // Transaksi harus memenuhi SEMUA kriteria filter
+        return matchesDate && matchesWallet && matchesAccount && matchesType && matchesSearch;
     });
 
+    // Urutkan transaksi berdasarkan kolom dan arah yang dipilih
     filtered.sort((a, b) => {
         let valA = a[sortColumn];
         let valB = b[sortColumn];
+        
+        // Konversi ke lowercase untuk perbandingan string yang case-insensitive
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
+        
         let comparison = 0;
         if (valA > valB) comparison = 1;
         else if (valA < valB) comparison = -1;
+        
         return sortDirection === 'asc' ? comparison : -comparison;
     });
 
@@ -152,11 +173,16 @@ function getFilteredAndSortedTransactions() {
 }
 
 function resetFilters() {
+    // Reset semua filter ke nilai default
     document.getElementById('filterStartDate').value = '';
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterWallet').value = '';
     document.getElementById('filterAccount').value = '';
-    displayPage(); // Panggil displayPage untuk menerapkan reset
+    document.getElementById('filterType').value = '';
+    document.getElementById('transactionSearch').value = '';
+    
+    // Tampilkan ulang data tanpa filter
+    displayPage();
 }
 
 // ============================================================================
@@ -264,6 +290,7 @@ function loadWalletsForForm(wallets) {
 function loadFilters(accounts, wallets) {
     loadFilterWallets(wallets);
     loadFilterAccounts(accounts);
+    loadFilterTypes();
 }
 
 function loadFilterWallets(wallets) {
@@ -290,6 +317,16 @@ function loadFilterAccounts(accounts) {
         option.text = account;
         filterAccountSelect.appendChild(option);
     });
+}
+
+function loadFilterTypes() {
+    const filterTypeSelect = document.getElementById('filterType');
+    if (!filterTypeSelect) return;
+    filterTypeSelect.innerHTML = `
+        <option value="">All Types</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+    `;
 }
 
 // ============================================================================
