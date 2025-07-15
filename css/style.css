@@ -1132,77 +1132,103 @@ body:not(.dashboard-body) {
 }
 
 /* ============================================================================ */
-/* TRANSACTIONS PAGE (transactions.html)
+/* TRANSACTIONS PAGE - ENHANCED LAYOUT
 /* ============================================================================ */
 
-.filter-panel .search-group {
-    flex-grow: 2; /* Membuat kolom search lebih lebar */
-}
-
-.table-container {
-    width: 100%;
-    overflow-x: auto; /* Memungkinkan scroll horizontal di layar kecil */
+/* Collapsible Section (untuk form 'Add Transaction') */
+.collapsible-section {
     background-color: var(--bg-secondary);
     border-radius: 12px;
+    margin-bottom: 2rem;
     box-shadow: var(--card-shadow);
-    padding: 1rem;
+    overflow: hidden;
 }
 
-.transaction-table {
-    width: 100%;
-    border-collapse: collapse;
-    white-space: nowrap; /* Mencegah teks membungkus di dalam sel */
-}
-
-.transaction-table th,
-.transaction-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.transaction-table thead th {
-    background-color: var(--bg-primary);
-    font-weight: 600;
-    color: var(--text-primary);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.transaction-table th.sortable {
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
     cursor: pointer;
-    user-select: none;
+    list-style: none; /* Menghilangkan panah default dari <summary> */
 }
 
-.transaction-table th.sortable:hover {
-    background-color: var(--border-color);
+.collapsible-header::-webkit-details-marker {
+    display: none; /* Menghilangkan panah default di Chrome/Safari */
 }
 
-.sort-icon {
-    margin-left: 8px;
+.collapsible-header h2 {
+    padding: 0;
+    border: none;
+    margin: 0;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+}
+
+details[open] > summary .collapse-icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+/* Table Header Controls (Toolbar) */
+.table-header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.table-header-controls h2 {
+    padding: 0;
+    border: none;
+    margin: 0;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-container input {
+    padding-right: 2.5rem;
+    min-width: 250px;
+}
+
+.search-container .fa-search {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--text-secondary);
-    opacity: 0.7;
 }
 
-.transaction-table tbody tr:hover {
+/* Collapsible Filter Panel */
+.filter-panel.collapsible {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 1.5rem;
+    margin-bottom: 0;
+    border-radius: 12px;
     background-color: var(--bg-primary);
+    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
 }
 
-.transaction-table .type-cell span {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: white;
-}
-
-.type-cell .income {
-    background-color: var(--income-color);
-}
-
-.type-cell .expense {
-    background-color: var(--expense-color);
+.filter-panel.collapsible.show {
+    max-height: 500px; /* Nilai yang cukup besar untuk menampung konten */
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Pagination */
