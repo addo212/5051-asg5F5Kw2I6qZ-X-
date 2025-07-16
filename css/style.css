@@ -1215,7 +1215,7 @@ details[open] > summary .collapse-icon {
 /* 3. IKON PENCARIAN */
 .table-actions .search-container .fa-search {
     position: absolute; /* KUNCI #3: Mengeluarkan ikon dari alur normal dokumen. */
-    right: 15px;       /* Memposisikan ikon 15px dari tepi kanan wadah (.search-container). */
+    right: 0px;       /* Memposisikan ikon 15px dari tepi kanan wadah (.search-container). */
     top: 50%;          /* Memposisikan bagian atas ikon di tengah secara vertikal. */
     transform: translateY(-50%); /* Trik untuk centering vertikal sempurna dengan menggeser ikon ke atas sebesar 50% dari tingginya sendiri. */
     color: var(--text-secondary);
