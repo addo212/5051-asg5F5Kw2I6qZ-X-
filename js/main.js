@@ -554,7 +554,7 @@ function displayTopWallets(wallets) {
     container.innerHTML = html;
 }
 
-// Fungsi displayTopBudgets yang diperbarui untuk mengurutkan berdasarkan persentase atau limit
+// Fungsi displayTopBudgets yang diperbarui untuk mengurutkan dan menampilkan dengan benar
 function displayTopBudgets(budgets) {
     const container = document.getElementById('topBudgets');
     if (!container) return;
@@ -570,30 +570,32 @@ function displayTopBudgets(budgets) {
         return;
     }
     
-    // Convert to array and calculate percentages and amounts
+    // Convert to array and calculate percentages
     const budgetsArray = Object.entries(currentBudgets).map(([category, budget]) => {
         // Pastikan nilai spent dan limit adalah angka
         const spent = parseFloat(budget.spent) || 0;
         const limit = parseFloat(budget.limit) || 1; // Hindari pembagian dengan nol
         
+        // Hitung persentase penggunaan budget (progress)
+        const percentage = (spent / limit) * 100;
+        
         return {
             category,
             spent: spent,
             limit: limit,
-            percentage: (spent / limit) * 100,
+            percentage: percentage
         };
     });
     
     console.log(`Displaying budgets in ${budgetViewMode} mode`);
-    console.log("Budget data before sorting:", budgetsArray);
     
     // Sort based on current view mode
     if (budgetViewMode === 'percentage') {
-        // Sort by percentage (highest first)
+        // Sort by percentage (highest first) - ini adalah progress
         budgetsArray.sort((a, b) => b.percentage - a.percentage);
-        console.log("Sorted by percentage:", budgetsArray.map(b => `${b.category}: ${b.percentage.toFixed(1)}%`));
+        console.log("Sorted by progress (percentage):", budgetsArray.map(b => `${b.category}: ${b.percentage.toFixed(1)}%`));
     } else {
-        // Sort by limit (highest first) - PERUBAHAN UTAMA DI SINI
+        // Sort by limit (highest first)
         budgetsArray.sort((a, b) => b.limit - a.limit);
         console.log("Sorted by limit:", budgetsArray.map(b => `${b.category}: ${formatRupiah(b.limit)}`));
     }
