@@ -554,7 +554,7 @@ function displayTopWallets(wallets) {
     container.innerHTML = html;
 }
 
-// Fungsi displayTopBudgets yang diperbarui untuk benar-benar mengurutkan berdasarkan persentase atau jumlah
+// Fungsi displayTopBudgets yang diperbarui untuk mengurutkan berdasarkan persentase atau limit
 function displayTopBudgets(budgets) {
     const container = document.getElementById('topBudgets');
     if (!container) return;
@@ -593,9 +593,9 @@ function displayTopBudgets(budgets) {
         budgetsArray.sort((a, b) => b.percentage - a.percentage);
         console.log("Sorted by percentage:", budgetsArray.map(b => `${b.category}: ${b.percentage.toFixed(1)}%`));
     } else {
-        // Sort by amount spent (highest first)
-        budgetsArray.sort((a, b) => b.spent - a.spent);
-        console.log("Sorted by amount:", budgetsArray.map(b => `${b.category}: ${formatRupiah(b.spent)}`));
+        // Sort by limit (highest first) - PERUBAHAN UTAMA DI SINI
+        budgetsArray.sort((a, b) => b.limit - a.limit);
+        console.log("Sorted by limit:", budgetsArray.map(b => `${b.category}: ${formatRupiah(b.limit)}`));
     }
     
     // Take top 3
@@ -622,7 +622,7 @@ function displayTopBudgets(budgets) {
                 <div class="budget-percentage ${statusClass}">
                     ${budgetViewMode === 'percentage' 
                         ? `${percentage.toFixed(0)}%` 
-                        : formatRupiah(budget.spent)}
+                        : formatRupiah(budget.limit)}
                 </div>
             </div>
         `;
