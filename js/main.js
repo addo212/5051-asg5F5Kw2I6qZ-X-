@@ -302,8 +302,24 @@ function displayRecentTransactions(transactions) {
         }
     });
 
-    // Urutkan berdasarkan timestamp terbaru
-    validTransactions.sort((a, b) => b.timestamp - a.timestamp);
+    // SOLUSI: Urutkan berdasarkan kombinasi timestamp dan ID untuk memastikan urutan yang konsisten
+    // Ini akan memastikan bahwa jika ada beberapa transaksi dengan timestamp yang sama,
+    // mereka akan diurutkan berdasarkan ID (yang biasanya berisi timestamp pembuatan)
+    validTransactions.sort((a, b) => {
+        // Jika timestamp berbeda, urutkan berdasarkan timestamp
+        if (b.timestamp !== a.timestamp) {
+            return b.timestamp - a.timestamp;
+        }
+        // Jika timestamp sama, urutkan berdasarkan ID (yang mungkin berisi timestamp pembuatan)
+        return b.id.localeCompare(a.id);
+    });
+    
+    // Tambahkan log untuk debugging
+    console.log("Sorted transactions (first 5):", validTransactions.slice(0, 5).map(tx => ({
+        id: tx.id,
+        date: new Date(tx.timestamp).toLocaleDateString(),
+        description: tx.description
+    })));
     
     // Ambil 5 transaksi teratas
     const recentTransactions = validTransactions.slice(0, 5);
