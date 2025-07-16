@@ -64,45 +64,61 @@ function setupEventListeners() {
         window.location.href = 'budgets.html';
     });
     
-    // Setup budget view toggle
-    setupBudgetViewToggle();
+    // Fungsi setupBudgetViewToggle() akan dipanggil di akhir initializeDashboard()
 }
 
-// Fungsi untuk mengatur toggle view budget
+// Fungsi untuk mengatur toggle view budget (diperbaiki)
 function setupBudgetViewToggle() {
     const percentageBtn = document.getElementById('viewByPercentage');
     const amountBtn = document.getElementById('viewByAmount');
     
+    console.log("Setting up budget view toggle buttons:", { 
+        percentageBtn: !!percentageBtn, 
+        amountBtn: !!amountBtn 
+    });
+    
     if (percentageBtn && amountBtn) {
-        percentageBtn.addEventListener('click', () => {
+        percentageBtn.addEventListener('click', function() {
+            console.log("Percentage button clicked");
             if (budgetViewMode !== 'percentage') {
                 budgetViewMode = 'percentage';
                 percentageBtn.classList.add('active');
                 amountBtn.classList.remove('active');
                 
-                // Reload budgets with new view mode
-                loadUserData(userId).then(userData => {
-                    if (userData && userData.budgets) {
-                        displayTopBudgets(userData.budgets);
+                // Langsung perbarui tampilan budget tanpa memuat ulang data
+                const userData = loadUserData(userId);
+                userData.then(data => {
+                    if (data && data.budgets) {
+                        displayTopBudgets(data.budgets);
                     }
+                }).catch(err => {
+                    console.error("Error reloading budget data:", err);
                 });
             }
         });
         
-        amountBtn.addEventListener('click', () => {
+        amountBtn.addEventListener('click', function() {
+            console.log("Amount button clicked");
             if (budgetViewMode !== 'amount') {
                 budgetViewMode = 'amount';
                 amountBtn.classList.add('active');
                 percentageBtn.classList.remove('active');
                 
-                // Reload budgets with new view mode
-                loadUserData(userId).then(userData => {
-                    if (userData && userData.budgets) {
-                        displayTopBudgets(userData.budgets);
+                // Langsung perbarui tampilan budget tanpa memuat ulang data
+                const userData = loadUserData(userId);
+                userData.then(data => {
+                    if (data && data.budgets) {
+                        displayTopBudgets(data.budgets);
                     }
+                }).catch(err => {
+                    console.error("Error reloading budget data:", err);
                 });
             }
         });
+        
+        console.log("Budget view toggle buttons set up successfully");
+    } else {
+        console.error("Budget view toggle buttons not found in DOM");
     }
 }
 
@@ -153,6 +169,9 @@ async function initializeDashboard() {
 
         // Tampilkan tip keuangan harian
         showDailyTip();
+        
+        // PENTING: Setup event listeners untuk toggle budget view SETELAH semua data dimuat
+        setupBudgetViewToggle();
 
     } catch (error) {
         console.error("Error initializing dashboard:", error);
@@ -558,6 +577,9 @@ function displayTopBudgets(budgets) {
         percentage: budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0,
         amount: budget.spent || 0
     }));
+    
+    console.log(`Displaying budgets in ${budgetViewMode} mode`);
+    console.log("Budget data:", budgetsArray);
     
     // Sort based on current view mode
     if (budgetViewMode === 'percentage') {
