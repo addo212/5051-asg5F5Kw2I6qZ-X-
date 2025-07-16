@@ -554,7 +554,7 @@ function displayTopWallets(wallets) {
     container.innerHTML = html;
 }
 
-// Fungsi displayTopBudgets yang diperbarui untuk mendukung toggle view
+// Fungsi displayTopBudgets yang diperbarui untuk benar-benar mengurutkan berdasarkan persentase atau jumlah
 function displayTopBudgets(budgets) {
     const container = document.getElementById('topBudgets');
     if (!container) return;
@@ -571,27 +571,36 @@ function displayTopBudgets(budgets) {
     }
     
     // Convert to array and calculate percentages and amounts
-    const budgetsArray = Object.entries(currentBudgets).map(([category, budget]) => ({
-        category,
-        ...budget,
-        percentage: budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0,
-        amount: budget.spent || 0
-    }));
+    const budgetsArray = Object.entries(currentBudgets).map(([category, budget]) => {
+        // Pastikan nilai spent dan limit adalah angka
+        const spent = parseFloat(budget.spent) || 0;
+        const limit = parseFloat(budget.limit) || 1; // Hindari pembagian dengan nol
+        
+        return {
+            category,
+            spent: spent,
+            limit: limit,
+            percentage: (spent / limit) * 100,
+        };
+    });
     
     console.log(`Displaying budgets in ${budgetViewMode} mode`);
-    console.log("Budget data:", budgetsArray);
+    console.log("Budget data before sorting:", budgetsArray);
     
     // Sort based on current view mode
     if (budgetViewMode === 'percentage') {
         // Sort by percentage (highest first)
         budgetsArray.sort((a, b) => b.percentage - a.percentage);
+        console.log("Sorted by percentage:", budgetsArray.map(b => `${b.category}: ${b.percentage.toFixed(1)}%`));
     } else {
         // Sort by amount spent (highest first)
-        budgetsArray.sort((a, b) => b.amount - a.amount);
+        budgetsArray.sort((a, b) => b.spent - a.spent);
+        console.log("Sorted by amount:", budgetsArray.map(b => `${b.category}: ${formatRupiah(b.spent)}`));
     }
     
     // Take top 3
     const topBudgets = budgetsArray.slice(0, 3);
+    console.log("Top 3 budgets:", topBudgets);
     
     let html = '';
     topBudgets.forEach(budget => {
@@ -613,7 +622,7 @@ function displayTopBudgets(budgets) {
                 <div class="budget-percentage ${statusClass}">
                     ${budgetViewMode === 'percentage' 
                         ? `${percentage.toFixed(0)}%` 
-                        : formatRupiah(budget.amount)}
+                        : formatRupiah(budget.spent)}
                 </div>
             </div>
         `;
