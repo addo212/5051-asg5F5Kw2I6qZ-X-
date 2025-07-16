@@ -1023,6 +1023,40 @@ body:not(.dashboard-body) {
 .budget-percentage.warning { color: #f9a825; }
 .budget-percentage.danger { color: var(--expense-color); }
 
+/* Toggle buttons for section views */
+.section-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toggle-view {
+    display: flex;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 500;
+}
+
+.toggle-btn:hover:not(.active) {
+    background-color: var(--border-color);
+}
 /* Wallet Grid */
 .wallet-grid {
     display: grid;
