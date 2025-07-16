@@ -70,48 +70,51 @@ async function initializeDashboard() {
     try {
         console.log("Initializing dashboard...");
         
-        // Show loading states
+        // Tampilkan loading state
         document.getElementById('recentTransactionsList').innerHTML = '<p class="empty-state">Loading recent transactions...</p>';
-        document.getElementById('topBudgets').innerHTML = '<p class="empty-state">Loading budget data...</p>';
-        document.getElementById('topWallets').innerHTML = '<p class="empty-state">Loading wallet data...</p>';
         
-        // Load user data and transactions
+        // Memuat data pengguna dan transaksi secara bersamaan
         const [userData, transactionsData] = await Promise.all([
             loadUserData(userId),
             loadTransactions(userId)
         ]);
 
-        console.log("Data loaded:", { userData, transactionsHasData: !!transactionsData });
+        console.log("Data loaded:", { 
+            userData: !!userData, 
+            transactionsData: !!transactionsData,
+            transactionsCount: transactionsData ? Object.keys(transactionsData).length : 0
+        });
 
         if (!userData) {
             console.error("User data not found!");
             return;
         }
 
-        // Calculate monthly summary
+        // Hitung ringkasan bulanan dari semua transaksi
         const monthlySummary = calculateMonthlySummary(transactionsData);
 
-        // Update dashboard cards
+        // Perbarui kartu ringkasan di UI
         updateDashboardCards(userData.totalBalance, monthlySummary.monthlyIncome, monthlySummary.monthlyExpenses);
 
-        // Display recent transactions
+        // Tampilkan transaksi terbaru di UI
         displayRecentTransactions(transactionsData);
 
-        // Display top wallets
-        displayTopWallets(userData.wallets || {});
-
-        // Display top budgets
-        displayTopBudgets(userData.budgets || {});
-
-        // Display weekly trends
+        // Tampilkan tren mingguan
         displayWeeklyTrends(transactionsData);
 
-        // Show daily financial tip
+        // Tampilkan dompet teratas
+        displayTopWallets(userData.wallets || {});
+
+        // Tampilkan anggaran teratas
+        displayTopBudgets(userData.budgets || {});
+
+        // Tampilkan tip keuangan harian
         showDailyTip();
 
     } catch (error) {
         console.error("Error initializing dashboard:", error);
-        document.getElementById('recentTransactionsList').innerHTML = '<p class="empty-state">Error loading transactions. Please try refreshing the page.</p>';
+        document.getElementById('recentTransactionsList').innerHTML = 
+            '<p class="empty-state">Error loading transactions. Please try refreshing the page.</p>';
     }
 }
 
@@ -130,7 +133,7 @@ function calculateMonthlySummary(transactions) {
         return { monthlyIncome, monthlyExpenses };
     }
 
-    // Convert transactions object to array if needed
+    // Konversi objek transaksi menjadi array
     const transactionsArray = typeof transactions === 'object' && !Array.isArray(transactions) 
         ? Object.values(transactions) 
         : transactions;
@@ -140,7 +143,7 @@ function calculateMonthlySummary(transactions) {
         
         const txDate = new Date(tx.timestamp);
         
-        // Only process transactions from current month and year
+        // Hanya proses transaksi dari bulan dan tahun saat ini
         if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
             if (tx.type === 'income') {
                 monthlyIncome += tx.amount;
@@ -167,6 +170,8 @@ function getWeeklyData(transactions) {
         incomeData.push(0);
         expenseData.push(0);
     }
+    
+    if (!transactions) return { labels: dates, income: incomeData, expense: expenseData, totalIncome: 0, totalExpense: 0 };
     
     // Convert transactions object to array if needed
     const transactionsArray = typeof transactions === 'object' && !Array.isArray(transactions) 
@@ -209,20 +214,24 @@ function getWeeklyData(transactions) {
 // UI Update Functions
 // ============================================================================
 function updateDashboardCards(totalBalance, monthlyIncome, monthlyExpenses) {
-    // Update main stats
-    document.getElementById('totalBalance').textContent = formatRupiah(totalBalance || 0);
-    document.getElementById('monthlyIncome').textContent = formatRupiah(monthlyIncome || 0);
-    document.getElementById('monthlyExpenses').textContent = formatRupiah(monthlyExpenses || 0);
+    const totalBalanceElement = document.getElementById('totalBalance');
+    const monthlyIncomeElement = document.getElementById('monthlyIncome');
+    const monthlyExpensesElement = document.getElementById('monthlyExpenses');
+
+    if (totalBalanceElement) {
+        totalBalanceElement.textContent = formatRupiah(totalBalance || 0);
+    }
+    if (monthlyIncomeElement) {
+        monthlyIncomeElement.textContent = formatRupiah(monthlyIncome || 0);
+    }
+    if (monthlyExpensesElement) {
+        monthlyExpensesElement.textContent = formatRupiah(monthlyExpenses || 0);
+    }
     
     // Update trends (placeholder - in a real app, you'd compare with previous month)
-    const balanceTrend = document.getElementById('balanceTrend');
-    const incomeTrend = document.getElementById('incomeTrend');
-    const expenseTrend = document.getElementById('expenseTrend');
-    
-    // Simulate some trend data
-    updateTrendIndicator(balanceTrend, 5.2);
-    updateTrendIndicator(incomeTrend, 3.8);
-    updateTrendIndicator(expenseTrend, -2.1);
+    updateTrendIndicator(document.getElementById('balanceTrend'), 5.2);
+    updateTrendIndicator(document.getElementById('incomeTrend'), 3.8);
+    updateTrendIndicator(document.getElementById('expenseTrend'), -2.1);
 }
 
 function updateTrendIndicator(element, percentage) {
@@ -247,6 +256,9 @@ function updateTrendIndicator(element, percentage) {
     }
 }
 
+// ============================================================================
+// FUNGSI YANG DIPERBAIKI: displayRecentTransactions
+// ============================================================================
 function displayRecentTransactions(transactions) {
     const container = document.getElementById('recentTransactionsList');
     if (!container) {
@@ -261,30 +273,43 @@ function displayRecentTransactions(transactions) {
         return;
     }
 
-    // Convert transactions object to array
+    // Konversi objek transaksi menjadi array dengan ID
     let transactionsArray = [];
     
     if (Array.isArray(transactions)) {
         transactionsArray = transactions;
     } else {
-        // Convert from object to array
-        transactionsArray = Object.keys(transactions).map(key => ({
-            id: key,
-            ...transactions[key]
+        // Konversi dari objek ke array dengan ID
+        transactionsArray = Object.entries(transactions).map(([id, tx]) => ({
+            id,
+            ...tx
         }));
     }
     
-    // Filter valid transactions
+    console.log(`Found ${transactionsArray.length} transactions total`);
+
+    // Filter transaksi yang valid (memiliki timestamp dan type)
     const validTransactions = transactionsArray.filter(tx => 
         tx && tx.timestamp && tx.type && (tx.type === 'income' || tx.type === 'expense')
     );
     
-    // Sort by timestamp (newest first)
+    console.log(`Found ${validTransactions.length} valid transactions`);
+
+    // Pastikan timestamp adalah angka untuk pengurutan yang benar
+    validTransactions.forEach(tx => {
+        if (typeof tx.timestamp === 'string') {
+            tx.timestamp = parseInt(tx.timestamp);
+        }
+    });
+
+    // Urutkan berdasarkan timestamp terbaru
     validTransactions.sort((a, b) => b.timestamp - a.timestamp);
     
-    // Take 5 most recent
+    // Ambil 5 transaksi teratas
     const recentTransactions = validTransactions.slice(0, 5);
     
+    console.log(`Displaying ${recentTransactions.length} recent transactions`);
+
     if (recentTransactions.length === 0) {
         container.innerHTML = '<p class="empty-state">No recent transactions found.</p>';
         return;
@@ -300,7 +325,7 @@ function displayRecentTransactions(transactions) {
         const icon = isIncome ? 'fa-arrow-down' : 'fa-arrow-up';
         const sign = isIncome ? '+' : '-';
         
-        // Ensure timestamp is a number
+        // Pastikan timestamp adalah angka
         const timestamp = typeof transaction.timestamp === 'number' 
             ? transaction.timestamp 
             : parseInt(transaction.timestamp);
@@ -331,6 +356,84 @@ function displayRecentTransactions(transactions) {
 
     container.innerHTML = html;
     console.log("Recent transactions displayed successfully");
+}
+
+function displayWeeklyTrends(transactions) {
+    const weeklyData = getWeeklyData(transactions);
+    
+    // Update totals
+    document.getElementById('weeklyIncomeTotal').textContent = formatRupiah(weeklyData.totalIncome);
+    document.getElementById('weeklyExpenseTotal').textContent = formatRupiah(weeklyData.totalExpense);
+    
+    // Create income sparkline
+    const incomeCtx = document.getElementById('incomeSparkline');
+    if (incomeCtx) {
+        new Chart(incomeCtx, {
+            type: 'line',
+            data: {
+                labels: weeklyData.labels,
+                datasets: [{
+                    data: weeklyData.income,
+                    borderColor: 'rgba(76, 175, 80, 0.8)',
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(76, 175, 80, 1)'
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { 
+                    x: { 
+                        display: true,
+                        grid: { display: false }
+                    }, 
+                    y: { 
+                        display: false,
+                        beginAtZero: true
+                    } 
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+    
+    // Create expense sparkline
+    const expenseCtx = document.getElementById('expenseSparkline');
+    if (expenseCtx) {
+        new Chart(expenseCtx, {
+            type: 'line',
+            data: {
+                labels: weeklyData.labels,
+                datasets: [{
+                    data: weeklyData.expense,
+                    borderColor: 'rgba(244, 67, 54, 0.8)',
+                    backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(244, 67, 54, 1)'
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { 
+                    x: { 
+                        display: true,
+                        grid: { display: false }
+                    }, 
+                    y: { 
+                        display: false,
+                        beginAtZero: true
+                    } 
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
 }
 
 function displayTopWallets(wallets) {
@@ -427,84 +530,6 @@ function displayTopBudgets(budgets) {
     });
     
     container.innerHTML = html;
-}
-
-function displayWeeklyTrends(transactions) {
-    const weeklyData = getWeeklyData(transactions);
-    
-    // Update totals
-    document.getElementById('weeklyIncomeTotal').textContent = formatRupiah(weeklyData.totalIncome);
-    document.getElementById('weeklyExpenseTotal').textContent = formatRupiah(weeklyData.totalExpense);
-    
-    // Create income sparkline
-    const incomeCtx = document.getElementById('incomeSparkline');
-    if (incomeCtx) {
-        new Chart(incomeCtx, {
-            type: 'line',
-            data: {
-                labels: weeklyData.labels,
-                datasets: [{
-                    data: weeklyData.income,
-                    borderColor: 'rgba(76, 175, 80, 0.8)',
-                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointBackgroundColor: 'rgba(76, 175, 80, 1)'
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: { 
-                    x: { 
-                        display: true,
-                        grid: { display: false }
-                    }, 
-                    y: { 
-                        display: false,
-                        beginAtZero: true
-                    } 
-                },
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
-    
-    // Create expense sparkline
-    const expenseCtx = document.getElementById('expenseSparkline');
-    if (expenseCtx) {
-        new Chart(expenseCtx, {
-            type: 'line',
-            data: {
-                labels: weeklyData.labels,
-                datasets: [{
-                    data: weeklyData.expense,
-                    borderColor: 'rgba(244, 67, 54, 0.8)',
-                    backgroundColor: 'rgba(244, 67, 54, 0.2)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointBackgroundColor: 'rgba(244, 67, 54, 1)'
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: { 
-                    x: { 
-                        display: true,
-                        grid: { display: false }
-                    }, 
-                    y: { 
-                        display: false,
-                        beginAtZero: true
-                    } 
-                },
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
 }
 
 function showDailyTip() {
