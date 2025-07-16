@@ -161,9 +161,17 @@ async function initializeDashboard() {
 
         // Hitung ringkasan bulanan dari semua transaksi
         const monthlySummary = calculateMonthlySummary(transactionsData);
+        
+        // Hitung perbandingan dengan bulan sebelumnya
+        const monthlyComparison = calculateMonthlyComparison(transactionsData);
 
-        // Perbarui kartu ringkasan di UI
-        updateDashboardCards(userData.totalBalance, monthlySummary.monthlyIncome, monthlySummary.monthlyExpenses);
+        // Perbarui kartu ringkasan di UI dengan data perbandingan
+        updateDashboardCards(
+            userData.totalBalance, 
+            monthlySummary.monthlyIncome, 
+            monthlySummary.monthlyExpenses,
+            monthlyComparison
+        );
 
         // Tampilkan transaksi terbaru di UI
         displayRecentTransactions(transactionsData);
@@ -196,6 +204,99 @@ async function initializeDashboard() {
 // ============================================================================
 // Data Processing Functions
 // ============================================================================
+// Fungsi untuk menghitung perbandingan bulan ini dengan bulan sebelumnya
+function calculateMonthlyComparison(transactions) {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Hitung bulan dan tahun sebelumnya
+    let previousMonth = currentMonth - 1;
+    let previousYear = currentYear;
+    if (previousMonth < 0) {
+        previousMonth = 11; // Desember
+        previousYear = currentYear - 1;
+    }
+    
+    // Inisialisasi data
+    let currentMonthIncome = 0;
+    let currentMonthExpense = 0;
+    let previousMonthIncome = 0;
+    let previousMonthExpense = 0;
+    
+    if (!transactions) {
+        return {
+            incomeChange: 0,
+            expenseChange: 0,
+            balanceChange: 0
+        };
+    }
+    
+    // Konversi objek transaksi menjadi array
+    const transactionsArray = typeof transactions === 'object' && !Array.isArray(transactions) 
+        ? Object.values(transactions) 
+        : transactions;
+    
+    // Proses setiap transaksi
+    transactionsArray.forEach(tx => {
+        if (!tx || !tx.timestamp) return;
+        
+        const txDate = new Date(tx.timestamp);
+        const txMonth = txDate.getMonth();
+        const txYear = txDate.getFullYear();
+        
+        // Transaksi bulan ini
+        if (txMonth === currentMonth && txYear === currentYear) {
+            if (tx.type === 'income') {
+                currentMonthIncome += tx.amount;
+            } else if (tx.type === 'expense') {
+                currentMonthExpense += tx.amount;
+            }
+        }
+        // Transaksi bulan sebelumnya
+        else if (txMonth === previousMonth && txYear === previousYear) {
+            if (tx.type === 'income') {
+                previousMonthIncome += tx.amount;
+            } else if (tx.type === 'expense') {
+                previousMonthExpense += tx.amount;
+            }
+        }
+    });
+    
+    // Hitung perubahan persentase
+    const currentBalance = currentMonthIncome - currentMonthExpense;
+    const previousBalance = previousMonthIncome - previousMonthExpense;
+    
+    // Hitung persentase perubahan
+    let incomeChange = 0;
+    let expenseChange = 0;
+    let balanceChange = 0;
+    
+    if (previousMonthIncome > 0) {
+        incomeChange = ((currentMonthIncome - previousMonthIncome) / previousMonthIncome) * 100;
+    } else if (currentMonthIncome > 0) {
+        incomeChange = 100; // Jika bulan lalu 0, dan bulan ini ada, maka naik 100%
+    }
+    
+    if (previousMonthExpense > 0) {
+        expenseChange = ((currentMonthExpense - previousMonthExpense) / previousMonthExpense) * 100;
+    } else if (currentMonthExpense > 0) {
+        expenseChange = 100; // Jika bulan lalu 0, dan bulan ini ada, maka naik 100%
+    }
+    
+    if (previousBalance !== 0) {
+        balanceChange = ((currentBalance - previousBalance) / Math.abs(previousBalance)) * 100;
+    } else if (currentBalance !== 0) {
+        balanceChange = currentBalance > 0 ? 100 : -100;
+    }
+    
+    return {
+        incomeChange,
+        expenseChange,
+        balanceChange
+    };
+}
+
 // Fungsi untuk menghitung ulang nilai spent untuk setiap budget berdasarkan transaksi
 async function calculateBudgetSpending(budgets, transactions) {
     const now = new Date();
@@ -343,7 +444,7 @@ function getWeeklyData(transactions) {
 // ============================================================================
 // UI Update Functions
 // ============================================================================
-function updateDashboardCards(totalBalance, monthlyIncome, monthlyExpenses) {
+function updateDashboardCards(totalBalance, monthlyIncome, monthlyExpenses, comparison = { balanceChange: 0, incomeChange: 0, expenseChange: 0 }) {
     const totalBalanceElement = document.getElementById('totalBalance');
     const monthlyIncomeElement = document.getElementById('monthlyIncome');
     const monthlyExpensesElement = document.getElementById('monthlyExpenses');
@@ -358,10 +459,10 @@ function updateDashboardCards(totalBalance, monthlyIncome, monthlyExpenses) {
         monthlyExpensesElement.textContent = formatRupiah(monthlyExpenses || 0);
     }
     
-    // Update trends (placeholder - in a real app, you'd compare with previous month)
-    updateTrendIndicator(document.getElementById('balanceTrend'), 5.2);
-    updateTrendIndicator(document.getElementById('incomeTrend'), 3.8);
-    updateTrendIndicator(document.getElementById('expenseTrend'), -2.1);
+    // Update trends dengan data perbandingan yang sebenarnya
+    updateTrendIndicator(document.getElementById('balanceTrend'), comparison.balanceChange);
+    updateTrendIndicator(document.getElementById('incomeTrend'), comparison.incomeChange);
+    updateTrendIndicator(document.getElementById('expenseTrend'), comparison.expenseChange);
 }
 
 function updateTrendIndicator(element, percentage) {
@@ -596,8 +697,7 @@ function displayTopWallets(wallets) {
     
     // Sort by balance (highest first)
     walletsArray.sort((a, b) => (b.balance || 0) - (a.balance || 0));
-    
-    // Take top 3
+// Take top 3
     const topWallets = walletsArray.slice(0, 3);
     
     let html = '';
