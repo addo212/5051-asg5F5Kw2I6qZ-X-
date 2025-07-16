@@ -11,6 +11,8 @@ import { formatRupiah } from './utils.js';
 // Global Variables
 // ============================================================================
 let userId;
+// Variabel global untuk melacak mode tampilan budget
+let budgetViewMode = 'percentage'; // 'percentage' atau 'amount'
 
 // ============================================================================
 // Main Initialization on Auth State Change
@@ -61,6 +63,47 @@ function setupEventListeners() {
     document.getElementById('quickBudget')?.addEventListener('click', () => {
         window.location.href = 'budgets.html';
     });
+    
+    // Setup budget view toggle
+    setupBudgetViewToggle();
+}
+
+// Fungsi untuk mengatur toggle view budget
+function setupBudgetViewToggle() {
+    const percentageBtn = document.getElementById('viewByPercentage');
+    const amountBtn = document.getElementById('viewByAmount');
+    
+    if (percentageBtn && amountBtn) {
+        percentageBtn.addEventListener('click', () => {
+            if (budgetViewMode !== 'percentage') {
+                budgetViewMode = 'percentage';
+                percentageBtn.classList.add('active');
+                amountBtn.classList.remove('active');
+                
+                // Reload budgets with new view mode
+                loadUserData(userId).then(userData => {
+                    if (userData && userData.budgets) {
+                        displayTopBudgets(userData.budgets);
+                    }
+                });
+            }
+        });
+        
+        amountBtn.addEventListener('click', () => {
+            if (budgetViewMode !== 'amount') {
+                budgetViewMode = 'amount';
+                amountBtn.classList.add('active');
+                percentageBtn.classList.remove('active');
+                
+                // Reload budgets with new view mode
+                loadUserData(userId).then(userData => {
+                    if (userData && userData.budgets) {
+                        displayTopBudgets(userData.budgets);
+                    }
+                });
+            }
+        });
+    }
 }
 
 // ============================================================================
@@ -256,9 +299,6 @@ function updateTrendIndicator(element, percentage) {
     }
 }
 
-// ============================================================================
-// FUNGSI YANG DIPERBAIKI: displayRecentTransactions
-// ============================================================================
 function displayRecentTransactions(transactions) {
     const container = document.getElementById('recentTransactionsList');
     if (!container) {
@@ -495,6 +535,7 @@ function displayTopWallets(wallets) {
     container.innerHTML = html;
 }
 
+// Fungsi displayTopBudgets yang diperbarui untuk mendukung toggle view
 function displayTopBudgets(budgets) {
     const container = document.getElementById('topBudgets');
     if (!container) return;
@@ -510,15 +551,22 @@ function displayTopBudgets(budgets) {
         return;
     }
     
-    // Convert to array and calculate percentages
+    // Convert to array and calculate percentages and amounts
     const budgetsArray = Object.entries(currentBudgets).map(([category, budget]) => ({
         category,
         ...budget,
-        percentage: budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0
+        percentage: budget.limit > 0 ? (budget.spent / budget.limit) * 100 : 0,
+        amount: budget.spent || 0
     }));
     
-    // Sort by percentage (highest first)
-    budgetsArray.sort((a, b) => b.percentage - a.percentage);
+    // Sort based on current view mode
+    if (budgetViewMode === 'percentage') {
+        // Sort by percentage (highest first)
+        budgetsArray.sort((a, b) => b.percentage - a.percentage);
+    } else {
+        // Sort by amount spent (highest first)
+        budgetsArray.sort((a, b) => b.amount - a.amount);
+    }
     
     // Take top 3
     const topBudgets = budgetsArray.slice(0, 3);
@@ -540,7 +588,11 @@ function displayTopBudgets(budgets) {
                 <div class="budget-bar">
                     <div class="budget-progress ${statusClass}" style="width: ${Math.min(percentage, 100)}%;"></div>
                 </div>
-                <div class="budget-percentage ${statusClass}">${percentage.toFixed(0)}%</div>
+                <div class="budget-percentage ${statusClass}">
+                    ${budgetViewMode === 'percentage' 
+                        ? `${percentage.toFixed(0)}%` 
+                        : formatRupiah(budget.amount)}
+                </div>
             </div>
         `;
     });
