@@ -85,11 +85,16 @@ function setupBudgetViewToggle() {
                 percentageBtn.classList.add('active');
                 amountBtn.classList.remove('active');
                 
-                // Langsung perbarui tampilan budget tanpa memuat ulang data
-                const userData = loadUserData(userId);
-                userData.then(data => {
-                    if (data && data.budgets) {
-                        displayTopBudgets(data.budgets);
+                // Langsung perbarui tampilan budget dengan menghitung ulang nilai spent
+                Promise.all([
+                    loadUserData(userId),
+                    loadTransactions(userId)
+                ]).then(([userData, transactionsData]) => {
+                    if (userData && userData.budgets) {
+                        calculateBudgetSpending(userData.budgets, transactionsData)
+                            .then(updatedBudgets => {
+                                displayTopBudgets(updatedBudgets);
+                            });
                     }
                 }).catch(err => {
                     console.error("Error reloading budget data:", err);
@@ -104,11 +109,16 @@ function setupBudgetViewToggle() {
                 amountBtn.classList.add('active');
                 percentageBtn.classList.remove('active');
                 
-                // Langsung perbarui tampilan budget tanpa memuat ulang data
-                const userData = loadUserData(userId);
-                userData.then(data => {
-                    if (data && data.budgets) {
-                        displayTopBudgets(data.budgets);
+                // Langsung perbarui tampilan budget dengan menghitung ulang nilai spent
+                Promise.all([
+                    loadUserData(userId),
+                    loadTransactions(userId)
+                ]).then(([userData, transactionsData]) => {
+                    if (userData && userData.budgets) {
+                        calculateBudgetSpending(userData.budgets, transactionsData)
+                            .then(updatedBudgets => {
+                                displayTopBudgets(updatedBudgets);
+                            });
                     }
                 }).catch(err => {
                     console.error("Error reloading budget data:", err);
@@ -164,8 +174,11 @@ async function initializeDashboard() {
         // Tampilkan dompet teratas
         displayTopWallets(userData.wallets || {});
 
-        // Tampilkan anggaran teratas
-        displayTopBudgets(userData.budgets || {});
+        // PENTING: Hitung ulang nilai spent untuk setiap budget berdasarkan transaksi
+        const updatedBudgets = await calculateBudgetSpending(userData.budgets || {}, transactionsData);
+        
+        // Tampilkan anggaran teratas dengan data yang sudah diperbarui
+        displayTopBudgets(updatedBudgets);
 
         // Tampilkan tip keuangan harian
         showDailyTip();
@@ -183,6 +196,61 @@ async function initializeDashboard() {
 // ============================================================================
 // Data Processing Functions
 // ============================================================================
+// Fungsi untuk menghitung ulang nilai spent untuk setiap budget berdasarkan transaksi
+async function calculateBudgetSpending(budgets, transactions) {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const currentPeriod = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+    
+    // Jika tidak ada budget untuk bulan ini, return saja
+    if (!budgets || !budgets[currentPeriod]) {
+        return budgets;
+    }
+    
+    // Buat salinan budget untuk bulan ini
+    const currentBudgets = JSON.parse(JSON.stringify(budgets[currentPeriod]));
+    
+    // Reset nilai spent untuk semua budget
+    Object.keys(currentBudgets).forEach(category => {
+        currentBudgets[category].spent = 0;
+    });
+    
+    // Jika tidak ada transaksi, return budget dengan spent = 0
+    if (!transactions) {
+        budgets[currentPeriod] = currentBudgets;
+        return budgets;
+    }
+    
+    // Konversi transaksi menjadi array jika perlu
+    const transactionsArray = typeof transactions === 'object' && !Array.isArray(transactions) 
+        ? Object.values(transactions) 
+        : transactions;
+    
+    // Hitung spent untuk setiap budget berdasarkan transaksi bulan ini
+    transactionsArray.forEach(tx => {
+        if (!tx || !tx.timestamp || tx.type !== 'expense') return;
+        
+        const txDate = new Date(tx.timestamp);
+        
+        // Hanya proses transaksi dari bulan dan tahun saat ini
+        if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
+            // Gunakan account sebagai kategori budget
+            const category = tx.account;
+            
+            // Jika kategori ada di budget, tambahkan amount ke spent
+            if (category && currentBudgets[category]) {
+                currentBudgets[category].spent = (currentBudgets[category].spent || 0) + tx.amount;
+            }
+        }
+    });
+    
+    // Update budget untuk bulan ini dengan nilai spent yang baru
+    budgets[currentPeriod] = currentBudgets;
+    
+    return budgets;
+}
+
 function calculateMonthlySummary(transactions) {
     let monthlyIncome = 0;
     let monthlyExpenses = 0;
@@ -570,14 +638,18 @@ function displayTopBudgets(budgets) {
         return;
     }
     
+    console.log("Raw budget data:", currentBudgets);
+    
     // Convert to array and calculate percentages
     const budgetsArray = Object.entries(currentBudgets).map(([category, budget]) => {
         // Pastikan nilai spent dan limit adalah angka
-        const spent = parseFloat(budget.spent) || 0;
-        const limit = parseFloat(budget.limit) || 1; // Hindari pembagian dengan nol
+        const spent = parseFloat(budget.spent || 0);
+        const limit = parseFloat(budget.limit || 1); // Hindari pembagian dengan nol
         
         // Hitung persentase penggunaan budget (progress)
         const percentage = (spent / limit) * 100;
+        
+        console.log(`Budget: ${category}, Spent: ${spent}, Limit: ${limit}, Percentage: ${percentage.toFixed(1)}%`);
         
         return {
             category,
