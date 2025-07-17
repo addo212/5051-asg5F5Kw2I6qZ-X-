@@ -1,0 +1,205 @@
+/* css/pages/transactions.css */
+
+/* Collapsible Section for the form */
+.collapsible-section {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.collapsible-header::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-header h2 {
+    padding: 0;
+    border: none;
+    margin: 0;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+}
+
+details[open] > summary .collapse-icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+/* Table Header Controls (Toolbar) */
+.table-header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem; 
+    align-items: center;
+}
+
+.search-container {
+    position: relative;
+}
+
+.search-container input {
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    min-width: 250px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+}
+
+.search-container .fa-search {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+/* Collapsible Filter Panel */
+.filter-panel.collapsible {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 1.5rem;
+    margin-bottom: 0;
+    border-radius: 12px;
+    background-color: var(--bg-primary);
+    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
+}
+
+.filter-panel.collapsible.show {
+    max-height: 500px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-panel .filter-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-panel .filter-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Table container */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 1rem;
+}
+
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.transaction-table th,
+.transaction-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-table thead th {
+    background-color: var(--bg-primary);
+    font-weight: 600;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.transaction-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.transaction-table th.sortable:hover {
+    background-color: var(--border-color);
+}
+
+.sort-icon {
+    margin-left: 8px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.transaction-table tbody tr:hover {
+    background-color: var(--bg-primary);
+}
+
+.transaction-table .type-cell span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+}
+
+.type-cell .income { background-color: var(--income-color); }
+.type-cell .expense { background-color: var(--expense-color); }
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination-container button {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.pagination-container button:hover:not(:disabled) {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.pagination-container button.active {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    font-weight: bold;
+}
+
+.pagination-container button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
