@@ -1159,19 +1159,21 @@ body:not(.dashboard-body) {
 }
 
 /* ============================================================================ */
-/* WALLETS PAGE (wallets.html)
+/* WALLETS PAGE (wallets.html) - PERBAIKAN TATA LETAK
 /* ============================================================================ */
 
-.wallet-list-container {
-    list-style: none;
+/* Wadah utama untuk semua kartu dompet */
+.wallets-grid {
+    display: grid; /* Mengaktifkan layout grid */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Membuat grid yang responsif */
+    gap: 1.5rem; /* Jarak antar kartu */
+    list-style: none; /* Menghilangkan bullet points jika ini adalah <ul> */
     padding: 0;
     margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
 }
 
-.wallet-item {
+/* Styling untuk setiap kartu dompet */
+.wallet-card {
     color: white;
     padding: 1.5rem;
     border-radius: 12px;
@@ -1179,48 +1181,29 @@ body:not(.dashboard-body) {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 120px;
+    min-height: 150px; /* Memberi tinggi minimal agar rapi */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
-.wallet-item:hover {
+.wallet-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 }
 
-.wallet-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.wallet-item .wallet-icon {
-    font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.wallet-item h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: white;
-}
-
-.wallet-item .wallet-balance {
-    margin: 0;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: white;
-    align-self: flex-end;
-    margin-top: 1rem;
-}
-
+/* Header di dalam kartu (untuk ikon dan tombol aksi) */
 .wallet-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.wallet-card .wallet-icon {
+    font-size: 1.8rem; /* Sedikit lebih besar */
+    color: rgba(255, 255, 255, 0.7);
+    position: static; /* Menghapus position: absolute agar tidak tumpang tindih */
 }
 
 .wallet-actions {
@@ -1228,6 +1211,7 @@ body:not(.dashboard-body) {
     gap: 0.5rem;
 }
 
+/* Tombol Edit dan Delete di dalam kartu */
 .edit-wallet-btn, .delete-wallet-btn {
     background: rgba(255, 255, 255, 0.2);
     border: none;
@@ -1245,6 +1229,23 @@ body:not(.dashboard-body) {
 .edit-wallet-btn:hover, .delete-wallet-btn:hover {
     background: rgba(255, 255, 255, 0.4);
     transform: scale(1.1);
+}
+
+/* Nama dan Saldo Dompet */
+.wallet-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+}
+
+.wallet-card .wallet-balance {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    align-self: flex-start; /* Memastikan saldo tetap di kiri */
+    margin-top: auto; /* Mendorong saldo ke bawah jika ada ruang */
 }
 /* ============================================================================ */
 /* TRANSACTIONS PAGE (transactions.html)
