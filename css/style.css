@@ -1157,23 +1157,30 @@ body:not(.dashboard-body) {
     color: var(--text-secondary);
     text-transform: uppercase;
 }
-
 /* ============================================================================ */
-/* WALLETS PAGE (wallets.html) - PERBAIKAN TATA LETAK
+/* WALLETS PAGE - PERBAIKAN TATA LETAK GRID
 /* ============================================================================ */
 
-/* Wadah utama untuk semua kartu dompet */
-.wallets-grid {
-    display: grid; /* Mengaktifkan layout grid */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Membuat grid yang responsif */
-    gap: 1.5rem; /* Jarak antar kartu */
-    list-style: none; /* Menghilangkan bullet points jika ini adalah <ul> */
-    padding: 0;
-    margin: 0;
+/* Container utama - pastikan cukup lebar */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
 }
 
-/* Styling untuk setiap kartu dompet */
+/* Wallets grid - perbaikan untuk layout yang lebih baik */
+.wallets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Sedikit lebih kecil untuk memastikan bisa fit lebih banyak kolom */
+    gap: 1.5rem;
+    padding: 0;
+    margin: 1.5rem 0;
+    width: 100%; /* Pastikan menggunakan lebar penuh */
+}
+
+/* Wallet card - pastikan ukuran yang konsisten */
 .wallet-card {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); /* Fallback gradient */
     color: white;
     padding: 1.5rem;
     border-radius: 12px;
@@ -1181,59 +1188,39 @@ body:not(.dashboard-body) {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 150px; /* Memberi tinggi minimal agar rapi */
+    min-height: 150px;
+    width: 100%; /* Gunakan lebar penuh dari cell grid */
+    box-sizing: border-box; /* Pastikan padding tidak menambah lebar total */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
-.wallet-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-/* Header di dalam kartu (untuk ikon dan tombol aksi) */
+/* Wallet header - untuk ikon dan tombol aksi */
 .wallet-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    width: 100%;
     margin-bottom: 1rem;
 }
 
+/* Wallet icon */
 .wallet-card .wallet-icon {
-    font-size: 1.8rem; /* Sedikit lebih besar */
-    color: rgba(255, 255, 255, 0.7);
-    position: static; /* Menghapus position: absolute agar tidak tumpang tindih */
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-right: auto; /* Dorong ke kiri */
 }
 
+/* Wallet actions container */
 .wallet-actions {
     display: flex;
     gap: 0.5rem;
 }
 
-/* Tombol Edit dan Delete di dalam kartu */
-.edit-wallet-btn, .delete-wallet-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.edit-wallet-btn:hover, .delete-wallet-btn:hover {
-    background: rgba(255, 255, 255, 0.4);
-    transform: scale(1.1);
-}
-
-/* Nama dan Saldo Dompet */
+/* Wallet name and balance */
 .wallet-card h3 {
-    margin: 0;
+    margin: 0.5rem 0;
     font-size: 1.2rem;
     font-weight: 600;
     color: white;
@@ -1241,11 +1228,35 @@ body:not(.dashboard-body) {
 
 .wallet-card .wallet-balance {
     margin: 0;
+    margin-top: auto; /* Dorong ke bawah */
     font-size: 1.8rem;
     font-weight: 700;
     color: white;
-    align-self: flex-start; /* Memastikan saldo tetap di kiri */
-    margin-top: auto; /* Mendorong saldo ke bawah jika ada ruang */
+    align-self: flex-start;
+}
+
+/* Responsive adjustments - pastikan grid bekerja di semua ukuran layar */
+@media (max-width: 768px) {
+    .wallets-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Sedikit lebih kecil untuk tablet */
+    }
+}
+
+@media (max-width: 576px) {
+    .wallets-grid {
+        grid-template-columns: 1fr; /* Satu kolom penuh untuk mobile */
+    }
+}
+
+/* Pastikan tidak ada konflik dengan kode lain */
+#walletsContainer.wallets-grid {
+    display: grid !important; /* Paksa menggunakan grid */
+}
+
+.wallet-card {
+    float: none !important; /* Hapus floating jika ada */
+    position: relative !important; /* Pastikan tidak absolute */
+    margin-bottom: 0 !important; /* Hapus margin bottom yang mungkin mengganggu */
 }
 /* ============================================================================ */
 /* TRANSACTIONS PAGE (transactions.html)
