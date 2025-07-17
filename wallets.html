@@ -15,15 +15,16 @@
         })();
     </script>
     
-    <link rel="stylesheet" href="css/main.css">
+    <!-- Menggunakan main.css yang sudah dipecah -->
+    <link rel="stylesheet" href="css/main.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="icon" href="images/logo.jpeg">
-    
 </head>
 <body>
     <div class="container">
         <header>
             <div class="header-left">
+                <!-- Logo dengan kelas yang benar -->
                 <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
@@ -73,7 +74,7 @@
                 <h3>Your Wallets</h3>
             </div>
 
-            <!-- Wadah untuk kartu-kartu dompet -->
+            <!-- Wadah untuk kartu-kartu dompet dengan kelas grid -->
             <div id="walletsContainer" class="wallets-grid">
                 <p class="empty-state">Loading wallets...</p>
             </div>
@@ -139,7 +140,7 @@
         </div>
     </div>
 
-    <!-- Transfer Modal -->
+    <!-- Transfer Modal dengan struktur form yang sudah diperbaiki -->
     <div id="transferModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -150,18 +151,18 @@
                 <div class="form-group">
                     <label for="fromWallet">From Wallet</label>
                     <select id="fromWallet" required>
-                        <option value="">Select source wallet</option>
+                        <option value="" disabled selected>Select source wallet</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="toWallet">To Wallet</label>
                     <select id="toWallet" required>
-                        <option value="">Select destination wallet</option>
+                        <option value="" disabled selected>Select destination wallet</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="transferAmount">Amount</label>
-                    <input type="number" id="transferAmount" min="1" step="1" required>
+                    <input type="number" id="transferAmount" min="1" step="1" placeholder="e.g., 50000" required>
                 </div>
                 <div class="form-group">
                     <label for="transferDate">Date</label>
@@ -169,7 +170,7 @@
                 </div>
                 <div class="form-group">
                     <label for="transferDescription">Description (Optional)</label>
-                    <input type="text" id="transferDescription" placeholder="Transfer description">
+                    <input type="text" id="transferDescription" placeholder="e.g., For monthly shopping">
                 </div>
                 <button type="submit" id="transferSubmitBtn" class="btn-primary">Transfer</button>
             </form>
