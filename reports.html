@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Finance Tracker</title>
     
-    <!-- Skrip pencegah kedipan tema - dijalankan SEBELUM CSS dimuat -->
+    <!-- Skrip pencegah kedipan tema -->
     <script>
         (function() {
             try {
@@ -15,24 +15,31 @@
         })();
     </script>
     
+    <!-- Menggunakan main.css yang sudah dipecah -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="icon" href="images/logo.jpeg">
-    <!-- Impor Chart.js dari CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="icon" href="images/logo.jpeg">
 </head>
-<body class="dashboard-body">
-    <div class="dashboard-container">
-        <!-- ================= HEADER ================= -->
+<body>
+    <div class="container">
         <header>
             <div class="header-left">
-                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <!-- Logo dengan kelas yang benar dan konsisten -->
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
-            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div class="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fas fa-moon"></i>
+            </div>
         </header>
 
-        <!-- ================= NAVIGASI ================= -->
         <nav class="main-nav">
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
@@ -47,78 +54,96 @@
             </div>
         </nav>
 
-        <!-- ================= KONTEN UTAMA ================= -->
-        <div class="content-container">
-            <h2><i class="fas fa-chart-bar"></i> Financial Reports</h2>
+        <main>
+            <div class="page-header">
+                <h2>Financial Reports</h2>
+                <div class="page-actions">
+                    <button id="printReportBtn" class="btn-secondary"><i class="fas fa-print"></i> Print Report</button>
+                </div>
+            </div>
 
-            <!-- FILTER TANGGAL -->
+            <!-- Filter Laporan -->
             <div class="report-filters">
                 <div class="form-group">
-                    <label for="reportStartDate">Start Date</label>
-                    <input type="date" id="reportStartDate">
+                    <label for="reportType">Report Type</label>
+                    <select id="reportType">
+                        <option value="income_vs_expense">Income vs Expense</option>
+                        <option value="expense_by_category">Expense by Category</option>
+                        <option value="income_by_category">Income by Category</option>
+                        <option value="cash_flow">Cash Flow</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="reportEndDate">End Date</label>
-                    <input type="date" id="reportEndDate">
+                    <label for="dateRange">Date Range</label>
+                    <select id="dateRange">
+                        <option value="this_month">This Month</option>
+                        <option value="last_month">Last Month</option>
+                        <option value="this_year">This Year</option>
+                        <option value="all_time">All Time</option>
+                        <option value="custom">Custom</option>
+                    </select>
                 </div>
-                <button id="generateReportBtn" class="btn-filter apply">Generate Report</button>
+                <div class="form-group-inline" id="customDateRange" style="display: none;">
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <button id="generateReportBtn" class="btn-primary-small">Generate</button>
             </div>
 
-            <!-- RINGKASAN LAPORAN -->
-            <div id="reportSummary" class="report-summary" style="display: none;">
-                <div class="report-card income">
-                    <h4>Total Income</h4>
-                    <p id="totalIncomeReport">Rp 0</p>
+            <!-- Kontainer untuk hasil laporan -->
+            <div id="reportsContainer" class="content-container">
+                <div id="reportSummary" class="report-summary">
+                    <!-- Summary cards will be inserted here by JavaScript -->
                 </div>
-                <div class="report-card expense">
-                    <h4>Total Expense</h4>
-                    <p id="totalExpenseReport">Rp 0</p>
-                </div>
-                <div class="report-card net">
-                    <h4>Net Savings</h4>
-                    <p id="netSavingsReport">Rp 0</p>
-                </div>
-            </div>
 
-            <!-- GRAFIK -->
-            <div id="chartsContainer" class="chart-grid" style="display: none;">
-                <div class="chart-container">
-                    <h3>Expense Breakdown</h3>
-                    <canvas id="expensePieChart"></canvas>
+                <div class="chart-grid">
+                    <div class="grid-item">
+                        <div class="section-header">
+                            <h3 id="chart1Title">Main Chart</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="mainChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="section-header">
+                            <h3 id="chart2Title">Secondary Chart</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="secondaryChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <h3>Income vs Expense Trend</h3>
-                    <canvas id="trendLineChart"></canvas>
+
+                <div class="table-container" style="margin-top: 2rem;">
+                    <div class="section-header">
+                        <h3>Detailed Data</h3>
+                    </div>
+                    <table class="report-table">
+                        <thead id="reportTableHead">
+                            <!-- Table headers will be inserted here by JavaScript -->
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <!-- Table rows will be inserted here by JavaScript -->
+                            <tr><td colspan="3" class="empty-state">Generate a report to see data.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </main>
 
-            <!-- TABEL RINCIAN -->
-            <div id="reportTableContainer" style="display: none; margin-top: 2rem;">
-                <h3>Category Summary</h3>
-                <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Total Spent</th>
-                            <th>Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportTableBody">
-                        <!-- Data akan dimuat oleh JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="reportPlaceholder">
-                <p class="empty-state">Select a date range and click "Generate Report" to view your financial summary.</p>
-            </div>
-        </div>
+        <footer>
+            <p>&copy; 2025 Finance Tracker. All rights reserved.</p>
+        </footer>
     </div>
 
-    <!-- ================= SCRIPTS ================= -->
-    <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/reports.js"></script>
-    <script type="module" src="js/utils.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/dropdown.js"></script>
 </body>
