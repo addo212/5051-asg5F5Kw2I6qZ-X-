@@ -1,0 +1,150 @@
+/* css/layout/header.css */
+
+/* Header styles used across all pages */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-left h1 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.dashboard-logo {
+    height: 35px;
+    width: auto;
+    border-radius: 50%;
+}
+
+/* Navigation styles */
+.main-nav {
+    margin-bottom: 2.5rem;
+}
+
+/* Dropdown menu styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(var(--accent-color-rgb), 0.2);
+}
+
+.dropbtn:hover {
+    box-shadow: 0 6px 15px rgba(var(--accent-color-rgb), 0.3);
+    transform: translateY(-2px);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--bg-secondary);
+    min-width: 220px;
+    box-shadow: var(--card-shadow);
+    z-index: 100; /* Ensure it's above other content */
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 8px;
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+[data-theme="dark"] .dropdown-content {
+    background-color: #2d2d2d;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.dropdown-content.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeIn 0.3s ease;
+}
+
+.dropdown-content a {
+    color: var(--text-primary);
+    padding: 14px 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease-in-out;
+    border-left: 4px solid transparent;
+}
+
+.dropdown-content a i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--bg-primary);
+    border-left-color: var(--accent-color);
+}
+
+[data-theme="dark"] .dropdown-content a:hover {
+    background-color: #3d3d3d;
+}
+
+.dropdown-content a.active {
+    background-color: var(--bg-primary);
+    color: var(--accent-color);
+    font-weight: 600;
+    border-left-color: var(--accent-color);
+}
+
+[data-theme="dark"] .dropdown-content a.active {
+    background-color: #3d3d3d;
+}
+
+.dropdown-content a.active i,
+.dropdown-content a:hover i {
+    color: var(--accent-color);
+}
+
+.dropbtn.active {
+    background-color: var(--accent-hover);
+}
+
+/* Responsive adjustments for header */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .btn-logout {
+        align-self: flex-end;
+    }
+}
