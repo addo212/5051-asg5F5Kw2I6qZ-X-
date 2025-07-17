@@ -1,0 +1,75 @@
+/* variables.css - Variabel tema dan warna */
+
+:root {
+  /* Default Light Theme */
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --accent-color: #4CAF50;
+  --accent-color-rgb: 76, 175, 80;
+  --accent-hover: #45a049;
+  --border-color: #dddddd;
+  --card-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  --danger-color: #dc3545;
+  --income-color: #4CAF50;
+  --expense-color: #f44336;
+  --gradient-start: #4CAF50;
+  --gradient-end: #8BC34A;
+  --calendar-icon-filter: invert(0.5);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-color: #F9A825; /* Emas */
+  --accent-color-rgb: 249, 168, 37;
+  --accent-hover: #F57F17; /* Emas lebih gelap saat hover */
+  --border-color: #444444;
+  --card-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  --danger-color: #ff6b6b;
+  --income-color: #4ecca3;
+  --expense-color: #ff6b6b;
+  --gradient-start: #F9A825;
+  --gradient-end: #F57F17;
+  --calendar-icon-filter: invert(0.8);
+}
+
+/* Blue Theme */
+[data-theme="blue"] {
+  --bg-primary: #f0f8ff;
+  --bg-secondary: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --accent-color: #3498db;
+  --accent-color-rgb: 52, 152, 219;
+  --accent-hover: #2980b9;
+  --border-color: #e0e0e0;
+  --card-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
+  --danger-color: #e74c3c;
+  --income-color: #2ecc71;
+  --expense-color: #e74c3c;
+  --gradient-start: #3498db;
+  --gradient-end: #2980b9;
+}
+
+/* Purple Theme */
+[data-theme="purple"] {
+  --bg-primary: #f8f5fe;
+  --bg-secondary: #ffffff;
+  --text-primary: #2c2c54;
+  --text-secondary: #57606f;
+  --accent-color: #9b59b6;
+  --accent-color-rgb: 155, 89, 182;
+  --accent-hover: #8e44ad;
+  --border-color: #e0e0e0;
+  --card-shadow: 0 5px 15px rgba(155, 89, 182, 0.1);
+  --danger-color: #e74c3c;
+  --income-color: #2ecc71;
+  --expense-color: #e74c3c;
+  --gradient-start: #9b59b6;
+  --gradient-end: #8e44ad;
+}
