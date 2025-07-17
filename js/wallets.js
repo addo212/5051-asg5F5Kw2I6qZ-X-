@@ -3,320 +3,656 @@
 // ============================================================================
 // Module Imports
 // ============================================================================
-import { auth, db, loadUserData, loadTransactions, saveTransaction, deleteTransaction } from './database.js';
+import { auth, database } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { ref, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+import { 
+    ref, 
+    get, 
+    set, 
+    update, 
+    push, 
+    remove 
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { formatRupiah } from './utils.js';
-import { paginate, renderPaginationControls } from './pagination.js';
 
 // ============================================================================
 // Global Variables
 // ============================================================================
 let userId;
-let userWallets = {};
-let allTransfers = []; // Array untuk menyimpan riwayat transfer
-let currentTransferPage = 1;
-const TRANSFERS_PER_PAGE = 5; // Tampilkan 5 riwayat transfer per halaman
+const walletColors = [
+    '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#F44336',
+    '#3F51B5', '#009688', '#FF5722', '#607D8B', '#E91E63'
+];
+const walletIcons = [
+    'fa-wallet', 'fa-credit-card', 'fa-piggy-bank', 'fa-money-bill',
+    'fa-coins', 'fa-landmark', 'fa-money-check', 'fa-university',
+    'fa-dollar-sign', 'fa-money-bill-wave'
+];
 
 // ============================================================================
-// Initialization
+// Main Initialization on Auth State Change
 // ============================================================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
-        initializeWalletPage(); 
+        initializeWalletsPage();
+        setupEventListeners();
     } else {
         window.location.href = "index.html";
     }
 });
 
-async function initializeWalletPage() {
-    try {
-        const userData = await loadUserData(userId);
-        if (!userData) throw new Error("Could not load user data.");
-
-        userWallets = userData.wallets || {};
-        displayWallets();
-        loadTransferFormOptions(); 
-
-        // Memuat riwayat transfer
-        const allTransactions = await loadTransactions(userId) || {};
-        allTransfers = Object.values(allTransactions)
-            .filter(tx => tx.type === 'transfer')
-            .sort((a, b) => b.timestamp - a.timestamp);
-        
-        displayTransferHistoryPage();
-
-    } catch (error) {
-        console.error("Error initializing wallet page:", error);
-        document.getElementById('walletsList').innerHTML = `<p class="empty-state error-message">${error.message}</p>`;
-    }
-}
-
 // ============================================================================
-// Wallet Display and Form Logic
+// Event Listeners
 // ============================================================================
-function displayWallets() {
-    const walletsListElement = document.getElementById('walletsList');
-    if (!walletsListElement) return;
-    const walletIds = Object.keys(userWallets);
-    if (walletIds.length === 0) {
-        walletsListElement.innerHTML = '<p class="empty-state">No wallets found. Add one in Settings.</p>';
-        return;
-    }
-    let html = '<ul class="wallet-list-container">'; 
-    walletIds.forEach(walletId => {
-        const wallet = userWallets[walletId];
-        const bgColor = wallet.color || '#6c5ce7'; 
-        const iconClass = wallet.icon || 'fa-wallet'; 
-        html += `
-            <li class="wallet-item" style="background-color: ${bgColor};">
-                <div class="wallet-info">
-                    <i class="fas ${iconClass} wallet-icon"></i>
-                    <h3>${wallet.name}</h3>
-                </div>
-                <p class="wallet-balance">${formatRupiah(wallet.balance)}</p>
-            </li>`;
+function setupEventListeners() {
+    // Add wallet button
+    document.getElementById('addWalletBtn')?.addEventListener('click', () => {
+        document.getElementById('walletModal').style.display = 'flex';
     });
-    html += '</ul>';
-    walletsListElement.innerHTML = html;
+
+    // Transfer button
+    document.getElementById('transferBtn')?.addEventListener('click', () => {
+        showTransferModal();
+    });
+
+    // Close modal buttons
+    document.querySelectorAll('.close-modal').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        });
+    });
+
+    // Add wallet form
+    document.getElementById('walletForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('walletName').value;
+        const balance = parseFloat(document.getElementById('walletBalance').value);
+        const color = document.getElementById('walletColor').value;
+        const icon = document.getElementById('walletIcon').value;
+        
+        if (!name || isNaN(balance)) {
+            alert('Please fill all required fields');
+            return;
+        }
+        
+        try {
+            document.getElementById('walletSubmitBtn').disabled = true;
+            document.getElementById('walletSubmitBtn').textContent = 'Adding...';
+            
+            await addWallet(name, balance, color, icon);
+            
+            alert('Wallet added successfully!');
+            document.getElementById('walletForm').reset();
+            document.getElementById('walletModal').style.display = 'none';
+            
+            // Refresh wallet data
+            await loadAndDisplayWallets();
+        } catch (error) {
+            alert(`Failed to add wallet: ${error.message}`);
+        } finally {
+            document.getElementById('walletSubmitBtn').disabled = false;
+            document.getElementById('walletSubmitBtn').textContent = 'Add Wallet';
+        }
+    });
+
+    // Transfer form
+    document.getElementById('transferForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const fromWalletId = document.getElementById('fromWallet').value;
+        const toWalletId = document.getElementById('toWallet').value;
+        const amount = parseFloat(document.getElementById('transferAmount').value);
+        const description = document.getElementById('transferDescription').value;
+        const date = document.getElementById('transferDate').value; // Ambil nilai tanggal
+        
+        if (!fromWalletId || !toWalletId || isNaN(amount) || amount <= 0) {
+            alert('Please fill all required fields with valid values');
+            return;
+        }
+        
+        try {
+            document.getElementById('transferSubmitBtn').disabled = true;
+            document.getElementById('transferSubmitBtn').textContent = 'Processing...';
+            
+            await transferBetweenWallets(fromWalletId, toWalletId, amount, description, date);
+            
+            alert('Transfer completed successfully!');
+            document.getElementById('transferForm').reset();
+            document.getElementById('transferModal').style.display = 'none';
+            
+            // Refresh wallet data
+            await loadAndDisplayWallets();
+        } catch (error) {
+            alert(`Transfer failed: ${error.message}`);
+        } finally {
+            document.getElementById('transferSubmitBtn').disabled = false;
+            document.getElementById('transferSubmitBtn').textContent = 'Transfer';
+        }
+    });
+
+    // Edit wallet form
+    document.getElementById('editWalletForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const walletId = document.getElementById('editWalletId').value;
+        const name = document.getElementById('editWalletName').value;
+        const color = document.getElementById('editWalletColor').value;
+        const icon = document.getElementById('editWalletIcon').value;
+        
+        if (!walletId || !name) {
+            alert('Please fill all required fields');
+            return;
+        }
+        
+        try {
+            document.getElementById('editWalletSubmitBtn').disabled = true;
+            document.getElementById('editWalletSubmitBtn').textContent = 'Saving...';
+            
+            await updateWallet(walletId, { name, color, icon });
+            
+            alert('Wallet updated successfully!');
+            document.getElementById('editWalletModal').style.display = 'none';
+            
+            // Refresh wallet data
+            await loadAndDisplayWallets();
+        } catch (error) {
+            alert(`Failed to update wallet: ${error.message}`);
+        } finally {
+            document.getElementById('editWalletSubmitBtn').disabled = false;
+            document.getElementById('editWalletSubmitBtn').textContent = 'Save Changes';
+        }
+    });
+
+    // Initialize color and icon pickers
+    initializeColorPicker('walletColor');
+    initializeIconPicker('walletIcon');
+    initializeColorPicker('editWalletColor');
+    initializeIconPicker('editWalletIcon');
 }
 
-function loadTransferFormOptions() {
-    const fromWalletSelect = document.getElementById('fromWallet');
-    const toWalletSelect = document.getElementById('toWallet');
-    fromWalletSelect.innerHTML = '<option value="">Select From Wallet</option>';
-    toWalletSelect.innerHTML = '<option value="">Select To Wallet</option>';
-    for (const walletId in userWallets) {
-        const wallet = userWallets[walletId];
-        const fromOption = document.createElement('option');
-        fromOption.value = walletId;
-        fromOption.text = `${wallet.name} (${formatRupiah(wallet.balance)})`;
-        fromWalletSelect.appendChild(fromOption);
-        const toOption = document.createElement('option');
-        toOption.value = walletId;
-        toOption.text = wallet.name;
-        toWalletSelect.appendChild(toOption);
+// ============================================================================
+// Core Wallets Page Logic
+// ============================================================================
+async function initializeWalletsPage() {
+    try {
+        // Check if we need to show transfer modal from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        
+        // Load and display wallets
+        await loadAndDisplayWallets();
+        
+        // Show transfer modal if action=transfer
+        if (action === 'transfer') {
+            showTransferModal();
+        }
+    } catch (error) {
+        console.error('Error initializing wallets page:', error);
+        alert('Failed to load wallet data. Please try refreshing the page.');
     }
 }
 
-// ============================================================================
-// Transfer History Logic (NEW)
-// ============================================================================
-function displayTransferHistoryPage() {
-    const { paginatedItems, totalPages } = paginate(allTransfers, currentTransferPage, TRANSFERS_PER_PAGE);
-    renderTransferHistoryList(paginatedItems);
-    renderPaginationControls('transferPagination', currentTransferPage, totalPages, handleTransferPageChange);
+// Fungsi untuk menampilkan modal transfer
+function showTransferModal() {
+    const modal = document.getElementById('transferModal');
+    if (!modal) return;
+    
+    // Set tanggal hari ini sebagai default
+    const today = new Date();
+    const formattedDate = formatDateForInput(today);
+    document.getElementById('transferDate').value = formattedDate;
+    
+    // Tampilkan modal
+    modal.style.display = 'flex';
 }
 
-function handleTransferPageChange(newPage) {
-    currentTransferPage = newPage;
-    displayTransferHistoryPage();
+// Helper function untuk memformat tanggal untuk input date (YYYY-MM-DD)
+function formatDateForInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
-function renderTransferHistoryList(transfersOnPage) {
-    const container = document.getElementById('transferHistory');
+// ============================================================================
+// Wallet Management Functions
+// ============================================================================
+async function loadAndDisplayWallets() {
+    try {
+        const userRef = ref(database, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val();
+        
+        if (!userData) {
+            throw new Error('User data not found');
+        }
+        
+        const wallets = userData.wallets || {};
+        displayWallets(wallets);
+        populateWalletDropdowns(wallets);
+        
+        // Update total balance display
+        document.getElementById('totalBalance').textContent = formatRupiah(userData.totalBalance || 0);
+    } catch (error) {
+        console.error('Error loading wallets:', error);
+        throw error;
+    }
+}
+
+function displayWallets(wallets) {
+    const container = document.getElementById('walletsContainer');
     if (!container) return;
-    if (transfersOnPage.length === 0) {
-        container.innerHTML = '<p class="empty-state">No transfer history found.</p>';
+    
+    if (Object.keys(wallets).length === 0) {
+        container.innerHTML = '<p class="empty-state">No wallets found. Create a wallet to get started.</p>';
         return;
     }
-    let html = '<ul class="transaction-list">';
-    transfersOnPage.forEach(tx => {
-        const formattedDate = new Date(tx.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    
+    let html = '';
+    Object.entries(wallets).forEach(([id, wallet]) => {
+        const darkerColor = adjustColor(wallet.color || '#6c5ce7', -30);
+        
         html += `
-            <li class="transaction-item">
-                <div class="transaction-icon transfer"><i class="fas fa-exchange-alt"></i></div>
-                <div class="transaction-details">
-                    <div class="transaction-info">
-                        <h4>${tx.fromWallet} <i class="fas fa-long-arrow-alt-right"></i> ${tx.toWallet}</h4>
-                        <p>${formattedDate}</p>
+            <div class="wallet-card" style="background: linear-gradient(135deg, ${wallet.color || '#6c5ce7'}, ${darkerColor})">
+                <div class="wallet-header">
+                    <div class="wallet-icon">
+                        <i class="fas ${wallet.icon || 'fa-wallet'}"></i>
+                    </div>
+                    <div class="wallet-actions">
+                        <button class="edit-wallet-btn" data-id="${id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-wallet-btn" data-id="${id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="transaction-amount amount-transfer">${formatRupiah(tx.amount)}</div>
-                <div class="transaction-actions">
-                    <button class="delete-btn" data-transaction-id="${tx.id}"><i class="fas fa-trash"></i></button>
-                </div>
-            </li>`;
+                <h3>${wallet.name}</h3>
+                <p class="wallet-balance">${formatRupiah(wallet.balance || 0)}</p>
+            </div>
+        `;
     });
-    html += '</ul>';
+    
     container.innerHTML = html;
-    attachDeleteListeners();
-}
-
-function attachDeleteListeners() {
-    document.querySelectorAll('#transferHistory .delete-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const transactionId = button.dataset.transactionId;
-            handleDeleteTransferRecord(transactionId);
+    
+    // Add event listeners for edit and delete buttons
+    document.querySelectorAll('.edit-wallet-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const walletId = e.currentTarget.getAttribute('data-id');
+            openEditWalletModal(walletId, wallets[walletId]);
+        });
+    });
+    
+    document.querySelectorAll('.delete-wallet-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const walletId = e.currentTarget.getAttribute('data-id');
+            const wallet = wallets[walletId];
+            
+            if (confirm(`Are you sure you want to delete the wallet "${wallet.name}"? This action cannot be undone.`)) {
+                try {
+                    await deleteWallet(walletId);
+                    await loadAndDisplayWallets();
+                } catch (error) {
+                    alert(`Failed to delete wallet: ${error.message}`);
+                }
+            }
         });
     });
 }
 
-async function handleDeleteTransferRecord(transactionId) {
-    if (!confirm('Are you sure you want to delete this transfer record? This will also revert the wallet balances to their previous state.')) {
-        return;
-    }
-    try {
-        showLoading();
-        
-        // 1. Ambil data transaksi yang akan dihapus
-        const transferToDelete = allTransfers.find(tx => tx.id === transactionId);
-        if (!transferToDelete) throw new Error("Transfer record not found");
-        
-        // 2. Ambil data wallet terkini
-        const userData = await loadUserData(userId);
-        const wallets = userData.wallets || {};
-        
-        // 3. Temukan wallet yang terlibat berdasarkan nama
-        const fromWalletId = Object.keys(wallets).find(id => wallets[id].name === transferToDelete.fromWallet);
-        const toWalletId = Object.keys(wallets).find(id => wallets[id].name === transferToDelete.toWallet);
-        
-        if (!fromWalletId || !toWalletId) {
-            throw new Error("One or both wallets involved in this transfer no longer exist");
-        }
-        
-        // 4. Kembalikan saldo ke nilai semula
-        const updates = {};
-        updates[`/users/${userId}/wallets/${fromWalletId}/balance`] = wallets[fromWalletId].balance + transferToDelete.amount;
-        updates[`/users/${userId}/wallets/${toWalletId}/balance`] = wallets[toWalletId].balance - transferToDelete.amount;
-        
-        // 5. Hapus transaksi dan perbarui saldo dalam satu operasi
-        updates[`/users/${userId}/transactions/${transactionId}`] = null;
-        await update(ref(db), updates);
-        
-        // 6. Perbarui data lokal
-        userWallets[fromWalletId].balance += transferToDelete.amount;
-        userWallets[toWalletId].balance -= transferToDelete.amount;
-        
-        // 7. Muat ulang data transaksi dan tampilkan kembali
-        const allTransactions = await loadTransactions(userId) || {};
-        allTransfers = Object.values(allTransactions)
-            .filter(tx => tx.type === 'transfer')
-            .sort((a, b) => b.timestamp - a.timestamp);
-        
-        const totalPages = Math.ceil(allTransfers.length / TRANSFERS_PER_PAGE);
-        if (currentTransferPage > totalPages && totalPages > 0) {
-            currentTransferPage = totalPages;
-        }
+function populateWalletDropdowns(wallets) {
+    const fromWalletSelect = document.getElementById('fromWallet');
+    const toWalletSelect = document.getElementById('toWallet');
+    
+    if (!fromWalletSelect || !toWalletSelect) return;
+    
+    // Clear existing options
+    fromWalletSelect.innerHTML = '<option value="">Select source wallet</option>';
+    toWalletSelect.innerHTML = '<option value="">Select destination wallet</option>';
+    
+    // Add wallet options
+    Object.entries(wallets).forEach(([id, wallet]) => {
+        const option = `<option value="${id}">${wallet.name} (${formatRupiah(wallet.balance || 0)})</option>`;
+        fromWalletSelect.insertAdjacentHTML('beforeend', option);
+        toWalletSelect.insertAdjacentHTML('beforeend', option);
+    });
+}
 
-        // 8. Perbarui tampilan
-        displayWallets();
-        loadTransferFormOptions();
-        displayTransferHistoryPage();
+function openEditWalletModal(walletId, wallet) {
+    const modal = document.getElementById('editWalletModal');
+    if (!modal) return;
+    
+    document.getElementById('editWalletId').value = walletId;
+    document.getElementById('editWalletName').value = wallet.name;
+    document.getElementById('editWalletColor').value = wallet.color || '#6c5ce7';
+    document.getElementById('editWalletIcon').value = wallet.icon || 'fa-wallet';
+    
+    // Update color and icon previews
+    updateColorPreview('editWalletColor');
+    updateIconPreview('editWalletIcon');
+    
+    modal.style.display = 'flex';
+}
+
+async function addWallet(name, balance, color, icon) {
+    try {
+        // Get user data
+        const userRef = ref(database, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val() || {};
         
-        showSuccessMessage('Transfer record deleted and wallet balances reverted successfully.');
+        // Create new wallet
+        const walletRef = push(ref(database, `users/${userId}/wallets`));
+        const walletId = walletRef.key;
+        const wallet = {
+            name,
+            balance,
+            color: color || '#6c5ce7',
+            icon: icon || 'fa-wallet'
+        };
+        
+        // Update total balance
+        const totalBalance = (userData.totalBalance || 0) + balance;
+        
+        // Create initial transaction if balance > 0
+        let transactionId = null;
+        let transaction = null;
+        
+        if (balance > 0) {
+            const transactionRef = push(ref(database, `users/${userId}/transactions`));
+            transactionId = transactionRef.key;
+            const now = new Date();
+            transaction = {
+                id: transactionId,
+                type: 'income',
+                amount: balance,
+                description: `Initial balance for ${name}`,
+                account: 'Initial Balance',
+                wallet: name,
+                walletId,
+                timestamp: now.getTime(),
+                date: formatDateForDB(now)
+            };
+        }
+        
+        // Update database
+        const updates = {};
+        updates[`users/${userId}/wallets/${walletId}`] = wallet;
+        updates[`users/${userId}/totalBalance`] = totalBalance;
+        
+        if (transaction) {
+            updates[`users/${userId}/transactions/${transactionId}`] = transaction;
+        }
+        
+        await update(ref(database), updates);
+        return walletId;
     } catch (error) {
-        console.error("Error deleting transfer record:", error);
-        showError(error.message || "Failed to delete transfer record.");
-    } finally {
-        hideLoading();
+        console.error('Error adding wallet:', error);
+        throw error;
     }
 }
 
-// ============================================================================
-// Balance Transfer Logic (Updated)
-// ============================================================================
-async function handleBalanceTransfer(fromWalletId, toWalletId, amount) {
+async function updateWallet(walletId, updates) {
     try {
-        showLoading();
-        const fromWallet = userWallets[fromWalletId];
-        const toWallet = userWallets[toWalletId];
-        if (!fromWallet || !toWallet) throw new Error("Invalid wallet selected.");
-        if (fromWallet.balance < amount) throw new Error("Insufficient balance.");
-
-        const transferTransaction = {
-            date: new Date().toISOString().split('T')[0],
-            type: 'transfer',
-            amount: amount,
-            fromWallet: fromWallet.name,
-            toWallet: toWallet.name,
-            account: 'Transfer',
-            timestamp: new Date().getTime()
+        const walletRef = ref(database, `users/${userId}/wallets/${walletId}`);
+        const walletSnapshot = await get(walletRef);
+        const wallet = walletSnapshot.val();
+        
+        if (!wallet) {
+            throw new Error('Wallet not found');
+        }
+        
+        // Update wallet properties
+        const updatedWallet = {
+            ...wallet,
+            ...updates
         };
         
-        const newTxRef = await saveTransaction(userId, transferTransaction);
-        
-        const newFromBalance = fromWallet.balance - amount;
-        const newToBalance = toWallet.balance + amount;
-        const updates = {};
-        updates[`/users/${userId}/wallets/${fromWalletId}/balance`] = newFromBalance;
-        updates[`/users/${userId}/wallets/${toWalletId}/balance`] = newToBalance;
-        await update(ref(db), updates);
-
-        // Update data lokal
-        userWallets[fromWalletId].balance = newFromBalance;
-        userWallets[toWalletId].balance = newToBalance;
-        allTransfers.unshift({ id: newTxRef.key, ...transferTransaction }); // Tambahkan ke riwayat lokal
-        allTransfers.sort((a, b) => b.timestamp - a.timestamp);
-
-        displayWallets();
-        loadTransferFormOptions();
-        displayTransferHistoryPage();
-        showSuccessMessage('Transfer successful and recorded!');
+        await set(walletRef, updatedWallet);
+        return walletId;
     } catch (error) {
-        console.error("Error transferring balance:", error);
-        showError(error.message);
-    } finally {
-        hideLoading();
+        console.error('Error updating wallet:', error);
+        throw error;
     }
+}
+
+async function deleteWallet(walletId) {
+    try {
+        // Get user data
+        const userRef = ref(database, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val();
+        
+        if (!userData || !userData.wallets || !userData.wallets[walletId]) {
+            throw new Error('Wallet not found');
+        }
+        
+        const wallet = userData.wallets[walletId];
+        
+        // Update total balance
+        const totalBalance = (userData.totalBalance || 0) - (wallet.balance || 0);
+        
+        // Remove wallet and update total balance
+        const updates = {};
+        updates[`users/${userId}/wallets/${walletId}`] = null;
+        updates[`users/${userId}/totalBalance`] = totalBalance;
+        
+        await update(ref(database), updates);
+        return true;
+    } catch (error) {
+        console.error('Error deleting wallet:', error);
+        throw error;
+    }
+}
+
+// Fungsi untuk melakukan transfer antar wallet
+async function transferBetweenWallets(fromWalletId, toWalletId, amount, description, date) {
+    try {
+        // Validasi input
+        if (!fromWalletId || !toWalletId || amount <= 0) {
+            throw new Error('Invalid transfer parameters');
+        }
+
+        if (fromWalletId === toWalletId) {
+            throw new Error('Cannot transfer to the same wallet');
+        }
+
+        // Ambil data wallet
+        const userRef = ref(database, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val();
+
+        if (!userData || !userData.wallets) {
+            throw new Error('User data or wallets not found');
+        }
+
+        const wallets = userData.wallets;
+        const fromWallet = wallets[fromWalletId];
+        const toWallet = wallets[toWalletId];
+
+        if (!fromWallet || !toWallet) {
+            throw new Error('One or both wallets not found');
+        }
+
+        // Cek saldo cukup
+        if (fromWallet.balance < amount) {
+            throw new Error('Insufficient balance in source wallet');
+        }
+
+        // Konversi tanggal ke timestamp
+        const timestamp = date ? new Date(date).getTime() : Date.now();
+
+        // Update saldo wallet
+        const fromWalletBalance = (fromWallet.balance || 0) - amount;
+        const toWalletBalance = (toWallet.balance || 0) + amount;
+
+        // Buat transaksi untuk wallet sumber (expense)
+        const fromTransactionRef = push(ref(database, `users/${userId}/transactions`));
+        const fromTransactionId = fromTransactionRef.key;
+        const fromTransaction = {
+            id: fromTransactionId,
+            type: 'expense',
+            amount: amount,
+            description: description || `Transfer to ${toWallet.name}`,
+            account: 'Transfer Out',
+            wallet: fromWallet.name,
+            walletId: fromWalletId,
+            timestamp: timestamp,
+            date: formatDateForDB(new Date(timestamp))
+        };
+
+        // Buat transaksi untuk wallet tujuan (income)
+        const toTransactionRef = push(ref(database, `users/${userId}/transactions`));
+        const toTransactionId = toTransactionRef.key;
+        const toTransaction = {
+            id: toTransactionId,
+            type: 'income',
+            amount: amount,
+            description: description || `Transfer from ${fromWallet.name}`,
+            account: 'Transfer In',
+            wallet: toWallet.name,
+            walletId: toWalletId,
+            timestamp: timestamp,
+            date: formatDateForDB(new Date(timestamp))
+        };
+
+        // Update database
+        const updates = {};
+        updates[`users/${userId}/wallets/${fromWalletId}/balance`] = fromWalletBalance;
+        updates[`users/${userId}/wallets/${toWalletId}/balance`] = toWalletBalance;
+        updates[`users/${userId}/transactions/${fromTransactionId}`] = fromTransaction;
+        updates[`users/${userId}/transactions/${toTransactionId}`] = toTransaction;
+        updates[`users/${userId}/totalBalance`] = (userData.totalBalance || 0); // Total balance tidak berubah pada transfer
+
+        await update(ref(database), updates);
+        return { fromTransaction, toTransaction };
+    } catch (error) {
+        console.error('Error transferring between wallets:', error);
+        throw error;
+    }
+}
+
+// Helper function to format date for database (YYYY-MM-DD)
+function formatDateForDB(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // ============================================================================
 // UI Helper Functions
 // ============================================================================
-function showSuccessMessage(message) { alert(message); }
-function showError(message) {
-    const errorElement = document.getElementById('transferError');
-    if (errorElement) {
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-        setTimeout(() => { errorElement.style.display = 'none'; }, 3000);
-    }
-}
-function showLoading() {
-    if (document.querySelector('.loading-overlay')) return;
-    const overlay = document.createElement('div');
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = '<div class="loading-spinner"></div>';
-    document.body.appendChild(overlay);
-}
-function hideLoading() {
-    const overlay = document.querySelector('.loading-overlay');
-    if (overlay) overlay.remove();
-}
-
-// ============================================================================
-// Event Listener for the Transfer Form
-// ============================================================================
-// ============================================================================
-document.getElementById('transferForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const fromWalletId = document.getElementById('fromWallet').value;
-    const toWalletId = document.getElementById('toWallet').value;
-    // PERBAIKAN DI SINI: Menggunakan id "transferAmount" yang benar sesuai HTML
-    const amount = parseFloat(document.getElementById('transferAmount').value);
-
-    // Validasi input
-    if (!fromWalletId || !toWalletId) {
-        showError('Please select both "From" and "To" wallets.');
-        return;
-    }
-    if (isNaN(amount) || amount <= 0) {
-        showError('Please enter a valid positive amount.');
-        return;
-    }
-    if (fromWalletId === toWalletId) {
-        showError('Cannot transfer to the same wallet.');
-        return;
-    }
-
-    // Panggil fungsi logika transfer
-    await handleBalanceTransfer(fromWalletId, toWalletId, amount);
+function initializeColorPicker(inputId) {
+    const colorInput = document.getElementById(inputId);
+    if (!colorInput) return;
     
-    // Reset form setelah transfer
-    e.target.reset();
-    // Muat ulang opsi dropdown untuk menampilkan saldo terbaru
-    loadTransferFormOptions();
-});
+    // Set initial color
+    colorInput.value = colorInput.value || walletColors[0];
+    updateColorPreview(inputId);
+    
+    // Create color options
+    const colorPickerContainer = document.createElement('div');
+    colorPickerContainer.className = 'color-picker';
+    
+    walletColors.forEach(color => {
+        const colorOption = document.createElement('div');
+        colorOption.className = 'color-option';
+        colorOption.style.backgroundColor = color;
+        colorOption.setAttribute('data-color', color);
+        colorOption.addEventListener('click', () => {
+            colorInput.value = color;
+            updateColorPreview(inputId);
+        });
+        colorPickerContainer.appendChild(colorOption);
+    });
+    
+    // Insert color picker after the input
+    colorInput.parentNode.insertBefore(colorPickerContainer, colorInput.nextSibling);
+    
+    // Update color preview when input changes
+    colorInput.addEventListener('input', () => {
+        updateColorPreview(inputId);
+    });
+}
+
+function updateColorPreview(inputId) {
+    const colorInput = document.getElementById(inputId);
+    if (!colorInput) return;
+    
+    const previewElement = colorInput.parentNode.querySelector('.color-preview') || document.createElement('div');
+    previewElement.className = 'color-preview';
+    previewElement.style.backgroundColor = colorInput.value;
+    
+    if (!colorInput.parentNode.querySelector('.color-preview')) {
+        colorInput.parentNode.insertBefore(previewElement, colorInput);
+    }
+}
+
+function initializeIconPicker(inputId) {
+    const iconInput = document.getElementById(inputId);
+    if (!iconInput) return;
+    
+    // Set initial icon
+    iconInput.value = iconInput.value || walletIcons[0];
+    updateIconPreview(inputId);
+    
+    // Create icon options
+    const iconPickerContainer = document.createElement('div');
+    iconPickerContainer.className = 'icon-picker';
+    
+    walletIcons.forEach(icon => {
+        const iconOption = document.createElement('div');
+        iconOption.className = 'icon-option';
+        iconOption.innerHTML = `<i class="fas ${icon}"></i>`;
+        iconOption.setAttribute('data-icon', icon);
+        iconOption.addEventListener('click', () => {
+            iconInput.value = icon;
+            updateIconPreview(inputId);
+        });
+        iconPickerContainer.appendChild(iconOption);
+    });
+    
+    // Insert icon picker after the input
+    iconInput.parentNode.insertBefore(iconPickerContainer, iconInput.nextSibling);
+    
+    // Update icon preview when input changes
+    iconInput.addEventListener('input', () => {
+        updateIconPreview(inputId);
+    });
+}
+
+function updateIconPreview(inputId) {
+    const iconInput = document.getElementById(inputId);
+    if (!iconInput) return;
+    
+    const previewElement = iconInput.parentNode.querySelector('.icon-preview') || document.createElement('div');
+    previewElement.className = 'icon-preview';
+    previewElement.innerHTML = `<i class="fas ${iconInput.value}"></i>`;
+    
+    if (!iconInput.parentNode.querySelector('.icon-preview')) {
+        iconInput.parentNode.insertBefore(previewElement, iconInput);
+    }
+}
+
+function adjustColor(hex, percent) {
+    // Convert hex to RGB
+    let r = parseInt(hex.substring(1, 3), 16);
+    let g = parseInt(hex.substring(3, 5), 16);
+    let b = parseInt(hex.substring(5, 7), 16);
+
+    // Adjust color
+    r = Math.max(0, Math.min(255, r + percent));
+    g = Math.max(0, Math.min(255, g + percent));
+    b = Math.max(0, Math.min(255, b + percent));
+
+    // Convert back to hex
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Export functions for testing
+export { addWallet, updateWallet, deleteWallet, transferBetweenWallets };
