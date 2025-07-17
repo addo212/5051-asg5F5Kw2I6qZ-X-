@@ -3,9 +3,14 @@
 // ============================================================================
 // Module Imports
 // ============================================================================
-import { auth, database } from './firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { firebaseConfig } from './firebase-config.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { 
+    getAuth, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { 
+    getDatabase,
     ref, 
     get, 
     set, 
@@ -14,6 +19,11 @@ import {
     remove 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { formatRupiah } from './utils.js';
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
 
 // ============================================================================
 // Global Variables
@@ -28,7 +38,6 @@ const walletIcons = [
     'fa-coins', 'fa-landmark', 'fa-money-check', 'fa-university',
     'fa-dollar-sign', 'fa-money-bill-wave'
 ];
-
 // ============================================================================
 // Main Initialization on Auth State Change
 // ============================================================================
