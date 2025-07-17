@@ -1443,7 +1443,39 @@ details[open] > summary .collapse-icon {
     align-self: flex-end;
     margin-top: 1rem;
 }
+/* ============================================================================ */
+/* Penambahan Tanggal Di style.css */
+/* ============================================================================ */
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
 
+input[type="date"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+/* Styling untuk browser yang mendukung ::-webkit-calendar-picker-indicator */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: var(--calendar-icon-filter);
+    cursor: pointer;
+}
+
+/* Variabel CSS untuk tema gelap/terang */
+:root {
+    --calendar-icon-filter: invert(0.5);
+}
+
+[data-theme="dark"] {
+    --calendar-icon-filter: invert(0.8);
+}
 /* ============================================================================ */
 /* BUDGETS PAGE (budgets.html)
 /* ============================================================================ */
