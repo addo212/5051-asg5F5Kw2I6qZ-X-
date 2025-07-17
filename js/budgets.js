@@ -11,7 +11,6 @@ import {
     ref, 
     get, 
     set, 
-    update, 
     remove 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { formatRupiah } from './utils.js';
@@ -45,11 +44,15 @@ onAuthStateChanged(auth, (user) => {
 
 async function initializeBudgetsPage() {
     setupEventListeners();
-    populatePeriodFilters();
+    populatePeriodFilters('periodMonth', 'periodYear'); // Mengisi filter utama
     try {
         const userData = await loadInitialData();
         expenseAccounts = userData.expenseAccounts || {};
+        
+        // Mengisi dropdown di modal dengan data yang sudah dimuat
         populateCategoryDropdown(expenseAccounts);
+        populatePeriodFilters('modalPeriodMonth', 'modalPeriodYear'); // Mengisi filter di modal
+
         await loadAndDisplayBudgetsForCurrentPeriod();
     } catch (error) {
         console.error("Error initializing budgets page:", error);
@@ -67,17 +70,12 @@ async function loadInitialData() {
 // EVENT LISTENERS
 // ============================================================================
 function setupEventListeners() {
-    // Filter
     document.getElementById('applyPeriodFilterBtn').addEventListener('click', loadAndDisplayBudgetsForCurrentPeriod);
-
-    // Add/Edit Budget Modal
     document.getElementById('addBudgetBtn').addEventListener('click', openAddBudgetModal);
     document.querySelector('#addBudgetModal .close-modal').addEventListener('click', () => {
         document.getElementById('addBudgetModal').classList.remove('show');
     });
     document.getElementById('addBudgetForm').addEventListener('submit', handleSaveBudget);
-
-    // Table Actions (Edit/Delete) using Event Delegation
     document.getElementById('budgetTableBody').addEventListener('click', handleTableActions);
 }
 
@@ -97,10 +95,7 @@ async function loadAndDisplayBudgetsForCurrentPeriod() {
 
         let budgets = budgetsData.val() || {};
         const transactions = transactionsData.val() || {};
-
-        // Recalculate spending for accuracy
         budgets = calculateSpending(budgets, transactions, period);
-
         displayBudgets(budgets, period);
 
     } catch (error) {
@@ -111,21 +106,15 @@ async function loadAndDisplayBudgetsForCurrentPeriod() {
 
 function calculateSpending(budgets, transactions, period) {
     const [year, month] = period.split('-').map(Number);
-
-    // 1. Reset all 'spent' values for the current period's budgets
     const calculatedBudgets = { ...budgets };
     for (const category in calculatedBudgets) {
         calculatedBudgets[category].spent = 0;
     }
-
-    // 2. Iterate through all transactions
     for (const txId in transactions) {
         const tx = transactions[txId];
         if (tx.type === 'expense') {
             const txDate = new Date(tx.timestamp);
-            // 3. Check if the transaction belongs to the selected period
             if (txDate.getFullYear() === year && (txDate.getMonth() + 1) === month) {
-                // 4. If a budget exists for the transaction's category, add the amount
                 if (calculatedBudgets[tx.account]) {
                     calculatedBudgets[tx.account].spent += tx.amount;
                 }
@@ -145,24 +134,24 @@ async function handleSaveBudget(e) {
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
-    const period = `${document.getElementById('periodYear').value}-${document.getElementById('periodMonth').value}`;
+    const period = `${form.modalPeriodYear.value}-${form.modalPeriodMonth.value}`;
     const category = form.budgetCategory.value;
     const limit = parseFloat(form.budgetLimit.value);
+    const mode = form.budgetMode.value;
 
     try {
         const budgetRef = ref(database, `users/${userId}/budgets/${period}/${category}`);
         
-        // Check if budget already exists to preserve spent amount
-        const snapshot = await get(budgetRef);
-        const existingBudget = snapshot.val();
-        const spent = existingBudget ? existingBudget.spent : 0;
+        let spent = 0;
+        if (mode === 'edit') {
+            const snapshot = await get(budgetRef);
+            const existingBudget = snapshot.val();
+            if (existingBudget) {
+                spent = existingBudget.spent || 0;
+            }
+        }
 
-        const newBudget = {
-            limit: limit,
-            spent: spent // Preserve spent amount if editing
-        };
-
-        await set(budgetRef, newBudget);
+        await set(budgetRef, { limit, spent });
         
         alert('Budget saved successfully!');
         document.getElementById('addBudgetModal').classList.remove('show');
@@ -181,8 +170,7 @@ async function handleDeleteBudget(period, category) {
     if (!confirm(`Are you sure you want to delete the budget for "${category}"?`)) return;
 
     try {
-        const budgetRef = ref(database, `users/${userId}/budgets/${period}/${category}`);
-        await remove(budgetRef);
+        await remove(ref(database, `users/${userId}/budgets/${period}/${category}`));
         alert('Budget deleted successfully!');
         await loadAndDisplayBudgetsForCurrentPeriod();
     } catch (error) {
@@ -290,7 +278,6 @@ function displayBudgetTable(budgets, period) {
         `;
     }).join('');
 
-    // Render footer total
     const totalLimit = budgetsArray.reduce((sum, b) => sum + (b.limit || 0), 0);
     const totalSpent = budgetsArray.reduce((sum, b) => sum + (b.spent || 0), 0);
     const totalRemaining = totalLimit - totalSpent;
@@ -310,7 +297,6 @@ function displayBudgetCharts(budgets) {
     const spentData = labels.map(label => budgets[label].spent || 0);
     const limitData = labels.map(label => budgets[label].limit || 0);
 
-    // Doughnut Chart: Spending Composition
     const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
     if (doughnutChartInstance) doughnutChartInstance.destroy();
     doughnutChartInstance = new Chart(doughnutCtx, {
@@ -335,7 +321,6 @@ function displayBudgetCharts(budgets) {
         }
     });
 
-    // Bar Chart: Spent vs. Limit
     const barCtx = document.getElementById('barChart').getContext('2d');
     if (barChartInstance) barChartInstance.destroy();
     barChartInstance = new Chart(barCtx, {
@@ -384,20 +369,39 @@ function displayError(message) {
 // MODAL & UI HELPERS
 // ============================================================================
 function openAddBudgetModal() {
+    const modal = document.getElementById('addBudgetModal');
+    const form = document.getElementById('addBudgetForm');
+    
     document.getElementById('budgetModalTitle').textContent = 'Add New Budget';
-    document.getElementById('addBudgetForm').reset();
+    form.reset();
+    form.budgetMode.value = 'add';
     document.getElementById('budgetCategory').disabled = false;
-    document.getElementById('addBudgetModal').classList.add('show');
+
+    // Set default periode di modal sesuai dengan yang sedang ditampilkan di halaman
+    document.getElementById('modalPeriodMonth').value = document.getElementById('periodMonth').value;
+    document.getElementById('modalPeriodYear').value = document.getElementById('periodYear').value;
+    
+    modal.classList.add('show');
 }
 
-function openEditBudgetModal(category, limit) {
-    document.getElementById('budgetModalTitle').textContent = `Edit Budget for ${category}`;
+function openEditBudgetModal(category, limit, period) {
+    const modal = document.getElementById('addBudgetModal');
     const form = document.getElementById('addBudgetForm');
+    const [year, month] = period.split('-');
+
+    document.getElementById('budgetModalTitle').textContent = `Edit Budget for ${category}`;
     form.reset();
+    form.budgetMode.value = 'edit';
+    
+    // Set periode di modal sesuai budget yang diedit
+    document.getElementById('modalPeriodMonth').value = month;
+    document.getElementById('modalPeriodYear').value = year;
+    
     form.budgetCategory.value = category;
-    form.budgetCategory.disabled = true; // Cannot change category when editing
+    form.budgetCategory.disabled = true; // Kategori tidak bisa diubah saat edit
     form.budgetLimit.value = limit;
-    document.getElementById('addBudgetModal').classList.add('show');
+    
+    modal.classList.add('show');
 }
 
 function handleTableActions(e) {
@@ -406,41 +410,53 @@ function handleTableActions(e) {
 
     const { period, category, limit } = target.dataset;
     if (target.classList.contains('edit-btn')) {
-        openEditBudgetModal(category, parseFloat(limit));
+        openEditBudgetModal(category, parseFloat(limit), period);
     } else if (target.classList.contains('delete-btn')) {
         handleDeleteBudget(period, category);
     }
 }
 
-function populatePeriodFilters() {
-    const monthSelect = document.getElementById('periodMonth');
-    const yearSelect = document.getElementById('periodYear');
+function populatePeriodFilters(monthId, yearId) {
+    const monthSelect = document.getElementById(monthId);
+    const yearSelect = document.getElementById(yearId);
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    // Populate months
+    monthSelect.innerHTML = '';
+    yearSelect.innerHTML = '';
+
     for (let i = 1; i <= 12; i++) {
         const monthName = new Date(0, i - 1).toLocaleString('default', { month: 'long' });
         monthSelect.innerHTML += `<option value="${String(i).padStart(2, '0')}">${monthName}</option>`;
     }
-
-    // Populate years (current year +/- 5 years)
     for (let i = currentYear - 5; i <= currentYear + 5; i++) {
         yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
     }
 
-    // Set to current period by default
     monthSelect.value = String(currentMonth).padStart(2, '0');
     yearSelect.value = currentYear;
 }
 
 function populateCategoryDropdown(accounts) {
     const categorySelect = document.getElementById('budgetCategory');
+    const warningMessage = document.getElementById('categoryWarning');
+    const submitButton = document.getElementById('budgetSubmitBtn');
+
     categorySelect.innerHTML = '<option value="" disabled selected>Select a category</option>';
-    Object.keys(accounts).sort().forEach(acc => {
-        categorySelect.innerHTML += `<option value="${acc}">${acc}</option>`;
-    });
+    
+    if (Object.keys(accounts).length === 0) {
+        warningMessage.style.display = 'block';
+        categorySelect.disabled = true;
+        submitButton.disabled = true;
+    } else {
+        warningMessage.style.display = 'none';
+        categorySelect.disabled = false;
+        submitButton.disabled = false;
+        Object.keys(accounts).sort().forEach(acc => {
+            categorySelect.innerHTML += `<option value="${acc}">${acc}</option>`;
+        });
+    }
 }
 
 function generateColors(numColors) {
