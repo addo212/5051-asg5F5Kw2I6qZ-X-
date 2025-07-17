@@ -1,204 +1,209 @@
-// settings.js
+// js/settings.js
 
 // ============================================================================
-// Module Imports
+// MODULE IMPORTS
 // ============================================================================
-// Impor fungsi dan instance yang dibutuhkan dari file database.js terpusat
-import { auth, loadUserData, saveWallet, deleteWallet, saveAccount, deleteAccount } from './database.js';
-// Impor fungsi spesifik dari Firebase SDK
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import firebaseConfig from './firebase-config.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { 
+    getDatabase, 
+    ref, 
+    get, 
+    set, 
+    remove 
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
 // ============================================================================
-// Global Variables & Constants
+// FIREBASE INITIALIZATION
+// ============================================================================
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// ============================================================================
+// GLOBAL STATE
 // ============================================================================
 let userId;
-// Daftar ikon yang bisa dipilih oleh pengguna. Anda bisa menambah/mengubah daftar ini.
-const availableIcons = [
-    'fa-wallet', 'fa-piggy-bank', 'fa-university', 'fa-credit-card', 'fa-money-bill-wave',
-    'fa-briefcase', 'fa-car', 'fa-home', 'fa-gift', 'fa-plane', 'fa-shopping-cart', 'fa-heart'
-];
 
 // ============================================================================
-// Initialization (Titik Awal Eksekusi)
+// AUTHENTICATION & INITIALIZATION
 // ============================================================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
-        // Muat semua data yang dibutuhkan saat halaman dibuka
-        loadAccountsData();
-        loadWalletsData();
-        populateIconPicker();
+        initializeSettingsPage();
     } else {
-        // Jika tidak ada pengguna, arahkan kembali ke halaman login
         window.location.href = "index.html";
     }
 });
 
-// ============================================================================
-// Account Management Functions
-// ============================================================================
-async function loadAccountsData() {
-    const incomeList = document.getElementById('incomeAccountsList');
-    const expenseList = document.getElementById('expenseAccountsList');
+async function initializeSettingsPage() {
+    setupEventListeners();
     try {
-        const userData = await loadUserData(userId);
-        const accounts = userData.accounts || { income: [], expense: [] };
-        displayAccounts(accounts.income, incomeList, 'income');
-        displayAccounts(accounts.expense, expenseList, 'expense');
+        const userData = await loadUserData();
+        renderThemeOptions();
+        renderAccountLists(userData.incomeAccounts || {}, userData.expenseAccounts || {});
     } catch (error) {
-        console.error("Error loading accounts:", error);
+        console.error("Error initializing settings page:", error);
+        alert("Failed to load settings. Please refresh the page.");
     }
 }
 
-function displayAccounts(accounts, listElement, type) {
-    listElement.innerHTML = `<h4>${type.charAt(0).toUpperCase() + type.slice(1)} Accounts</h4>`;
-    if (!accounts || accounts.length === 0) {
-        listElement.innerHTML += '<p>No accounts yet.</p>';
-        return;
-    }
-    accounts.forEach(account => {
-        const li = document.createElement('li');
-        li.textContent = account;
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.addEventListener('click', () => {
-            if (confirm(`Are you sure you want to delete account: ${account}?`)) {
-                // Panggil fungsi deleteAccount dengan userId
-                deleteAccount(userId, account, type)
-                    .then(loadAccountsData)
-                    .catch(error => alert(error.message));
-            }
-        });
-        li.appendChild(deleteBtn);
-        listElement.appendChild(li);
-    });
+async function loadUserData() {
+    const userRef = ref(database, `users/${userId}`);
+    const snapshot = await get(userRef);
+    return snapshot.val() || {};
 }
 
 // ============================================================================
-// Wallet Management Functions
+// EVENT LISTENERS
 // ============================================================================
-async function loadWalletsData() {
-    const walletsListElement = document.getElementById('walletsList');
-    try {
-        const userData = await loadUserData(userId);
-        const wallets = userData.wallets || {};
-        displayWallets(wallets, walletsListElement);
-    } catch (error) {
-        console.error("Error loading wallets:", error);
-    }
+function setupEventListeners() {
+    // Theme selection using event delegation
+    document.getElementById('themeOptions').addEventListener('click', handleThemeSelection);
+
+    // Add account forms
+    document.getElementById('addIncomeAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'income'));
+    document.getElementById('addExpenseAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'expense'));
+
+    // Delete account buttons using event delegation
+    document.getElementById('incomeAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'income'));
+    document.getElementById('expenseAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'expense'));
+
+    // Placeholder for data management buttons
+    document.getElementById('exportDataBtn').addEventListener('click', () => alert('Export data feature is coming soon!'));
+    document.getElementById('importDataBtn').addEventListener('click', () => alert('Import data feature is coming soon!'));
 }
 
-function displayWallets(wallets, listElement) {
-    listElement.innerHTML = ''; // Kosongkan daftar sebelum mengisi ulang
-    if (Object.keys(wallets).length === 0) {
-        listElement.innerHTML = '<p>No wallets yet.</p>';
-        return;
-    }
-    for (const walletId in wallets) {
-        const wallet = wallets[walletId];
-        const li = document.createElement('li');
-        li.style.borderLeft = `5px solid ${wallet.color}`;
-        li.innerHTML = `
-            <div>
-                <i class="fas ${wallet.icon}" style="margin-right: 10px; color: ${wallet.color};"></i>
-                <span>${wallet.name}</span>
+// ============================================================================
+// THEME MANAGEMENT
+// ============================================================================
+function renderThemeOptions() {
+    const themeContainer = document.getElementById('themeOptions');
+    const themes = [
+        { name: 'light', label: 'Light' },
+        { name: 'dark', label: 'Dark' },
+        { name: 'blue', label: 'Blue' },
+        { name: 'purple', label: 'Purple' }
+    ];
+    const currentTheme = localStorage.getItem('theme') || 'light';
+
+    themeContainer.innerHTML = themes.map(theme => `
+        <div class="theme-option ${currentTheme === theme.name ? 'active' : ''}" data-theme="${theme.name}">
+            <div class="theme-preview ${theme.name}-theme">
+                <div class="preview-header"></div>
+                <div class="preview-content"></div>
             </div>
-            <button class="delete-btn" data-wallet-id="${walletId}"><i class="fas fa-trash"></i></button>
-        `;
-        li.querySelector('.delete-btn').addEventListener('click', () => {
-            if (confirm(`Are you sure you want to delete wallet: ${wallet.name}?`)) {
-                // Panggil fungsi deleteWallet dengan userId
-                deleteWallet(userId, walletId)
-                    .then(loadWalletsData)
-                    .catch(error => alert(error.message));
-            }
-        });
-        listElement.appendChild(li);
-    }
+            <span>${theme.label}</span>
+            <i class="fas fa-check-circle theme-selected"></i>
+        </div>
+    `).join('');
+}
+
+function handleThemeSelection(e) {
+    const themeOption = e.target.closest('.theme-option');
+    if (!themeOption) return;
+
+    const newTheme = themeOption.dataset.theme;
+    
+    // Apply theme
+    document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Save theme to local storage
+    localStorage.setItem('theme', newTheme);
+
+    // Update active class
+    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+    themeOption.classList.add('active');
 }
 
 // ============================================================================
-// Icon Picker Functions
+// ACCOUNT MANAGEMENT (CRUD)
 // ============================================================================
-function populateIconPicker() {
-    const picker = document.getElementById('iconPicker');
-    const selectedIconInput = document.getElementById('selectedWalletIcon');
-    if (!picker || !selectedIconInput) return;
-    
-    picker.innerHTML = '';
-    const defaultIcon = 'fa-wallet';
-    selectedIconInput.value = defaultIcon; // Set nilai default
+function renderAccountLists(incomeAccounts, expenseAccounts) {
+    renderList('incomeAccountList', incomeAccounts, 'income');
+    renderList('expenseAccountList', expenseAccounts, 'expense');
+}
 
-    availableIcons.forEach(iconClass => {
-        const iconElement = document.createElement('i');
-        iconElement.className = `fas ${iconClass} icon-option`;
+function renderList(containerId, accounts, type) {
+    const listContainer = document.getElementById(containerId);
+    if (!listContainer) return;
+
+    if (Object.keys(accounts).length === 0) {
+        listContainer.innerHTML = `<li class="empty-state">No ${type} accounts found.</li>`;
+        return;
+    }
+
+    listContainer.innerHTML = Object.keys(accounts).sort().map(accountName => `
+        <li>
+            <span>${accountName}</span>
+            <button class="delete-btn" data-name="${accountName}" data-type="${type}">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </li>
+    `).join('');
+}
+
+async function handleAddAccount(e, type) {
+    e.preventDefault();
+    const inputId = type === 'income' ? 'newIncomeAccountName' : 'newExpenseAccountName';
+    const inputElement = document.getElementById(inputId);
+    const newName = inputElement.value.trim();
+
+    if (!newName) {
+        alert('Account name cannot be empty.');
+        return;
+    }
+
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+
+    try {
+        const accountPath = `users/${userId}/${type}Accounts/${newName}`;
+        const accountRef = ref(database, accountPath);
         
-        if (iconClass === defaultIcon) {
-            iconElement.classList.add('selected');
+        // Check if account already exists
+        const snapshot = await get(accountRef);
+        if (snapshot.exists()) {
+            alert(`Account "${newName}" already exists.`);
+            return;
         }
 
-        iconElement.addEventListener('click', () => {
-            picker.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
-            iconElement.classList.add('selected');
-            selectedIconInput.value = iconClass;
-        });
-        picker.appendChild(iconElement);
-    });
+        await set(accountRef, true); // Using true as a simple placeholder value
+        
+        // Refresh UI
+        const userData = await loadUserData();
+        renderAccountLists(userData.incomeAccounts || {}, userData.expenseAccounts || {});
+        inputElement.value = ''; // Clear input
+
+    } catch (error) {
+        console.error(`Error adding ${type} account:`, error);
+        alert(`Failed to add account. Please try again.`);
+    } finally {
+        btn.disabled = false;
+    }
 }
 
-// ============================================================================
-// Event Listeners for Forms
-// ============================================================================
-document.getElementById('addWalletForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const walletName = document.getElementById('newWalletName').value;
-    const walletColor = document.getElementById('newWalletColor').value;
-    const walletIcon = document.getElementById('selectedWalletIcon').value;
+async function handleDeleteAccount(e, type) {
+    const deleteButton = e.target.closest('.delete-btn');
+    if (!deleteButton) return;
 
-    if (!walletName.trim()) {
-        alert('Please enter a wallet name.');
+    const accountName = deleteButton.dataset.name;
+    if (!confirm(`Are you sure you want to delete the account "${accountName}"? This cannot be undone.`)) {
         return;
     }
 
-    // Panggil fungsi saveWallet dari database.js dengan semua parameter
-    saveWallet(userId, walletName, walletColor, walletIcon)
-        .then(() => {
-            showSuccessMessage('Wallet added successfully!');
-            loadWalletsData(); // Muat ulang daftar dompet
-            e.target.reset(); // Reset form
-            populateIconPicker(); // Reset pilihan ikon ke default
-        })
-        .catch(error => {
-            alert(error.message);
-        });
-});
+    try {
+        const accountPath = `users/${userId}/${type}Accounts/${accountName}`;
+        await remove(ref(database, accountPath));
 
-document.getElementById('addAccountForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const accountName = document.getElementById('newAccountName').value;
-    const accountType = document.getElementById('newAccountType').value;
+        // Refresh UI
+        const userData = await loadUserData();
+        renderAccountLists(userData.incomeAccounts || {}, userData.expenseAccounts || {});
 
-    if (!accountName.trim()) {
-        alert('Please enter an account name.');
-        return;
+    } catch (error) {
+        console.error(`Error deleting ${type} account:`, error);
+        alert(`Failed to delete account. Please try again.`);
     }
-
-    // Panggil fungsi saveAccount dari database.js dengan userId
-    saveAccount(userId, accountName, accountType)
-        .then(() => {
-            showSuccessMessage('Account added successfully!');
-            loadAccountsData();
-            e.target.reset();
-        })
-        .catch(error => {
-            alert(error.message);
-        });
-});
-
-// ============================================================================
-// UI Helper Functions
-// ============================================================================
-function showSuccessMessage(message) {
-    alert(message); // Menggunakan alert sederhana untuk notifikasi sukses
 }
