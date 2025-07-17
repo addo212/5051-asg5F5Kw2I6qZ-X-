@@ -1,0 +1,25 @@
+/* main.css - File utama yang mengimpor semua file CSS */
+
+/* Base */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* Layout */
+@import 'layout/header.css';
+@import 'layout/footer.css';
+@import 'layout/grid.css';
+
+/* Components */
+@import 'components/buttons.css';
+@import 'components/forms.css';
+@import 'components/modals.css';
+@import 'components/cards.css';
+
+/* Pages */
+@import 'pages/dashboard.css';
+@import 'pages/wallets.css';
+@import 'pages/transactions.css';
+@import 'pages/budgets.css';
+@import 'pages/reports.css';
+@import 'pages/settings.css';
