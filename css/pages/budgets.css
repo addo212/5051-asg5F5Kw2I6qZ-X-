@@ -1,0 +1,168 @@
+/* css/pages/budgets.css */
+
+/* Period filter */
+.period-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    background-color: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.period-filter .form-group {
+    margin-bottom: 0;
+    min-width: 150px;
+}
+
+.current-period-indicator {
+    margin-bottom: 2rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.current-period-indicator h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.current-period-indicator span {
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* Budget visualization */
+.budget-visualization {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Budget summary */
+.budget-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+}
+
+.summary-item p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.summary-item p.safe { color: var(--income-color); }
+.summary-item p.warning { color: #f9a825; }
+.summary-item p.danger { color: var(--expense-color); }
+
+.summary-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-progress .table-progress-bar {
+    width: 80%;
+    height: 10px;
+}
+
+/* Budget table */
+.budget-table-container {
+    overflow-x: auto;
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+}
+
+.budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.budget-table th,
+.budget-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.budget-table th {
+    background-color: var(--bg-primary);
+    font-weight: 600;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.budget-table tbody tr:hover {
+    background-color: var(--bg-primary);
+}
+
+.budget-table td.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Progress bar in table */
+.table-progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-primary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.table-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+
+.table-progress-fill.safe { background-color: var(--income-color); }
+.table-progress-fill.warning { background-color: #f9a825; }
+.table-progress-fill.danger { background-color: var(--expense-color); }
+
+.budget-total-row {
+    background-color: var(--bg-primary);
+    font-weight: bold;
+}
+
+.budget-total-row td {
+    border-top: 2px solid var(--border-color);
+}
