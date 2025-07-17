@@ -1,0 +1,15 @@
+/* css/pages/wallets.css */
+
+/* Wallets grid layout */
+.wallets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 0;
+    margin-top: 1.5rem;
+}
+
+/* Wallet card styling is in components/cards.css, but we can add specific overrides here if needed */
+.wallets-grid .wallet-card {
+    min-height: 160px; /* Ensure consistent height */
+}
