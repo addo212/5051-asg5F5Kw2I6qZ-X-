@@ -3,7 +3,7 @@
 // ============================================================================
 // Module Imports
 // ============================================================================
-import { firebaseConfig } from './firebase-config.js';
+import firebaseConfig from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { 
     getAuth, 
@@ -38,6 +38,7 @@ const walletIcons = [
     'fa-coins', 'fa-landmark', 'fa-money-check', 'fa-university',
     'fa-dollar-sign', 'fa-money-bill-wave'
 ];
+
 // ============================================================================
 // Main Initialization on Auth State Change
 // ============================================================================
