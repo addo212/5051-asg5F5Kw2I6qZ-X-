@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transactions - Finance Tracker</title>
-
-    <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
+    
+    <!-- Skrip pencegah kedipan tema -->
     <script>
         (function() {
             try {
@@ -14,24 +14,30 @@
             } catch (e) {}
         })();
     </script>
-
+    
+    <!-- Menggunakan main.css yang sudah dipecah -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="icon" href="images/logo.jpeg">
-    
 </head>
-<body class="dashboard-body">
-    <div class="dashboard-container">
-        <!-- ================= HEADER ================= -->
+<body>
+    <div class="container">
         <header>
             <div class="header-left">
-                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <!-- Logo dengan kelas yang benar dan konsisten -->
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
-            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div class="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fas fa-moon"></i>
+            </div>
         </header>
 
-        <!-- ================= NAVIGASI ================= -->
         <nav class="main-nav">
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
@@ -46,120 +52,183 @@
             </div>
         </nav>
 
-        <!-- ================= KONTEN UTAMA ================= -->
-        <div class="content-container">
-            <!-- FORM TAMBAH TRANSAKSI (BISA DILIPAT) -->
-            <details class="collapsible-section" open>
+        <main>
+            <!-- Bagian Form Tambah Transaksi yang Bisa Dilipat -->
+            <details class="collapsible-section" id="addTransactionSection">
                 <summary class="collapsible-header">
-                    <h2><i class="fas fa-plus-circle"></i> Add Transaction</h2>
+                    <h2><i class="fas fa-plus-circle"></i> Add New Transaction</h2>
                     <i class="fas fa-chevron-down collapse-icon"></i>
                 </summary>
-                <form id="transactionForm" class="collapsible-content">
-                    <div class="form-group">
-                        <label for="date">Date:</label>
-                        <input type="date" id="date" name="date" required>
+                <div class="collapsible-content">
+                    <form id="addTransactionForm">
+                        <div class="form-group-inline">
+                            <div class="form-group">
+                                <label for="transactionType">Type</label>
+                                <select id="transactionType" required>
+                                    <option value="expense">Expense</option>
+                                    <option value="income">Income</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transactionDate">Date</label>
+                                <input type="date" id="transactionDate" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionAmount">Amount</label>
+                            <input type="number" id="transactionAmount" placeholder="e.g., 150000" min="0" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionDescription">Description</label>
+                            <input type="text" id="transactionDescription" placeholder="e.g., Lunch with client" required>
+                        </div>
+                        <div class="form-group-inline">
+                            <div class="form-group">
+                                <label for="transactionAccount">Account / Category</label>
+                                <select id="transactionAccount" required>
+                                    <option value="" disabled selected>Select an account</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transactionWallet">Wallet</label>
+                                <select id="transactionWallet" required>
+                                    <option value="" disabled selected>Select a wallet</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" id="addTransactionBtn" class="btn-primary">Add Transaction</button>
+                    </form>
+                </div>
+            </details>
+
+            <!-- Bagian Daftar Transaksi -->
+            <div class="content-container">
+                <div class="table-header-controls">
+                    <h2><i class="fas fa-history"></i> Transaction History</h2>
+                    <div class="table-actions">
+                        <div class="search-container">
+                            <input type="text" id="searchInput" placeholder="Search transactions...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <button id="filterToggleBtn" class="btn-secondary"><i class="fas fa-filter"></i> Filter</button>
                     </div>
+                </div>
+
+                <!-- Panel Filter yang Bisa Dilipat -->
+                <div class="filter-panel collapsible" id="filterPanel">
+                    <div class="filter-controls">
+                        <div class="form-group">
+                            <label for="filterType">Type</label>
+                            <select id="filterType">
+                                <option value="">All</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filterAccount">Account</label>
+                            <select id="filterAccount">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filterWallet">Wallet</label>
+                            <select id="filterWallet">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filterStartDate">Start Date</label>
+                            <input type="date" id="filterStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="filterEndDate">End Date</label>
+                            <input type="date" id="filterEndDate">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="resetFilterBtn" class="btn-filter reset"><i class="fas fa-undo"></i> Reset</button>
+                        <button id="applyFilterBtn" class="btn-filter apply"><i class="fas fa-check"></i> Apply</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="date">Date <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="sortable" data-sort="description">Description <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="sortable" data-sort="account">Account <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="sortable" data-sort="wallet">Wallet <i class="fas fa-sort sort-icon"></i></th>
+                                <th class="sortable" data-sort="amount">Amount <i class="fas fa-sort sort-icon"></i></th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            <!-- Rows will be inserted here by JavaScript -->
+                            <tr><td colspan="6" class="empty-state">Loading transactions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container" id="paginationContainer">
+                    <!-- Pagination buttons will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Finance Tracker. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="editTransactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Transaction</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="editTransactionForm">
+                <input type="hidden" id="editTransactionId">
+                <!-- Form fields similar to add form, will be populated by JS -->
+                <div class="form-group-inline">
                     <div class="form-group">
-                        <label for="type">Type:</label>
-                        <select id="type" name="type" required>
+                        <label for="editTransactionType">Type</label>
+                        <select id="editTransactionType" required>
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="account">Account:</label>
-                        <select id="account" name="account" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Description:</label>
-                        <input type="text" id="description" name="description" placeholder="Enter description" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="amount">Amount:</label>
-                        <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="wallet">Wallet:</label>
-                        <select id="wallet" name="wallet" required></select>
-                    </div>
-                    <button type="submit" class="btn-primary">Save Transaction</button>
-                    <p id="formError" class="status-message" style="color: var(--danger-color); display: none;"></p>
-                    <div id="successMessage" style="color: var(--income-color); margin-top: 1rem; display: none;"></div> 
-                </form>
-            </details>
-
-            <!-- TOOLBAR KONTROL TABEL -->
-            <div class="table-header-controls">
-                <h2><i class="fas fa-history"></i> Transaction History</h2>
-                <div class="table-actions">
-                    <div class="search-container">
-                        <input type="text" id="transactionSearch" placeholder="Search...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <button id="toggleFilterBtn" class="btn-filter"><i class="fas fa-filter"></i> Filters</button>
-                </div>
-            </div>
-
-            <!-- PANEL FILTER (BISA DILIPAT) -->
-            <div id="filterPanel" class="filter-panel collapsible">
-                <div class="filter-controls">
-                    <div class="form-group">
-                        <label for="filterStartDate">Start Date</label>
-                        <input type="date" id="filterStartDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="filterEndDate">End Date</label>
-                        <input type="date" id="filterEndDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="filterWallet">Wallet</label>
-                        <select id="filterWallet"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filterAccount">Account</label>
-                        <select id="filterAccount"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filterType">Type</label>
-                        <select id="filterType">
-                        <option value="">All Types</option>
-                        <option value="income">Income</option>
-                        <option value="expense">Expense</option>
-                        </select>
+                        <label for="editTransactionDate">Date</label>
+                        <input type="date" id="editTransactionDate" required>
                     </div>
                 </div>
-            </div>
-
-            <!-- TABEL RIWAYAT TRANSAKSI -->
-            <div class="table-container">
-                <table class="transaction-table">
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-column="timestamp">Date <i class="fas fa-sort sort-icon"></i></th>
-                            <th class="sortable" data-column="description">Description <i class="fas fa-sort sort-icon"></i></th>
-                            <th class="sortable" data-column="account">Account <i class="fas fa-sort sort-icon"></i></th>
-                            <th class="sortable" data-column="wallet">Wallet <i class="fas fa-sort sort-icon"></i></th>
-                            <th class="sortable" data-column="type">Type <i class="fas fa-sort sort-icon"></i></th>
-                            <th class="sortable" data-column="amount">Amount <i class="fas fa-sort sort-icon"></i></th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionHistoryBody">
-                        <tr><td colspan="7" class="empty-state">Loading transactions...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- PAGINATION -->
-            <div id="pagination-container" class="pagination-container"></div>
+                <div class="form-group">
+                    <label for="editTransactionAmount">Amount</label>
+                    <input type="number" id="editTransactionAmount" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTransactionDescription">Description</label>
+                    <input type="text" id="editTransactionDescription" required>
+                </div>
+                <div class="form-group-inline">
+                    <div class="form-group">
+                        <label for="editTransactionAccount">Account / Category</label>
+                        <select id="editTransactionAccount" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTransactionWallet">Wallet</label>
+                        <select id="editTransactionWallet" required></select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
         </div>
     </div>
 
-    <!-- ================= SCRIPTS ================= -->
-    <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/transactions.js"></script>
-    <script type="module" src="js/pagination.js"></script>
-    <script type="module" src="js/utils.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/dropdown.js"></script>
 </body>
