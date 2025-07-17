@@ -15,21 +15,31 @@
         })();
     </script>
     
+    <!-- Menggunakan main.css yang sudah dipecah -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="icon" href="images/logo.jpeg">
-    <!-- Impor Chart.js untuk grafik mini -->
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="images/logo.jpeg">
 </head>
 <body class="dashboard-body">
-    <div class="dashboard-container">
+    <div class="container">
         <header>
             <div class="header-left">
-                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <!-- Logo dengan kelas yang benar dan konsisten -->
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
-            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div class="header-right">
+                <div class="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <i class="fas fa-moon"></i>
+                </div>
+                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
         </header>
 
         <nav class="main-nav">
@@ -46,138 +56,135 @@
             </div>
         </nav>
 
-        <!-- Tombol Tindakan Cepat -->
-        <div class="quick-actions">
-            <button class="action-btn" id="quickAddIncome">
-                <i class="fas fa-plus"></i>
-                <span>Income</span>
-            </button>
-            <button class="action-btn" id="quickAddExpense">
-                <i class="fas fa-minus"></i>
-                <span>Expense</span>
-            </button>
-            <button class="action-btn" id="quickTransfer">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Transfer</span>
-            </button>
-            <button class="action-btn" id="quickBudget">
-                <i class="fas fa-chart-pie"></i>
-                <span>Budget</span>
-            </button>
-        </div>
-
-        <!-- Tip Keuangan Harian -->
-        <div class="finance-tip">
-            <i class="fas fa-lightbulb"></i>
-            <p id="dailyTip">Loading today's financial tip...</p>
-        </div>
-
-        <!-- Tata Letak Grid untuk Dashboard -->
-        <div class="dashboard-grid">
-            <!-- Kartu Statistik (Lebar Penuh) -->
-            <div class="grid-item full-width">
-                <div class="stats-summary">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon"><i class="fas fa-wallet"></i></div>
-                            <h3>Total Balance</h3>
-                        </div>
-                        <p id="totalBalance">Rp 0</p>
-                        <div class="stat-footer">
-                            <span class="trend" id="balanceTrend"><i class="fas fa-minus"></i> 0%</span>
-                            <span class="period">vs last month</span>
-                        </div>
+        <main>
+            <!-- Bagian Ringkasan Statistik Utama -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
+                        <h3>Total Balance</h3>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
-                            <h3>Monthly Income</h3>
-                        </div>
-                        <p id="monthlyIncome">Rp 0</p>
-                        <div class="stat-footer">
-                            <span class="trend" id="incomeTrend"><i class="fas fa-minus"></i> 0%</span>
-                            <span class="period">vs last month</span>
-                        </div>
+                    <p id="totalBalance">Rp 0</p>
+                    <div class="stat-footer">
+                        <span class="trend" id="balanceTrend"><i class="fas fa-minus"></i> 0.0%</span>
+                        <span class="period">vs last month</span>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
-                            <h3>Monthly Expenses</h3>
-                        </div>
-                        <p id="monthlyExpenses">Rp 0</p>
-                        <div class="stat-footer">
-                            <span class="trend" id="expenseTrend"><i class="fas fa-minus"></i> 0%</span>
-                            <span class="period">vs last month</span>
-                        </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                        <h3>Monthly Income</h3>
+                    </div>
+                    <p id="monthlyIncome">Rp 0</p>
+                    <div class="stat-footer">
+                        <span class="trend" id="incomeTrend"><i class="fas fa-minus"></i> 0.0%</span>
+                        <span class="period">vs last month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                        <h3>Monthly Expenses</h3>
+                    </div>
+                    <p id="monthlyExpenses">Rp 0</p>
+                    <div class="stat-footer">
+                        <span class="trend" id="expenseTrend"><i class="fas fa-minus"></i> 0.0%</span>
+                        <span class="period">vs last month</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Grafik Mini -->
-            <div class="grid-item">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-line"></i> Weekly Trends</h2>
-                </div>
-                <div class="mini-charts">
-                    <div class="mini-chart-card">
-                        <h3>Income</h3>
-                        <canvas id="incomeSparkline"></canvas>
-                        <p class="chart-value" id="weeklyIncomeTotal">Rp 0</p>
-                    </div>
-                    <div class="mini-chart-card">
-                        <h3>Expense</h3>
-                        <canvas id="expenseSparkline"></canvas>
-                        <p class="chart-value" id="weeklyExpenseTotal">Rp 0</p>
-                    </div>
-                </div>
+            <!-- Bagian Tombol Aksi Cepat -->
+            <div class="quick-actions">
+                <button class="action-btn" id="quickAddIncome">
+                    <i class="fas fa-plus"></i>
+                    <span>Income</span>
+                </button>
+                <button class="action-btn" id="quickAddExpense">
+                    <i class="fas fa-minus"></i>
+                    <span>Expense</span>
+                </button>
+                <button class="action-btn" id="quickTransfer">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transfer</span>
+                </button>
+                <button class="action-btn" id="quickBudget">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Budget</span>
+                </button>
             </div>
 
-            <!-- Ringkasan Anggaran dengan Toggle View -->
-            <div class="grid-item">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-pie"></i> Top Budget Status</h2>
-                    <div class="section-controls">
-                        <div class="toggle-view">
-                            <button id="viewByPercentage" class="toggle-btn active">By Progress</button>
-                            <button id="viewByAmount" class="toggle-btn">By Limit</button>
+            <!-- Tata Letak Grid Utama Dashboard -->
+            <div class="dashboard-grid">
+                <div class="grid-item">
+                    <div class="section-header">
+                        <h2><i class="fas fa-history"></i> Recent Transactions</h2>
+                        <a href="transactions.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div id="recentTransactionsList" class="transaction-list enhanced">
+                        <p class="empty-state">Loading recent transactions...</p>
+                    </div>
+                </div>
+
+                <div class="grid-item">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-line"></i> Weekly Trends</h2>
+                    </div>
+                    <div class="mini-charts">
+                        <div class="mini-chart-card">
+                            <h3>Income</h3>
+                            <canvas id="incomeSparkline"></canvas>
+                            <p class="chart-value" id="weeklyIncomeTotal">Rp 0</p>
                         </div>
-                        <a href="budgets.html" class="view-all">Manage <i class="fas fa-chevron-right"></i></a>
+                        <div class="mini-chart-card">
+                            <h3>Expense</h3>
+                            <canvas id="expenseSparkline"></canvas>
+                            <p class="chart-value" id="weeklyExpenseTotal">Rp 0</p>
+                        </div>
                     </div>
                 </div>
-                <div class="budget-progress-list" id="topBudgets">
-                    <p class="empty-state">Loading budget data...</p>
-                </div>
-            </div>
 
-            <!-- Kartu Dompet -->
-            <div class="grid-item full-width">
-                <div class="section-header">
-                    <h2><i class="fas fa-wallet"></i> Your Wallets</h2>
-                    <a href="wallets.html" class="view-all">Manage <i class="fas fa-chevron-right"></i></a>
+                <div class="grid-item">
+                    <div class="section-header">
+                        <h2><i class="fas fa-wallet"></i> Top Wallets</h2>
+                        <a href="wallets.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div id="topWallets" class="wallet-grid">
+                        <p class="empty-state">Loading wallets...</p>
+                    </div>
                 </div>
-                <div class="wallet-grid" id="topWallets">
-                    <p class="empty-state">Loading wallet data...</p>
-                </div>
-            </div>
 
-            <!-- Aktivitas Terbaru -->
-            <div class="grid-item full-width">
-                <div class="section-header">
-                    <h2><i class="fas fa-history"></i> Recent Activity</h2>
-                    <a href="transactions.html" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+                <div class="grid-item">
+                    <div class="section-header">
+                        <h2><i class="fas fa-bullseye"></i> Top Budgets</h2>
+                        <div class="section-controls">
+                            <div class="toggle-view">
+                                <button class="toggle-btn active" id="viewByPercentage">By Progress</button>
+                                <button class="toggle-btn" id="viewByAmount">By Limit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="topBudgets" class="budget-progress-list">
+                        <p class="empty-state">Loading budgets...</p>
+                    </div>
                 </div>
-                <div id="recentTransactionsList" class="transaction-list enhanced">
-                    <p class="empty-state">Loading recent transactions...</p>
+
+                <div class="grid-item full-width">
+                    <div class="finance-tip">
+                        <i class="fas fa-lightbulb"></i>
+                        <p id="dailyTip">Loading financial tip...</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Finance Tracker. All rights reserved.</p>
+        </footer>
     </div>
 
-    <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/utils.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/dropdown.js"></script>
-    
 </body>
 </html>
