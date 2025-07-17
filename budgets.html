@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <!-- Filter Periode -->
+            <!-- Filter Periode Utama -->
             <div class="period-filter">
                 <div class="form-group">
                     <label for="periodMonth">Month</label>
@@ -76,7 +76,7 @@
 
             <!-- Ringkasan Budget -->
             <div id="budgetSummary" class="budget-summary">
-                <!-- Summary items will be inserted here by JavaScript -->
+                <!-- Summary items akan diisi oleh JavaScript -->
             </div>
 
             <!-- Visualisasi Budget (Grafik) -->
@@ -106,11 +106,11 @@
                         </tr>
                     </thead>
                     <tbody id="budgetTableBody">
-                        <!-- Budget rows will be inserted here by JavaScript -->
+                        <!-- Baris budget akan diisi oleh JavaScript -->
                         <tr><td colspan="6" class="empty-state">Loading budgets...</td></tr>
                     </tbody>
                     <tfoot id="budgetTableFooter">
-                        <!-- Total row will be inserted here by JavaScript -->
+                        <!-- Baris total akan diisi oleh JavaScript -->
                     </tfoot>
                 </table>
             </div>
@@ -121,7 +121,7 @@
         </footer>
     </div>
 
-    <!-- Add/Edit Budget Modal -->
+    <!-- Add/Edit Budget Modal yang sudah diperbarui -->
     <div id="addBudgetModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -129,13 +129,28 @@
                 <span class="close-modal">&times;</span>
             </div>
             <form id="addBudgetForm">
-                <input type="hidden" id="budgetCategoryHidden"> <!-- For editing -->
+                <input type="hidden" id="budgetMode" value="add"> <!-- Untuk membedakan mode add/edit -->
+                
+                <!-- Pilihan periode di dalam modal -->
+                <div class="form-group-inline">
+                    <div class="form-group">
+                        <label for="modalPeriodMonth">For Month</label>
+                        <select id="modalPeriodMonth" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalPeriodYear">For Year</label>
+                        <select id="modalPeriodYear" required></select>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="budgetCategory">Category</label>
                     <select id="budgetCategory" required>
-                        <option value="" disabled selected>Select a category</option>
-                        <!-- Options will be populated by JavaScript -->
+                        <!-- Opsi akan diisi oleh JavaScript -->
                     </select>
+                    <small id="categoryWarning" class="status-message" style="color: var(--danger-color); display: none;">
+                        No expense categories found. Please add them in Settings first.
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="budgetLimit">Budget Limit</label>
