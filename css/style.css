@@ -17,6 +17,7 @@
   --expense-color: #f44336;
   --gradient-start: #4CAF50;
   --gradient-end: #8BC34A;
+  --calendar-icon-filter: invert(0.5);
 }
 
 /* Dark Theme */
@@ -35,6 +36,7 @@
   --expense-color: #ff6b6b;
   --gradient-start: #F9A825;
   --gradient-end: #F57F17;
+  --calendar-icon-filter: invert(0.8);
 }
 
 /* Blue Theme */
@@ -155,7 +157,6 @@ header {
     background-color: var(--accent-color);
     color: white;
 }
-
 /* Dropdown menu styles */
 .dropdown {
     position: relative;
@@ -337,6 +338,29 @@ header {
     flex: 1;
 }
 
+/* Date input styling */
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+input[type="date"]:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+/* Styling untuk browser yang mendukung ::-webkit-calendar-picker-indicator */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: var(--calendar-icon-filter);
+    cursor: pointer;
+}
+
 /* Common buttons */
 .btn-primary {
     background-color: var(--accent-color);
@@ -441,7 +465,6 @@ header {
 .btn-filter.reset:hover {
     background-color: var(--bg-primary);
 }
-
 /* Common status messages */
 .status-message {
     margin-top: 1rem;
@@ -669,19 +692,40 @@ header {
     transform: translateX(3px);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .btn-logout {
-        align-self: flex-end;
-    }
+/* Toggle buttons for section views */
+.section-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
+.toggle-view {
+    display: flex;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 500;
+}
+
+.toggle-btn:hover:not(.active) {
+    background-color: var(--border-color);
+}
 /* ============================================================================ */
 /* LOGIN PAGE (index.html)
 /* ============================================================================ */
@@ -928,7 +972,6 @@ body:not(.dashboard-body) {
 .period {
     color: var(--text-secondary);
 }
-
 /* Mini Charts */
 .mini-charts {
     display: grid;
@@ -953,7 +996,6 @@ body:not(.dashboard-body) {
     margin-bottom: 0.5rem;
     height: 80px !important;
 }
-
 .chart-value {
     margin: 0;
     font-size: 1.2rem;
@@ -1023,40 +1065,6 @@ body:not(.dashboard-body) {
 .budget-percentage.warning { color: #f9a825; }
 .budget-percentage.danger { color: var(--expense-color); }
 
-/* Toggle buttons for section views */
-.section-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.toggle-view {
-    display: flex;
-    background-color: var(--bg-primary);
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
-
-.toggle-btn {
-    background: none;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-.toggle-btn.active {
-    background-color: var(--accent-color);
-    color: white;
-    font-weight: 500;
-}
-
-.toggle-btn:hover:not(.active) {
-    background-color: var(--border-color);
-}
 /* Wallet Grid */
 .wallet-grid {
     display: grid;
@@ -1150,21 +1158,94 @@ body:not(.dashboard-body) {
     text-transform: uppercase;
 }
 
-/* Responsive Adjustments for Dashboard */
-@media (max-width: 768px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .quick-actions {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .wallet-grid {
-        grid-template-columns: 1fr;
-    }
+/* ============================================================================ */
+/* WALLETS PAGE (wallets.html)
+/* ============================================================================ */
+
+.wallet-list-container {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 
+.wallet-item {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.wallet-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.wallet-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.wallet-item .wallet-icon {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.wallet-item h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+}
+
+.wallet-item .wallet-balance {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    align-self: flex-end;
+    margin-top: 1rem;
+}
+
+.wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.wallet-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-wallet-btn, .delete-wallet-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-wallet-btn:hover, .delete-wallet-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
 /* ============================================================================ */
 /* TRANSACTIONS PAGE (transactions.html)
 /* ============================================================================ */
@@ -1386,97 +1467,6 @@ details[open] > summary .collapse-icon {
 }
 
 /* ============================================================================ */
-/* WALLETS PAGE (wallets.html)
-/* ============================================================================ */
-
-.wallet-list-container {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.wallet-item {
-    color: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 120px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.wallet-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-.wallet-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.wallet-item .wallet-icon {
-    font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.wallet-item h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: white;
-}
-
-.wallet-item .wallet-balance {
-    margin: 0;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: white;
-    align-self: flex-end;
-    margin-top: 1rem;
-}
-/* ============================================================================ */
-/* Penambahan Tanggal Di style.css */
-/* ============================================================================ */
-input[type="date"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: border-color 0.3s;
-}
-
-input[type="date"]:focus {
-    border-color: var(--accent-color);
-    outline: none;
-}
-
-/* Styling untuk browser yang mendukung ::-webkit-calendar-picker-indicator */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: var(--calendar-icon-filter);
-    cursor: pointer;
-}
-
-/* Variabel CSS untuk tema gelap/terang */
-:root {
-    --calendar-icon-filter: invert(0.5);
-}
-
-[data-theme="dark"] {
-    --calendar-icon-filter: invert(0.8);
-}
-/* ============================================================================ */
 /* BUDGETS PAGE (budgets.html)
 /* ============================================================================ */
 
@@ -1647,31 +1637,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-top: 2px solid var(--border-color);
 }
 
-/* Responsive adjustments for budgets */
-@media (max-width: 768px) {
-    .budget-table th,
-    .budget-table td {
-        padding: 0.5rem;
-    }
-    
-    .budget-table {
-        font-size: 0.85rem;
-    }
-    
-    .budget-visualization {
-        grid-template-columns: 1fr;
-    }
-    
-    .chart-container {
-        height: 250px;
-    }
-}
-
-/* Dark theme adjustments for charts */
-[data-theme="dark"] .chart-container canvas {
-    filter: brightness(0.9);
-}
-
 /* ============================================================================ */
 /* REPORTS PAGE (reports.html)
 /* ============================================================================ */
@@ -1738,11 +1703,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-bottom: 1px solid var(--border-color);
 }
 
-.report-table th {
+	
     background-color: var(--bg-primary);
     font-weight: 600;
 }
-
 /* ============================================================================ */
 /* SETTINGS PAGE (settings.html)
 /* ============================================================================ */
@@ -2083,4 +2047,265 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     overflow: hidden;
     cursor: pointer;
 }
+/* ============================================================================ */
+/* RESPONSIVE ADJUSTMENTS
+/* ============================================================================ */
 
+/* Responsive adjustments for all pages */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .btn-logout {
+        align-self: flex-end;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .wallet-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .budget-table th,
+    .budget-table td {
+        padding: 0.5rem;
+    }
+    
+    .budget-table {
+        font-size: 0.85rem;
+    }
+    
+    .budget-visualization {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .table-header-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .table-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .table-actions .search-container {
+        width: 100%;
+    }
+    
+    .table-actions .search-container input {
+        width: 100%;
+    }
+    
+    .filter-panel .filter-controls {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-panel .filter-actions {
+        flex-direction: column;
+    }
+    
+    .report-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .report-filters .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .theme-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .theme-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .pagination-container {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+    
+    .transaction-item.enhanced {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .transaction-date {
+        margin-bottom: 10px;
+    }
+    
+    .transaction-amount {
+        margin-top: 10px;
+        align-self: flex-end;
+    }
+}
+
+/* Dark theme adjustments for charts */
+[data-theme="dark"] .chart-container canvas {
+    filter: brightness(0.9);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Apply animations to elements */
+.grid-item, .wallet-card, .stat-card, .budget-item {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.transaction-item.enhanced {
+    animation: slideInUp 0.3s ease-out forwards;
+}
+
+.action-btn:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Print styles */
+@media print {
+    body {
+        background-color: white;
+        color: black;
+    }
+    
+    header, nav, footer, .btn-logout, .quick-actions {
+        display: none;
+    }
+    
+    .dashboard-container, .content-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+    
+    .grid-item, .wallet-card, .budget-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .transaction-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .transaction-table th, .transaction-table td {
+        border: 1px solid #ddd;
+    }
+    
+    .chart-container {
+        height: auto;
+        page-break-inside: avoid;
+    }
+}
+
+/* Accessibility improvements */
+:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.btn-primary:focus, .btn-secondary:focus, .btn-logout:focus {
+    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.5);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    :root {
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --border-color: #000000;
+        --accent-color: #0000FF;
+        --accent-hover: #000099;
+        --danger-color: #FF0000;
+        --income-color: #006600;
+        --expense-color: #CC0000;
+    }
+    
+    [data-theme="dark"] {
+        --text-primary: #FFFFFF;
+        --text-secondary: #CCCCCC;
+        --border-color: #FFFFFF;
+        --accent-color: #FFFF00;
+        --accent-hover: #CCCC00;
+        --danger-color: #FF6666;
+        --income-color: #66FF66;
+        --expense-color: #FF6666;
+    }
+    
+    .transaction-table th, .transaction-table td,
+    .budget-table th, .budget-table td {
+        border: 1px solid var(--border-color);
+    }
+    
+    .btn-primary, .btn-secondary, .btn-logout {
+        border: 2px solid var(--border-color);
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+    
+    .action-btn:hover {
+        animation: none;
+    }
+}
