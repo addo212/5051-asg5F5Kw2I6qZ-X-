@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budgets - Finance Tracker</title>
-
-    <!-- Jalankan skrip pencegah kedipan SEBELUM CSS dimuat -->
+    
+    <!-- Skrip pencegah kedipan tema -->
     <script>
         (function() {
             try {
@@ -15,26 +15,30 @@
         })();
     </script>
     
-    <!-- Impor Pustaka Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <!-- Menggunakan main.css yang sudah dipecah -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="icon" href="images/logo.jpeg">
 </head>
-    
-<body class="dashboard-body">
-    <div class="dashboard-container">
-        <!-- ================= HEADER ================= -->
+<body>
+    <div class="container">
         <header>
             <div class="header-left">
-                <img src="images/logo.jpeg" alt="ASDO Logo" class="dashboard-logo">
+                <!-- Logo dengan kelas yang benar dan konsisten -->
+                <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
-            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div class="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fas fa-moon"></i>
+            </div>
         </header>
 
-        <!-- ================= NAVIGASI ================= -->
         <nav class="main-nav">
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
@@ -49,56 +53,47 @@
             </div>
         </nav>
 
-        <!-- ================= KONTEN UTAMA ================= -->
-        <div class="content-container">
-            <!-- FILTER PERIODE -->
+        <main>
+            <div class="page-header">
+                <h2>Manage Budgets</h2>
+                <div class="page-actions">
+                    <button id="addBudgetBtn" class="btn-primary"><i class="fas fa-plus"></i> Add New Budget</button>
+                </div>
+            </div>
+
+            <!-- Filter Periode -->
             <div class="period-filter">
                 <div class="form-group">
-                    <label for="budgetPeriodMonth">Month</label>
-                    <select id="budgetPeriodMonth" required>
-                        <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                    </select>
+                    <label for="periodMonth">Month</label>
+                    <select id="periodMonth"></select>
                 </div>
                 <div class="form-group">
-                    <label for="budgetPeriodYear">Year</label>
-                    <select id="budgetPeriodYear">
-                        <!-- Years will be populated by JavaScript -->
-                    </select>
+                    <label for="periodYear">Year</label>
+                    <select id="periodYear"></select>
                 </div>
-                <button id="viewBudgetPeriodBtn" class="btn-filter apply">View Period</button>
+                <button id="applyPeriodFilterBtn" class="btn-primary-small">Apply</button>
             </div>
 
-            <!-- INDIKATOR PERIODE YANG SEDANG DITAMPILKAN -->
-            <div class="current-period-indicator">
-                <h3>Showing Budget for: <span id="currentPeriodDisplay">Current Month</span></h3>
+            <!-- Ringkasan Budget -->
+            <div id="budgetSummary" class="budget-summary">
+                <!-- Summary items will be inserted here by JavaScript -->
             </div>
 
-            <!-- BAGIAN UNTUK MENAMPILKAN BUDGET YANG ADA -->
-            <h2 style="margin-top: 2rem;"><i class="fas fa-tasks"></i> Your Budgets for This Period</h2>
-
-            <!-- Container untuk chart -->
+            <!-- Visualisasi Budget (Grafik) -->
             <div class="budget-visualization">
                 <div class="chart-container">
-                    <canvas id="budgetPieChart"></canvas>
+                    <canvas id="doughnutChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <canvas id="budgetBarChart"></canvas>
+                    <canvas id="barChart"></canvas>
                 </div>
             </div>
 
-            <!-- Tabel budget yang baru -->
+            <!-- Tabel Detail Budget -->
             <div class="budget-table-container">
+                <div class="section-header">
+                    <h3>Budget Details</h3>
+                </div>
                 <table class="budget-table">
                     <thead>
                         <tr>
@@ -106,77 +101,52 @@
                             <th>Limit</th>
                             <th>Spent</th>
                             <th>Remaining</th>
-                            <th>Progress</th>
+                            <th style="width: 20%;">Progress</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="budgetTableBody">
-                        <!-- Data budget akan dimuat di sini oleh JS -->
-                        <tr>
-                            <td colspan="6" class="empty-state">Loading budgets...</td>
-                        </tr>
+                        <!-- Budget rows will be inserted here by JavaScript -->
+                        <tr><td colspan="6" class="empty-state">Loading budgets...</td></tr>
                     </tbody>
+                    <tfoot id="budgetTableFooter">
+                        <!-- Total row will be inserted here by JavaScript -->
+                    </tfoot>
                 </table>
             </div>
+        </main>
 
-            <!-- BAGIAN UNTUK MEMBUAT BUDGET BARU -->
-            <h2 style="margin-top: 2rem;"><i class="fas fa-plus-circle"></i> Create New Budget</h2>
-            <form id="addBudgetForm" class="add-item-form">
+        <footer>
+            <p>&copy; 2025 Finance Tracker. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Add/Edit Budget Modal -->
+    <div id="addBudgetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="budgetModalTitle">Add New Budget</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="addBudgetForm">
+                <input type="hidden" id="budgetCategoryHidden"> <!-- For editing -->
                 <div class="form-group">
-                    <label for="newBudgetPeriod">Period</label>
-                    <select id="newBudgetPeriod" required>
-                        <option value="current">Current Month</option>
-                        <option value="custom">Custom Period</option>
-                    </select>
-                </div>
-                <div id="customPeriodFields" style="display: none;">
-                    <div class="form-group-inline">
-                        <div class="form-group">
-                            <label for="customBudgetMonth">Month</label>
-                            <select id="customBudgetMonth" required>
-                                <option value="01">January</option>
-                                <option value="02">February</option>
-                                <option value="03">March</option>
-                                <option value="04">April</option>
-                                <option value="05">May</option>
-                                <option value="06">June</option>
-                                <option value="07">July</option>
-                                <option value="08">August</option>
-                                <option value="09">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="customBudgetYear">Year</label>
-                            <select id="customBudgetYear">
-                                <!-- Years will be populated by JavaScript -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="budgetCategory">Category (Expense Account)</label>
+                    <label for="budgetCategory">Category</label>
                     <select id="budgetCategory" required>
-                        <!-- Opsi kategori pengeluaran akan dimuat oleh JS -->
-                        <option value="">Select a category...</option>
+                        <option value="" disabled selected>Select a category</option>
+                        <!-- Options will be populated by JavaScript -->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="budgetLimit">Monthly Limit</label>
-                    <input type="number" id="budgetLimit" placeholder="e.g., 2000000" required>
+                    <label for="budgetLimit">Budget Limit</label>
+                    <input type="number" id="budgetLimit" placeholder="e.g., 1000000" min="0" step="1" required>
                 </div>
-                <button type="submit" class="btn-primary">Create Budget</button>
-                <p id="budgetError" class="status-message" style="color: var(--danger-color); display: none;"></p>
+                <button type="submit" id="budgetSubmitBtn" class="btn-primary">Save Budget</button>
             </form>
         </div>
     </div>
 
-    <!-- ================= SCRIPTS ================= -->
-    <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/budgets.js"></script>
-    <script type="module" src="js/utils.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/dropdown.js"></script>
 </body>
