@@ -9,7 +9,103 @@
     margin-top: 1.5rem;
 }
 
-/* Wallet card styling is in components/cards.css, but we can add specific overrides here if needed */
-.wallets-grid .wallet-card {
-    min-height: 160px; /* Ensure consistent height */
+/* Enhanced Wallet Card Design */
+.wallet-card {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 16px; /* Sudut lebih tumpul dan modern */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 180px; /* Memberi ruang lebih */
+    position: relative;
+    overflow: hidden; /* Penting untuk efek pseudo-element */
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Border halus */
+}
+
+/* Efek kilau (sheen) pada kartu */
+.wallet-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(45deg);
+    transition: opacity 0.5s ease;
+    opacity: 0;
+}
+
+.wallet-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.wallet-card:hover::before {
+    opacity: 1; /* Tampilkan efek kilau saat hover */
+}
+
+/* Wallet header (ikon dan tombol aksi) */
+.wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    z-index: 2; /* Pastikan di atas pseudo-element */
+}
+
+.wallet-card .wallet-icon {
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.wallet-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-wallet-btn, .delete-wallet-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(2px); /* Efek glassmorphism */
+}
+
+.edit-wallet-btn:hover, .delete-wallet-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Konten utama kartu */
+.wallet-content {
+    margin-top: auto; /* Mendorong konten ini ke bawah */
+    z-index: 2;
+}
+
+.wallet-card h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.wallet-card .wallet-balance {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
