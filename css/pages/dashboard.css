@@ -1,4 +1,73 @@
+css
+
+
 /* css/pages/dashboard.css */
+
+/* ============================================================================ */
+/* QUICK ACTIONS
+/* ============================================================================ */
+.quick-actions {
+    display: grid; /* Menggunakan grid untuk layout yang lebih mudah diatur */
+    grid-template-columns: repeat(4, 1fr); /* Membuat 4 kolom dengan lebar yang sama */
+    gap: 1.5rem; /* Jarak antar tombol */
+    margin: 2rem 0; /* Memberi jarak atas dan bawah */
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column; /* Menyusun ikon dan teks secara vertikal */
+    align-items: center;   /* Menengahkan konten secara horizontal */
+    justify-content: center; /* Menengahkan konten secara vertikal */
+    gap: 0.75rem; /* Jarak antara ikon dan teks */
+    padding: 1.5rem 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--card-shadow);
+}
+
+.action-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-color: var(--accent-color);
+}
+
+.action-btn i {
+    font-size: 1.8rem; /* Ukuran ikon yang lebih besar */
+    color: var(--accent-color);
+    line-height: 1; /* Memastikan tidak ada spasi ekstra */
+}
+
+.action-btn span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Responsive adjustments untuk Quick Actions */
+@media (max-width: 768px) {
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr); /* Menjadi 2 kolom di layar tablet */
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr); /* Tetap 2 kolom di layar HP agar tidak terlalu memanjang */
+        gap: 1rem;
+    }
+    .action-btn {
+        padding: 1rem;
+    }
+}
+
+
+/* ============================================================================ */
+/* DASHBOARD STYLES LAINNYA
+/* ============================================================================ */
 
 /* Stats summary grid */
 .stats-summary {
