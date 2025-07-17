@@ -1,0 +1,92 @@
+/* css/components/modals.css */
+
+/* Modal container */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    animation: fadeIn 0.3s ease;
+}
+
+/* Modal content */
+.modal-content {
+    background-color: var(--bg-secondary);
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    animation: slideInUp 0.3s ease;
+}
+
+/* Modal header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* Close button */
+.close-modal {
+    color: var(--text-secondary);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: var(--text-primary);
+}
+
+/* Modal animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Modal footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+}
