@@ -1,255 +1,569 @@
 /* css/components/cards.css */
 
-/* Common content container */
-.content-container {
-    background: var(--bg-secondary);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 1.5rem;
-}
+/* ============================================================================ */
+/* BASIC CARD STYLES
+/* ============================================================================ */
 
-.content-container h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-primary);
-    margin-top: 0;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.content-container h2 i {
-    color: var(--accent-color);
-}
-
-/* Summary card */
-.summary-card {
+.card {
     background-color: var(--bg-secondary);
     border-radius: 12px;
     box-shadow: var(--card-shadow);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.summary-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+.card:hover {
+    box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.1);
+    transform: translateY(-2px);
 }
 
-.summary-header {
+.card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
 }
 
-.summary-header h3 {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-.summary-content {
-    text-align: center;
-}
-
-.large-amount {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-/* Stats cards */
-.stat-card {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    animation: fadeInUp 0.5s ease forwards;
-    opacity: 0;
-    background: var(--bg-secondary);
-    padding: 1.8rem;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end)); 
-}
-
-.stat-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-
-.stat-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+.card-header h3 {
     font-size: 1.2rem;
-}
-
-.stat-card h3 {
-    color: var(--text-secondary);
-    margin-top: 0;
-    font-size: 1rem;
-    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
-.stat-card p {
-    color: var(--text-primary);
-    font-size: 2rem;
-    font-weight: 600;
-    margin: 15px 0 0;
-}
-
-.stat-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 0.85rem;
-}
-
-/* Mini chart cards */
-.mini-chart-card {
-    background-color: var(--bg-primary);
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.mini-chart-card h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1rem;
-    color: var(--text-secondary);
-}
-
-.mini-chart-card canvas {
-    margin-bottom: 0.5rem;
-    height: 80px !important;
-}
-
-.chart-value {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* Budget item cards */
-.budget-item {
-    background-color: var(--bg-primary);
-    padding: 1rem;
-    border-radius: 8px;
-}
-
-.budget-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-}
-
-.budget-info h4 {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-}
-
-.budget-info p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-/* Report cards */
-.report-card {
-    background-color: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    border-left: 5px solid;
-}
-
-.report-card.income { border-color: var(--income-color); }
-.report-card.expense { border-color: var(--expense-color); }
-.report-card.net { border-color: var(--accent-color); }
-
-.report-card h4 {
-    margin: 0 0 0.5rem 0;
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
-
-.report-card p {
-    margin: 0;
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* Finance tip card */
-.finance-tip {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background-color: var(--bg-secondary);
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--card-shadow);
-    border-left: 4px solid var(--accent-color);
-}
-
-.finance-tip i {
-    font-size: 1.5rem;
+.card-header h3 i {
     color: var(--accent-color);
 }
 
-.finance-tip p {
-    margin: 0;
-    color: var(--text-primary);
-    font-style: italic;
+.card-header .card-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
-/* Card animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
+.card-content {
+    color: var(--text-primary);
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================================================ */
+/* CARD VARIANTS
+/* ============================================================================ */
+
+/* Summary Card */
+.summary-card {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card:hover {
+    box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.1);
+    transform: translateY(-2px);
+}
+
+.summary-card .card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover .card-icon {
+    background-color: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.summary-card h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+}
+
+.summary-card .amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.summary-card .trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.summary-card .trend.positive {
+    color: var(--success-color);
+}
+
+.summary-card .trend.negative {
+    color: var(--danger-color);
+}
+
+.summary-card .trend.neutral {
+    color: var(--text-tertiary);
+}
+
+/* Wallet Card */
+.wallet-card {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.wallet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(var(--accent-color-rgb), 0.2);
+}
+
+.wallet-card .wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.wallet-card .wallet-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.wallet-card:hover .wallet-icon {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.wallet-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.wallet-card .wallet-balance {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.wallet-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wallet-card:hover::before {
+    opacity: 1;
+}
+
+/* Transaction Card */
+.transaction-item {
+    background-color: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.transaction-item:hover {
+    border-color: var(--accent-color);
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.transaction-item .transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+}
+
+.transaction-item .transaction-icon.income {
+    background-color: rgba(var(--income-color-rgb), 0.1);
+    color: var(--income-color);
+}
+
+.transaction-item .transaction-icon.expense {
+    background-color: rgba(var(--expense-color-rgb), 0.1);
+    color: var(--expense-color);
+}
+
+.transaction-item:hover .transaction-icon.income {
+    background-color: var(--income-color);
+    color: white;
+}
+
+.transaction-item:hover .transaction-icon.expense {
+    background-color: var(--expense-color);
+    color: white;
+}
+
+.transaction-item .transaction-details {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.transaction-item .transaction-info {
+    flex-grow: 1;
+}
+
+.transaction-item h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.transaction-item p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.transaction-item .transaction-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.transaction-item .amount-income {
+    color: var(--income-color);
+}
+
+.transaction-item .transaction-amount.amount-expense {
+    color: var(--expense-color);
+}
+
+/* Enhanced Transaction Item */
+.transaction-item.enhanced {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.transaction-item.enhanced .transaction-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    text-align: center;
+}
+
+.transaction-item.enhanced .transaction-date .day {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.transaction-item.enhanced .transaction-date .month {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Budget Card */
+.budget-item {
+    background-color: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.budget-item:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.budget-item .budget-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.budget-item h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.budget-item:hover .budget-info h4 {
+    color: var(--accent-color);
+}
+
+.budget-item .budget-amount {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.budget-item .budget-bar {
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.budget-item .budget-progress {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.budget-item .budget-progress.safe {
+    background-color: var(--success-color);
+}
+
+.budget-item .budget-progress.warning {
+    background-color: var(--warning-color);
+}
+
+.budget-item .budget-progress.danger {
+    background-color: var(--danger-color);
+}
+
+.budget-item .budget-percentage {
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.budget-item .budget-percentage.safe {
+    color: var(--success-color);
+}
+
+.budget-item .budget-percentage.warning {
+    color: var(--warning-color);
+}
+
+.budget-item .budget-percentage.danger {
+    color: var(--danger-color);
+}
+
+/* Stats Card */
+.stats-card {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.stats-card:hover {
+    box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.1);
+    transform: translateY(-2px);
+}
+
+.stats-card .stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stats-card .stats-header h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stats-card .stats-header h3 i {
+    color: var(--accent-color);
+}
+
+.stats-card .stats-content {
+    height: 200px;
+    position: relative;
+}
+
+.stats-card .stats-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stats-card .stats-total {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stats-card .stats-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Tip Card */
+.tip-card {
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.15);
+}
+
+.tip-card .tip-icon {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.tip-card .tip-content {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* ============================================================================ */
+/* CARD GRID LAYOUTS
+/* ============================================================================ */
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* ============================================================================ */
+/* CARD ANIMATIONS
+/* ============================================================================ */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card-animate-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* ============================================================================ */
+/* RESPONSIVE ADJUSTMENTS
+/* ============================================================================ */
+
+@media (max-width: 1200px) {
+    .card-grid-4 {
+        grid-template-columns: repeat(3, 1fr);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+}
+
+@media (max-width: 992px) {
+    .card-grid-3, .card-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .card-grid-2, .card-grid-3, .card-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .card {
+        padding: 1.2rem;
+    }
+    
+    .summary-card .amount {
+        font-size: 1.5rem;
     }
 }
