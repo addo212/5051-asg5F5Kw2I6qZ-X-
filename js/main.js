@@ -795,7 +795,6 @@ function displayTopBudgets(budgets) {
                     <div class="budget-progress ${statusClass}" style="width: ${Math.min(percentage, 100)}%;"></div>
                 </div>
                 <div class="budget-percentage ${statusClass}">
-                    <div class="budget-percentage ${statusClass}">
                     ${budgetViewMode === 'percentage' 
                         ? `${percentage.toFixed(0)}%` 
                         : formatRupiah(budget.limit)}
