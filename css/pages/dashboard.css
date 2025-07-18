@@ -63,35 +63,24 @@
 
 
 /* ============================================================================ */
-/* DASHBOARD STYLES LAINNYA
+/* DASHBOARD GRID ITEMS - PERBAIKAN TAMPILAN
 /* ============================================================================ */
 
-/* Stats summary grid */
-.stats-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-/* Mini Charts grid */
-.mini-charts {
-    display: grid;
-    grid-template-columns: 1fr; /* Default to one column */
-    gap: 1.5rem;
-}
-
-/* On larger screens, display side-by-side */
-@media (min-width: 576px) {
-    .mini-charts {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-/* Budget Progress List */
-.budget-progress-list {
+/* Style dasar untuk setiap kotak di grid */
+.grid-item {
+    background: var(--bg-secondary);
+    border-radius: 16px; /* Sudut lebih tumpul */
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    border-top: 4px solid var(--accent-color); /* Aksen warna di atas */
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.grid-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
 /* Enhanced Transaction List on Dashboard */
@@ -99,43 +88,146 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    max-height: 350px; /* Batasi tinggi agar tidak terlalu panjang */
+    overflow-y: auto; /* Tambahkan scroll jika konten melebihi batas */
+    padding-right: 10px; /* Ruang untuk scrollbar */
+    margin-right: -10px;
 }
+
+/* Custom Scrollbar */
+.transaction-list.enhanced::-webkit-scrollbar { width: 6px; }
+.transaction-list.enhanced::-webkit-scrollbar-track { background: transparent; }
+.transaction-list.enhanced::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 6px; }
+.transaction-list.enhanced::-webkit-scrollbar-thumb:hover { background-color: var(--accent-color); }
 
 .transaction-item.enhanced {
     display: flex;
     align-items: center;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+}
+.transaction-item.enhanced:hover {
+    border-color: var(--accent-color);
+    background-color: var(--bg-primary);
+}
+
+/* Weekly Trends - Mini Charts */
+.mini-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.mini-chart-card {
     background-color: var(--bg-primary);
     padding: 1rem;
     border-radius: 10px;
-    border: none;
-    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    border: 1px solid var(--border-color);
 }
 
-.transaction-item.enhanced:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+.mini-chart-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
-.transaction-date {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    background-color: var(--bg-secondary);
-    border-radius: 10px;
-    margin-right: 1rem;
+.mini-chart-card canvas {
+    margin-bottom: 0.5rem;
+    height: 60px !important;
 }
 
-.transaction-date .day {
+.chart-value {
+    margin: 0;
     font-size: 1.2rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-primary);
 }
 
-.transaction-date .month {
+/* Top Wallets */
+.wallet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+/* Top Budgets */
+.budget-progress-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.budget-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.budget-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.budget-info h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.budget-amount {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    text-transform: uppercase;
+}
+
+.budget-bar {
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.budget-progress {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+.budget-progress.safe { background-color: var(--income-color); }
+.budget-progress.warning { background-color: #f9a825; }
+.budget-progress.danger { background-color: var(--expense-color); }
+
+/* Toggle View Buttons */
+.toggle-view {
+    display: flex;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    padding: 2px;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(var(--accent-color-rgb), 0.2);
 }
