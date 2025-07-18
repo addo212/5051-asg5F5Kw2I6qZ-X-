@@ -11,6 +11,7 @@ import { formatRupiah } from './utils.js';
 // Global Variables
 // ============================================================================
 let userId;
+let userData;
 // Variabel global untuk melacak mode tampilan budget
 let budgetViewMode = 'percentage'; // 'percentage' atau 'amount'
 
@@ -43,6 +44,67 @@ function setupEventListeners() {
                     console.error('Error signing out:', error);
                     alert('Failed to sign out. Please try again.');
                 }
+            }
+        });
+    }
+
+    // Mobile logout button
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await signOut(auth);
+                    console.log('User signed out successfully.');
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                    alert('Failed to sign out. Please try again.');
+                }
+            }
+        });
+    }
+
+    // User menu toggle
+    const userMenuBtn = document.getElementById('userMenu');
+    if (userMenuBtn) {
+        userMenuBtn.addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!userMenuBtn.contains(event.target)) {
+                userMenuBtn.classList.remove('active');
+            }
+        });
+    }
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileNavClose = document.getElementById('mobileNavClose');
+
+    if (mobileMenuToggle && mobileNav && mobileNavClose) {
+        mobileMenuToggle.addEventListener('click', function() {
+            mobileNav.classList.add('active');
+        });
+
+        mobileNavClose.addEventListener('click', function() {
+            mobileNav.classList.remove('active');
+        });
+    }
+
+    // Notifications toggle
+    const notificationsBtn = document.getElementById('notificationsBtn');
+    if (notificationsBtn) {
+        notificationsBtn.addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+
+        // Close notifications when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!notificationsBtn.contains(event.target)) {
+                notificationsBtn.classList.remove('active');
             }
         });
     }
@@ -143,10 +205,13 @@ async function initializeDashboard() {
         document.getElementById('recentTransactionsList').innerHTML = '<p class="empty-state">Loading recent transactions...</p>';
         
         // Memuat data pengguna dan transaksi secara bersamaan
-        const [userData, transactionsData] = await Promise.all([
+        const [userDataResult, transactionsData] = await Promise.all([
             loadUserData(userId),
             loadTransactions(userId)
         ]);
+
+        // Simpan userData ke variabel global
+        userData = userDataResult;
 
         console.log("Data loaded:", { 
             userData: !!userData, 
@@ -158,6 +223,12 @@ async function initializeDashboard() {
             console.error("User data not found!");
             return;
         }
+
+        // Update user info di UI
+        updateUserInfo(userData);
+
+        // Update welcome message
+        updateWelcomeMessage(userData);
 
         // Hitung ringkasan bulanan dari semua transaksi
         const monthlySummary = calculateMonthlySummary(transactionsData);
@@ -198,6 +269,59 @@ async function initializeDashboard() {
         console.error("Error initializing dashboard:", error);
         document.getElementById('recentTransactionsList').innerHTML = 
             '<p class="empty-state">Error loading transactions. Please try refreshing the page.</p>';
+    }
+}
+
+// ============================================================================
+// User Info Functions
+// ============================================================================
+function updateUserInfo(userData) {
+    // Get user name and email
+    const userName = userData.displayName || auth.currentUser.displayName || 'User';
+    const userEmail = userData.email || auth.currentUser.email || '';
+    
+    // Update user name in header
+    const userNameElements = document.querySelectorAll('.user-name');
+    userNameElements.forEach(element => {
+        element.textContent = userName;
+    });
+    
+    // Update user email in header
+    const userEmailElements = document.querySelectorAll('.user-email');
+    userEmailElements.forEach(element => {
+        element.textContent = userEmail;
+    });
+    
+    // Update mobile nav user info
+    const mobileUserNameElement = document.querySelector('.mobile-nav-user-name');
+    if (mobileUserNameElement) {
+        mobileUserNameElement.textContent = userName;
+    }
+    
+    const mobileUserEmailElement = document.querySelector('.mobile-nav-user-email');
+    if (mobileUserEmailElement) {
+        mobileUserEmailElement.textContent = userEmail;
+    }
+    
+    // Update user avatar if available
+    if (userData.photoURL || auth.currentUser.photoURL) {
+        const photoURL = userData.photoURL || auth.currentUser.photoURL;
+        const avatarElements = document.querySelectorAll('.user-avatar img');
+        avatarElements.forEach(element => {
+            element.src = photoURL;
+        });
+    }
+}
+
+function updateWelcomeMessage(userData) {
+    // Get user's first name
+    const fullName = userData.displayName || auth.currentUser.displayName || 'User';
+    const firstName = fullName.split(' ')[0];
+    
+    // Update welcome message
+    const welcomeMessage = document.querySelector('.page-header p');
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Welcome back, ${firstName}! Here's an overview of your finances.`;
     }
 }
 
@@ -708,8 +832,7 @@ function displayTopWallets(wallets) {
         
         // Create a darker shade for gradient
         const darkerColor = adjustColor(color, -30);
-        
-        html += `
+html += `
             <div class="wallet-card" style="background: linear-gradient(135deg, ${color}, ${darkerColor})">
                 <div class="wallet-icon">
                     <i class="fas ${wallet.icon || 'fa-wallet'}"></i>
@@ -858,4 +981,4 @@ async function loadInitialData() {
         console.error("Error loading initial data:", error);
         throw error;
     }
-}
+}	
