@@ -24,7 +24,6 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <!-- Logo dengan kelas yang benar dan konsisten -->
                 <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
@@ -105,50 +104,46 @@
             <div class="content-container">
                 <div class="table-header-controls">
                     <h2><i class="fas fa-history"></i> Transaction History</h2>
-                    <div class="table-actions">
-                        <div class="search-container">
-                            <input type="text" id="searchInput" placeholder="Search transactions...">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <button id="filterToggleBtn" class="btn-secondary"><i class="fas fa-filter"></i> Filter</button>
+                    <!-- PERBAIKAN: Struktur search container yang benar -->
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search transactions...">
+                        <i class="fas fa-search search-icon"></i>
                     </div>
                 </div>
 
-                <!-- Panel Filter yang Bisa Dilipat -->
-                <div class="filter-panel collapsible" id="filterPanel">
-                    <div class="filter-controls">
-                        <div class="form-group">
-                            <label for="filterType">Type</label>
-                            <select id="filterType">
-                                <option value="">All</option>
-                                <option value="income">Income</option>
-                                <option value="expense">Expense</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="filterAccount">Account</label>
-                            <select id="filterAccount">
-                                <option value="">All</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="filterWallet">Wallet</label>
-                            <select id="filterWallet">
-                                <option value="">All</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="filterStartDate">Start Date</label>
-                            <input type="date" id="filterStartDate">
-                        </div>
-                        <div class="form-group">
-                            <label for="filterEndDate">End Date</label>
-                            <input type="date" id="filterEndDate">
-                        </div>
+                <!-- PERBAIKAN: Filter sekarang dalam satu baris -->
+                <div class="filter-bar">
+                    <div class="form-group">
+                        <label for="filterType">Type</label>
+                        <select id="filterType">
+                            <option value="">All</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterAccount">Account</label>
+                        <select id="filterAccount">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterWallet">Wallet</label>
+                        <select id="filterWallet">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterStartDate">Start Date</label>
+                        <input type="date" id="filterStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterEndDate">End Date</label>
+                        <input type="date" id="filterEndDate">
                     </div>
                     <div class="filter-actions">
-                        <button id="resetFilterBtn" class="btn-filter reset"><i class="fas fa-undo"></i> Reset</button>
-                        <button id="applyFilterBtn" class="btn-filter apply"><i class="fas fa-check"></i> Apply</button>
+                        <button id="applyFilterBtn" class="btn-filter apply" title="Apply Filters"><i class="fas fa-check"></i></button>
+                        <button id="resetFilterBtn" class="btn-filter reset" title="Reset Filters"><i class="fas fa-undo"></i></button>
                     </div>
                 </div>
 
@@ -165,14 +160,13 @@
                             </tr>
                         </thead>
                         <tbody id="transactionTableBody">
-                            <!-- Rows will be inserted here by JavaScript -->
                             <tr><td colspan="6" class="empty-state">Loading transactions...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="pagination-container" id="paginationContainer">
-                    <!-- Pagination buttons will be inserted here by JavaScript -->
+                    <!-- Tombol paginasi akan diisi oleh JavaScript -->
                 </div>
             </div>
         </main>
@@ -191,7 +185,6 @@
             </div>
             <form id="editTransactionForm">
                 <input type="hidden" id="editTransactionId">
-                <!-- Form fields similar to add form, will be populated by JS -->
                 <div class="form-group-inline">
                     <div class="form-group">
                         <label for="editTransactionType">Type</label>
