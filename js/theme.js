@@ -1,37 +1,71 @@
-// Theme management
+// js/theme.js
+
+/**
+ * Theme Manager Universal
+ * File ini menangani semua logika tema untuk seluruh aplikasi.
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Load saved theme or use default
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    
-    // Check if we're on the settings page
-    const themeOptions = document.querySelectorAll('.theme-option');
-    if (themeOptions.length > 0) {
-        // Mark active theme
-        themeOptions.forEach(option => {
-            if (option.getAttribute('data-theme') === savedTheme) {
-                option.classList.add('active');
-            }
-            
-            // Add click event
-            option.addEventListener('click', () => {
-                const theme = option.getAttribute('data-theme');
-                
-                // Update theme
-                document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-                
-                // Update active option
-                themeOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
+    // 1. Ambil elemen yang mungkin ada di halaman
+    const themeToggle = document.getElementById('themeToggle'); // Toggle sederhana di header
+    const themeOptionsContainer = document.getElementById('themeOptions'); // Opsi detail di settings
+
+    /**
+     * Fungsi pusat untuk menerapkan tema.
+     * @param {string} theme - Nama tema yang akan diterapkan (e.g., 'light', 'dark', 'blue').
+     */
+    function applyTheme(theme) {
+        // Terapkan tema ke elemen <html>
+        document.documentElement.setAttribute('data-theme', theme);
+        // Simpan pilihan ke localStorage
+        localStorage.setItem('theme', theme);
+
+        // Sinkronkan status toggle sederhana di header (jika ada)
+        if (themeToggle) {
+            // Toggle hanya merepresentasikan light/dark.
+            // Untuk tema lain seperti 'blue', anggap sebagai mode terang.
+            themeToggle.checked = (theme === 'dark');
+        }
+
+        // Sinkronkan pilihan aktif di halaman settings (jika ada)
+        if (themeOptionsContainer) {
+            themeOptionsContainer.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.remove('active');
             });
+            const activeOption = themeOptionsContainer.querySelector(`.theme-option[data-theme="${theme}"]`);
+            if (activeOption) {
+                activeOption.classList.add('active');
+            }
+        }
+    }
+
+    // 2. Muat tema saat halaman dibuka
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    // 3. Tambahkan event listener untuk toggle sederhana (akan berjalan di semua halaman)
+    if (themeToggle) {
+        themeToggle.addEventListener('change', function() {
+            const newTheme = this.checked ? 'dark' : 'light';
+            applyTheme(newTheme);
         });
     }
-    
-    // Toggle switches
+
+    // 4. Tambahkan event listener untuk opsi tema di halaman settings (hanya jika ada)
+    if (themeOptionsContainer) {
+        themeOptionsContainer.addEventListener('click', function(e) {
+            const themeOption = e.target.closest('.theme-option');
+            if (themeOption) {
+                const newTheme = themeOption.dataset.theme;
+                if (newTheme) {
+                    applyTheme(newTheme);
+                }
+            }
+        });
+    }
+
+    // 5. Menangani toggle lain yang mungkin ada di halaman settings
     const notificationsToggle = document.getElementById('notificationsToggle');
-    const soundsToggle = document.getElementById('soundsToggle');
-    
     if (notificationsToggle) {
         notificationsToggle.checked = localStorage.getItem('notifications') === 'true';
         notificationsToggle.addEventListener('change', () => {
@@ -39,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    const soundsToggle = document.getElementById('soundsToggle');
     if (soundsToggle) {
         soundsToggle.checked = localStorage.getItem('sounds') === 'true';
         soundsToggle.addEventListener('change', () => {
