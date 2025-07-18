@@ -1,0 +1,72 @@
+/* css/pages/profile.css */
+
+/* ============================================================================ */
+/* PROFILE PAGE STYLES
+/* ============================================================================ */
+
+.profile-avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+    border: 3px solid var(--accent-color);
+    box-shadow: 0 4px 10px rgba(var(--accent-color-rgb), 0.2);
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    margin-bottom: var(--spacing-lg);
+}
+
+.profile-info-item {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.profile-value {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* ============================================================================ */
+/* RESPONSIVE ADJUSTMENTS
+/* ============================================================================ */
+
+@media (max-width: 992px) {
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-avatar-container {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .profile-info-item {
+        margin-bottom: var(--spacing-sm);
+    }
+}
