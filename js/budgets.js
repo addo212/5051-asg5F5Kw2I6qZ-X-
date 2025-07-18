@@ -26,7 +26,7 @@ const database = getDatabase(app);
 // GLOBAL STATE
 // ============================================================================
 let userId;
-let expenseAccounts = {};
+let expenseAccounts = []; // Sekarang menjadi array
 let doughnutChartInstance = null;
 let barChartInstance = null;
 
@@ -44,14 +44,14 @@ onAuthStateChanged(auth, (user) => {
 
 async function initializeBudgetsPage() {
     setupEventListeners();
-    populatePeriodFilters('periodMonth', 'periodYear'); // Mengisi filter utama
+    populatePeriodFilters('periodMonth', 'periodYear');
     try {
         const userData = await loadInitialData();
-        expenseAccounts = userData.expenseAccounts || {};
+        // PERBAIKAN: Membaca kategori dari struktur array yang benar
+        expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
         
-        // Mengisi dropdown di modal dengan data yang sudah dimuat
         populateCategoryDropdown(expenseAccounts);
-        populatePeriodFilters('modalPeriodMonth', 'modalPeriodYear'); // Mengisi filter di modal
+        populatePeriodFilters('modalPeriodMonth', 'modalPeriodYear');
 
         await loadAndDisplayBudgetsForCurrentPeriod();
     } catch (error) {
@@ -146,9 +146,7 @@ async function handleSaveBudget(e) {
         if (mode === 'edit') {
             const snapshot = await get(budgetRef);
             const existingBudget = snapshot.val();
-            if (existingBudget) {
-                spent = existingBudget.spent || 0;
-            }
+            if (existingBudget) spent = existingBudget.spent || 0;
         }
 
         await set(budgetRef, { limit, spent });
@@ -377,7 +375,6 @@ function openAddBudgetModal() {
     form.budgetMode.value = 'add';
     document.getElementById('budgetCategory').disabled = false;
 
-    // Set default periode di modal sesuai dengan yang sedang ditampilkan di halaman
     document.getElementById('modalPeriodMonth').value = document.getElementById('periodMonth').value;
     document.getElementById('modalPeriodYear').value = document.getElementById('periodYear').value;
     
@@ -393,12 +390,11 @@ function openEditBudgetModal(category, limit, period) {
     form.reset();
     form.budgetMode.value = 'edit';
     
-    // Set periode di modal sesuai budget yang diedit
     document.getElementById('modalPeriodMonth').value = month;
     document.getElementById('modalPeriodYear').value = year;
     
     form.budgetCategory.value = category;
-    form.budgetCategory.disabled = true; // Kategori tidak bisa diubah saat edit
+    form.budgetCategory.disabled = true;
     form.budgetLimit.value = limit;
     
     modal.classList.add('show');
@@ -438,14 +434,17 @@ function populatePeriodFilters(monthId, yearId) {
     yearSelect.value = currentYear;
 }
 
-function populateCategoryDropdown(accounts) {
+function populateCategoryDropdown(accountsArray) {
     const categorySelect = document.getElementById('budgetCategory');
     const warningMessage = document.getElementById('categoryWarning');
     const submitButton = document.getElementById('budgetSubmitBtn');
 
     categorySelect.innerHTML = '<option value="" disabled selected>Select a category</option>';
     
-    if (Object.keys(accounts).length === 0) {
+    // Memfilter nilai null dari array
+    const validAccounts = accountsArray.filter(acc => acc !== null);
+
+    if (validAccounts.length === 0) {
         warningMessage.style.display = 'block';
         categorySelect.disabled = true;
         submitButton.disabled = true;
@@ -453,7 +452,7 @@ function populateCategoryDropdown(accounts) {
         warningMessage.style.display = 'none';
         categorySelect.disabled = false;
         submitButton.disabled = false;
-        Object.keys(accounts).sort().forEach(acc => {
+        validAccounts.sort().forEach(acc => {
             categorySelect.innerHTML += `<option value="${acc}">${acc}</option>`;
         });
     }
