@@ -5,16 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Finance Tracker</title>
     
-    <!-- Skrip pencegah kedipan tema -->
-    <script>
-        (function() {
-            try {
-                const savedTheme = localStorage.getItem('theme') || 'light';
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            } catch (e) {}
-        })();
-    </script>
-    
     <!-- Menggunakan main.css yang sudah dipecah -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -52,6 +42,6 @@
     </footer>
 
     <script type="module" src="js/auth.js"></script>
-    <script src="js/theme.js"></script>
+    <script type="module" src="js/theme.js"></script>
 </body>
 </html>
