@@ -15,7 +15,6 @@ import {
     remove 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { formatRupiah } from './utils.js';
-// PERBAIKAN: Impor fungsi dari pagination.js
 import { paginate, renderPaginationControls } from './pagination.js';
 
 // ============================================================================
@@ -116,7 +115,6 @@ function setupEventListeners() {
         displayTransactions();
     });
 
-    // Pencarian bekerja secara live
     document.getElementById('searchInput').addEventListener('input', () => {
         currentPage = 1;
         displayTransactions();
@@ -131,7 +129,7 @@ function setupEventListeners() {
 }
 
 // ============================================================================
-// CRUD HANDLERS
+// CRUD HANDLERS (Tidak ada perubahan di sini)
 // ============================================================================
 async function handleAddTransaction(e) {
     e.preventDefault();
@@ -268,30 +266,53 @@ function displayTransactions() {
     const filterStartDate = document.getElementById('filterStartDate').value;
     const filterEndDate = document.getElementById('filterEndDate').value;
 
-    if (searchTerm) {
-        filteredTransactions = filteredTransactions.filter(tx => 
-            tx.description.toLowerCase().includes(searchTerm) ||
-            tx.account.toLowerCase().includes(searchTerm) ||
-            tx.wallet.toLowerCase().includes(searchTerm)
-        );
-    }
-    if (filterType) filteredTransactions = filteredTransactions.filter(tx => tx.type === filterType);
-    if (filterAccount) filteredTransactions = filteredTransactions.filter(tx => tx.account === filterAccount);
-    if (filterWallet) filteredTransactions = filteredTransactions.filter(tx => tx.walletId === filterWallet);
-    if (filterStartDate) {
-        const startDate = new Date(filterStartDate).getTime();
-        filteredTransactions = filteredTransactions.filter(tx => tx.timestamp >= startDate);
-    }
-    if (filterEndDate) {
-        const endDate = new Date(filterEndDate).getTime() + (24 * 60 * 60 * 1000 - 1);
-        filteredTransactions = filteredTransactions.filter(tx => tx.timestamp <= endDate);
-    }
+    // PERBAIKAN: Logika filter dan pencarian yang lebih andal
+    filteredTransactions = filteredTransactions.filter(tx => {
+        // Pencarian Komprehensif
+        if (searchTerm) {
+            const descriptionMatch = (tx.description || '').toLowerCase().includes(searchTerm);
+            const accountMatch = (tx.account || '').toLowerCase().includes(searchTerm);
+            const walletMatch = (tx.wallet || '').toLowerCase().includes(searchTerm);
+            if (!descriptionMatch && !accountMatch && !walletMatch) {
+                return false;
+            }
+        }
+
+        // Filter berdasarkan Tipe
+        if (filterType && tx.type !== filterType) {
+            return false;
+        }
+
+        // Filter berdasarkan Akun
+        if (filterAccount && tx.account !== filterAccount) {
+            return false;
+        }
+
+        // Filter berdasarkan Dompet (Wallet)
+        if (filterWallet && tx.walletId !== filterWallet) {
+            return false;
+        }
+
+        // Filter berdasarkan Tanggal Mulai
+        if (filterStartDate) {
+            const startDate = new Date(filterStartDate).getTime();
+            if (tx.timestamp < startDate) return false;
+        }
+
+        // Filter berdasarkan Tanggal Akhir
+        if (filterEndDate) {
+            const endDate = new Date(filterEndDate).getTime() + (24 * 60 * 60 * 1000 - 1); // Akhir hari
+            if (tx.timestamp > endDate) return false;
+        }
+
+        return true; // Jika lolos semua filter
+    });
 
     // 2. Sorting
     filteredTransactions.sort((a, b) => {
         let valA = a[sortColumn];
         let valB = b[sortColumn];
-        if (sortColumn === 'date') valA = a.timestamp; valB = b.timestamp;
+        if (sortColumn === 'date') { valA = a.timestamp; valB = b.timestamp; }
         if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
         if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
