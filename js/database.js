@@ -36,6 +36,30 @@ export async function updateUserData(userId, updates) {
 }
 
 // ============================================================================
+// Theme & Appearance Settings
+// ============================================================================
+export async function saveAccentColor(userId, colorHex) {
+    try {
+        await set(ref(db, `users/${userId}/settings/accentColor`), colorHex);
+        console.log("Accent color saved successfully!");
+        return true;
+    } catch (error) {
+        console.error("Error saving accent color:", error);
+        throw error;
+    }
+}
+
+export async function loadAccentColor(userId) {
+    try {
+        const snapshot = await get(ref(db, `users/${userId}/settings/accentColor`));
+        return snapshot.exists() ? snapshot.val() : null;
+    } catch (error) {
+        console.error("Error loading accent color:", error);
+        return null;
+    }
+}
+
+// ============================================================================
 // Transaction Operations
 // ============================================================================
 export async function saveTransaction(userId, transaction) {
@@ -196,7 +220,10 @@ export async function initializeUserData(userId) {
             }
         },
         transactions: {},
-        budgets: {}
+        budgets: {},
+        settings: {
+            accentColor: '#4CAF50' // Warna aksen default
+        }
     };
     try {
         await set(ref(db, `users/${userId}`), initialData);
@@ -233,6 +260,10 @@ export async function debugViewUserData(userId) {
                 console.log(`  Category: ${category}, Limit: ${budget.limit}, Spent: ${budget.spent}`);
             });
         });
+
+        console.log("\n=== SETTINGS ===");
+        const settings = userData.settings || {};
+        console.log("Accent Color:", settings.accentColor || "Not set");
         
         return userData;
     } catch (error) {
