@@ -20,42 +20,72 @@ export function paginate(items, currentPage, itemsPerPage) {
 }
 
 /**
- * Merender tombol-tombol kontrol pagination ke dalam elemen HTML.
+ * Merender tombol-tombol kontrol pagination dengan sistem "sliding window".
  * @param {string} containerId - ID dari elemen div untuk menampung tombol.
  * @param {number} currentPage - Halaman yang sedang aktif.
  * @param {number} totalPages - Jumlah total halaman.
- * @param {Function} onPageChange - Fungsi callback yang akan dipanggil saat tombol halaman diklik, dengan nomor halaman baru sebagai argumen.
+ * @param {Function} onPageChange - Fungsi callback yang akan dipanggil saat tombol halaman diklik.
  */
 export function renderPaginationControls(containerId, currentPage, totalPages, onPageChange) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = ''; // Kosongkan kontrol lama
+    container.innerHTML = '';
+    if (totalPages <= 1) return;
 
-    if (totalPages <= 1) return; // Jangan tampilkan jika hanya ada 1 halaman
+    const pageWindow = 5; // Jumlah tombol halaman yang ditampilkan sekaligus
+
+    // Fungsi untuk membuat tombol
+    const createButton = (text, page, isDisabled = false, isActive = false) => {
+        const button = document.createElement('button');
+        button.innerHTML = text;
+        button.dataset.page = page;
+        button.disabled = isDisabled;
+        if (isActive) button.classList.add('active');
+        button.addEventListener('click', () => onPageChange(page));
+        return button;
+    };
+
+    // Fungsi untuk membuat elipsis (...)
+    const createEllipsis = () => {
+        const span = document.createElement('span');
+        span.className = 'pagination-ellipsis';
+        span.textContent = '...';
+        return span;
+    };
 
     // Tombol "Previous"
-    const prevButton = document.createElement('button');
-    prevButton.innerHTML = '« Prev';
-    prevButton.disabled = currentPage === 1;
-    prevButton.addEventListener('click', () => onPageChange(currentPage - 1));
-    container.appendChild(prevButton);
+    container.appendChild(createButton('« Prev', currentPage - 1, currentPage === 1));
 
-    // Tombol Halaman (misal: 1, 2, 3, ...)
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        if (i === currentPage) {
-            pageButton.classList.add('active');
+    // Logika untuk menentukan halaman awal dan akhir dari "jendela" paginasi
+    let startPage = Math.max(1, currentPage - Math.floor(pageWindow / 2));
+    let endPage = Math.min(totalPages, startPage + pageWindow - 1);
+
+    if (endPage === totalPages) {
+        startPage = Math.max(1, totalPages - pageWindow + 1);
+    }
+
+    // Menampilkan tombol halaman pertama dan elipsis (...) jika perlu
+    if (startPage > 1) {
+        container.appendChild(createButton('1', 1));
+        if (startPage > 2) {
+            container.appendChild(createEllipsis());
         }
-        pageButton.addEventListener('click', () => onPageChange(i));
-        container.appendChild(pageButton);
+    }
+
+    // Menampilkan tombol-tombol halaman di dalam "jendela"
+    for (let i = startPage; i <= endPage; i++) {
+        container.appendChild(createButton(i, i, false, i === currentPage));
+    }
+
+    // Menampilkan elipsis (...) dan tombol halaman terakhir jika perlu
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            container.appendChild(createEllipsis());
+        }
+        container.appendChild(createButton(totalPages, totalPages));
     }
 
     // Tombol "Next"
-    const nextButton = document.createElement('button');
-    nextButton.innerHTML = 'Next »';
-    nextButton.disabled = currentPage === totalPages;
-    nextButton.addEventListener('click', () => onPageChange(currentPage + 1));
-    container.appendChild(nextButton);
+    container.appendChild(createButton('Next »', currentPage + 1, currentPage === totalPages));
 }
