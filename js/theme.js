@@ -37,37 +37,60 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Memuat dan menerapkan warna aksen dari Firebase
+    // Fungsi untuk menerapkan warna aksen
+    function applyAccentColor(color) {
+        if (!color) return;
+        
+        console.log("Applying accent color:", color);
+        
+        // Terapkan warna aksen ke variabel CSS
+        document.documentElement.style.setProperty('--accent-color', color);
+        
+        // Hitung variasi warna untuk gradien
+        const rgbColor = hexToRgb(color);
+        if (rgbColor) {
+            // Variasi lebih terang untuk gradient-start
+            const lighterColor = adjustBrightness(rgbColor, 20);
+            // Variasi lebih gelap untuk gradient-end
+            const darkerColor = adjustBrightness(rgbColor, -20);
+            
+            document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
+            document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
+            
+            // Ekstrak nilai RGB untuk digunakan dalam rgba()
+            document.documentElement.style.setProperty(
+                '--accent-color-rgb', 
+                `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
+            );
+        }
+    }
+    
+    // Cek apakah pengguna sudah login saat halaman dimuat
+    if (auth.currentUser) {
+        console.log("User already logged in, loading accent color");
+        loadAccentColor(auth.currentUser.uid)
+            .then(applyAccentColor)
+            .catch(error => console.error("Error loading accent color:", error));
+    } else {
+        // Jika auth.currentUser belum tersedia, tunggu sebentar dan coba lagi
+        // Ini mengatasi masalah di mana Firebase Auth mungkin belum sepenuhnya diinisialisasi
+        setTimeout(() => {
+            if (auth.currentUser) {
+                console.log("User detected after delay, loading accent color");
+                loadAccentColor(auth.currentUser.uid)
+                    .then(applyAccentColor)
+                    .catch(error => console.error("Error loading accent color:", error));
+            }
+        }, 500);
+    }
+    
+    // Juga dengarkan perubahan status autentikasi
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            console.log("Auth state changed, loading accent color");
             loadAccentColor(user.uid)
-                .then(color => {
-                    if (color) {
-                        // Terapkan warna aksen ke variabel CSS
-                        document.documentElement.style.setProperty('--accent-color', color);
-                        
-                        // Hitung variasi warna untuk gradien
-                        const rgbColor = hexToRgb(color);
-                        if (rgbColor) {
-                            // Variasi lebih terang untuk gradient-start
-                            const lighterColor = adjustBrightness(rgbColor, 20);
-                            // Variasi lebih gelap untuk gradient-end
-                            const darkerColor = adjustBrightness(rgbColor, -20);
-                            
-                            document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
-                            document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
-                            
-                            // Ekstrak nilai RGB untuk digunakan dalam rgba()
-                            document.documentElement.style.setProperty(
-                                '--accent-color-rgb', 
-                                `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
-                            );
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading accent color:", error);
-                });
+                .then(applyAccentColor)
+                .catch(error => console.error("Error loading accent color:", error));
         }
     });
 });
