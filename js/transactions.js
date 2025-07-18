@@ -15,6 +15,8 @@ import {
     remove 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 import { formatRupiah } from './utils.js';
+// PERBAIKAN: Impor fungsi dari pagination.js
+import { paginate, renderPaginationControls } from './pagination.js';
 
 // ============================================================================
 // FIREBASE INITIALIZATION
@@ -104,9 +106,8 @@ function setupEventListeners() {
     document.getElementById('transactionTableBody').addEventListener('click', handleTableActions);
     document.querySelectorAll('.sortable').forEach(header => header.addEventListener('click', handleSort));
     
-    // PERBAIKAN: Listener untuk tombol filter yang baru
     document.getElementById('applyFilterBtn').addEventListener('click', () => {
-        currentPage = 1; // Selalu kembali ke halaman pertama saat filter baru diterapkan
+        currentPage = 1;
         displayTransactions();
     });
     document.getElementById('resetFilterBtn').addEventListener('click', () => {
@@ -115,14 +116,12 @@ function setupEventListeners() {
         displayTransactions();
     });
 
-    // Pencarian tetap bekerja secara live
+    // Pencarian bekerja secara live
     document.getElementById('searchInput').addEventListener('input', () => {
         currentPage = 1;
         displayTransactions();
     });
     
-    document.getElementById('paginationContainer').addEventListener('click', handlePagination);
-
     document.getElementById('transactionType').addEventListener('change', (e) => {
         updateAccountDropdown('transactionAccount', e.target.value);
     });
@@ -260,6 +259,7 @@ async function handleDeleteTransaction(txId) {
 function displayTransactions() {
     const tableBody = document.getElementById('transactionTableBody');
     
+    // 1. Filtering
     let filteredTransactions = [...allTransactions];
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filterType = document.getElementById('filterType').value;
@@ -287,31 +287,26 @@ function displayTransactions() {
         filteredTransactions = filteredTransactions.filter(tx => tx.timestamp <= endDate);
     }
 
+    // 2. Sorting
     filteredTransactions.sort((a, b) => {
         let valA = a[sortColumn];
         let valB = b[sortColumn];
-        if (sortColumn === 'date') {
-            valA = a.timestamp;
-            valB = b.timestamp;
-        }
-        if (typeof valA === 'string') {
-            valA = valA.toLowerCase();
-            valB = valB.toLowerCase();
-        }
+        if (sortColumn === 'date') valA = a.timestamp; valB = b.timestamp;
+        if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
         if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
     });
     updateSortIcons();
 
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
+    // 3. Pagination
+    const { paginatedItems, totalPages } = paginate(filteredTransactions, currentPage, rowsPerPage);
 
-    if (paginatedTransactions.length === 0) {
+    // 4. Rendering
+    if (paginatedItems.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">No transactions found.</td></tr>`;
     } else {
-        tableBody.innerHTML = paginatedTransactions.map(tx => `
+        tableBody.innerHTML = paginatedItems.map(tx => `
             <tr>
                 <td>${tx.date}</td>
                 <td>${tx.description}</td>
@@ -328,25 +323,10 @@ function displayTransactions() {
         `).join('');
     }
 
-    renderPagination(filteredTransactions.length);
-}
-
-function renderPagination(totalRows) {
-    const paginationContainer = document.getElementById('paginationContainer');
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
-    paginationContainer.innerHTML = '';
-
-    if (totalPages <= 1) return;
-
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i;
-        button.dataset.page = i;
-        if (i === currentPage) {
-            button.classList.add('active');
-        }
-        paginationContainer.appendChild(button);
-    }
+    renderPaginationControls('paginationContainer', currentPage, totalPages, (newPage) => {
+        currentPage = newPage;
+        displayTransactions();
+    });
 }
 
 async function openEditModal(txId) {
@@ -406,13 +386,6 @@ function handleSort(e) {
     }
     currentPage = 1;
     displayTransactions();
-}
-
-function handlePagination(e) {
-    if (e.target.tagName === 'BUTTON') {
-        currentPage = parseInt(e.target.dataset.page);
-        displayTransactions();
-    }
 }
 
 // ============================================================================
