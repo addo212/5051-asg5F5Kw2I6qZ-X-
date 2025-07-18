@@ -8,6 +8,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/fi
  * File ini menangani semua logika tema untuk seluruh aplikasi.
  * - Memuat dan menerapkan tema light/dark dari localStorage
  * - Memuat dan menerapkan warna aksen dari Firebase
+ * - Menyimpan warna aksen ke localStorage sebagai cache
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log("Applying accent color:", color);
         
+        // Simpan warna aksen ke localStorage sebagai cache
+        localStorage.setItem('accentColor', color);
+        
         // Terapkan warna aksen ke variabel CSS
         document.documentElement.style.setProperty('--accent-color', color);
         
@@ -73,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error("Error loading accent color:", error));
     } else {
         // Jika auth.currentUser belum tersedia, tunggu sebentar dan coba lagi
-        // Ini mengatasi masalah di mana Firebase Auth mungkin belum sepenuhnya diinisialisasi
         setTimeout(() => {
             if (auth.currentUser) {
                 console.log("User detected after delay, loading accent color");
