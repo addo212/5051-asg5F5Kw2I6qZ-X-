@@ -3,80 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Finance Tracker</title>
-    	<!-- Skrip pencegah kedipan tema yang ditingkatkan -->
-	<script>
-		(function() {
-			try {
-				// 1. Terapkan tema light/dark dari localStorage (cepat)
-				const savedTheme = localStorage.getItem('theme') || 'light';
-				document.documentElement.setAttribute('data-theme', savedTheme);
-				
-				// 2. Terapkan warna aksen dari localStorage (jika ada)
-				const cachedAccentColor = localStorage.getItem('accentColor');
-				if (cachedAccentColor) {
-					document.documentElement.style.setProperty('--accent-color', cachedAccentColor);
-					
-					// Fungsi sederhana untuk mengkonversi hex ke rgb
-					function hexToRgb(hex) {
-						hex = hex.replace(/^#/, '');
-						const bigint = parseInt(hex, 16);
-						const r = (bigint >> 16) & 255;
-						const g = (bigint >> 8) & 255;
-						const b = bigint & 255;
-						return { r, g, b };
-					}
-					
-					// Fungsi untuk menyesuaikan kecerahan
-					function adjustBrightness(rgb, percent) {
-						const adjust = (value) => Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
-						return {
-							r: adjust(rgb.r),
-							g: adjust(rgb.g),
-							b: adjust(rgb.b)
-						};
-					}
-					
-					// Fungsi untuk mengkonversi rgb ke hex
-					function rgbToHex(rgb) {
-						return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
-					}
-					
-					// Hitung variasi warna untuk gradien
-					const rgbColor = hexToRgb(cachedAccentColor);
-					if (rgbColor) {
-						const lighterColor = adjustBrightness(rgbColor, 20);
-						const darkerColor = adjustBrightness(rgbColor, -20);
-						
-						document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
-						document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
-						document.documentElement.style.setProperty(
-							'--accent-color-rgb', 
-							`${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
-						);
-					}
-				}
-			} catch (e) {
-				console.error("Error in theme flash prevention script:", e);
-			}
-		})();
-	</script>
-
-    <!-- Menggunakan main.css yang sudah dipecah -->
+    <title>Dashboard | FinTrack</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Skrip pencegah kedipan tema -->
+    <script>
+        (function() {
+            try {
+                // 1. Terapkan tema light/dark dari localStorage (cepat)
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // 2. Terapkan warna aksen dari localStorage (jika ada)
+                const cachedAccentColor = localStorage.getItem('accentColor');
+                if (cachedAccentColor) {
+                    document.documentElement.style.setProperty('--accent-color', cachedAccentColor);
+                    
+                    // Fungsi sederhana untuk mengkonversi hex ke rgb
+                    function hexToRgb(hex) {
+                        hex = hex.replace(/^#/, '');
+                        const bigint = parseInt(hex, 16);
+                        const r = (bigint >> 16) & 255;
+                        const g = (bigint >> 8) & 255;
+                        const b = bigint & 255;
+                        return { r, g, b };
+                    }
+                    
+                    // Fungsi untuk menyesuaikan kecerahan
+                    function adjustBrightness(rgb, percent) {
+                        const adjust = (value) => Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
+                        return {
+                            r: adjust(rgb.r),
+                            g: adjust(rgb.g),
+                            b: adjust(rgb.b)
+                        };
+                    }
+                    
+                    // Fungsi untuk mengkonversi rgb ke hex
+                    function rgbToHex(rgb) {
+                        return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
+                    }
+                    
+                    // Hitung variasi warna untuk gradien
+                    const rgbColor = hexToRgb(cachedAccentColor);
+                    if (rgbColor) {
+                        const lighterColor = adjustBrightness(rgbColor, 20);
+                        const darkerColor = adjustBrightness(rgbColor, -20);
+                        
+                        document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
+                        document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
+                        document.documentElement.style.setProperty(
+                            '--accent-color-rgb', 
+                            `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
+                        );
+                    }
+                }
+            } catch (e) {
+                console.error("Error in theme flash prevention script:", e);
+            }
+        })();
+    </script>
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="icon" href="images/logo.jpeg">
 </head>
-<body class="dashboard-body">
-    <div class="container">
-        <header>
-            <div class="header-left">
-                <!-- Logo dengan kelas yang benar dan konsisten -->
-                <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
-                <h1>Finance Tracker</h1>
-            </div>
-            <div class="header-right">
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Logo -->
+            <a href="dashboard.html" class="logo">
+                <img src="assets/logo.svg" alt="FinTrack Logo">
+                <div class="logo-text">
+                    <span class="logo-name">FinTrack</span>
+                    <span class="logo-tagline">Personal Finance</span>
+                </div>
+            </a>
+            
+            <!-- Navigation -->
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link active">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="transactions.html" class="nav-link">
+                            <i class="fas fa-exchange-alt"></i> Transactions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="wallets.html" class="nav-link">
+                            <i class="fas fa-wallet"></i> Wallets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="budgets.html" class="nav-link">
+                            <i class="fas fa-chart-pie"></i> Budgets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-line"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <!-- Search -->
+                <div class="header-search">
+                    <input type="text" class="header-search-input" placeholder="Search...">
+                    <i class="fas fa-search header-search-icon"></i>
+                </div>
+                
+                <!-- Notifications -->
+                <button class="header-action-btn" id="notificationsBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                
+                <!-- Notifications Dropdown -->
+                <div class="notifications-dropdown">
+                    <div class="notifications-header">
+                        <h3>Notifications</h3>
+                        <button class="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notifications-body">
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Budget Alert</h4>
+                                <p class="notification-text">You've reached 80% of your Food budget for this month.</p>
+                                <span class="notification-time">2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Payment Successful</h4>
+                                <p class="notification-text">Your payment of $50 to Electricity Bill was successful.</p>
+                                <span class="notification-time">Yesterday</span>
+                            </div>
+                        </div>
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">New Feature</h4>
+                                <p class="notification-text">We've added a new budget tracking feature. Check it out!</p>
+                                <span class="notification-time">3 days ago</span>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Savings Goal Achieved</h4>
+                                <p class="notification-text">Congratulations! You've reached your savings goal of $1000.</p>
+                                <span class="notification-time">1 week ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notifications-footer">
+                        <a href="#">View all notifications</a>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle -->
                 <div class="theme-toggle">
                     <i class="fas fa-sun"></i>
                     <label class="switch">
@@ -85,158 +205,329 @@
                     </label>
                     <i class="fas fa-moon"></i>
                 </div>
-                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-        </header>
-
-        <nav class="main-nav">
-            <div class="dropdown">
-                <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
-                <div class="dropdown-content">
-                    <a href="dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a>
-                    <a href="transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a>
-                    <a href="wallets.html"><i class="fas fa-wallet"></i> Wallets</a>
-                    <a href="budgets.html"><i class="fas fa-chart-pie"></i> Budgets</a>
-                    <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
-                </div>
-            </div>
-        </nav>
-
-        <main>
-           <!-- Bagian Ringkasan Statistik Utama -->
-            <div class="stats-summary">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
-                        <h3>Total Balance</h3>
-                    </div>
-                    <p id="totalBalance">Rp 0</p>
-                    <div class="stat-footer">
-                        <span class="trend" id="balanceTrend"><i class="fas fa-minus"></i> 0.0%</span>
-                        <span class="period">vs last month</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
-                        <h3>Monthly Income</h3>
-                    </div>
-                    <p id="monthlyIncome">Rp 0</p>
-                    <div class="stat-footer">
-                        <span class="trend" id="incomeTrend"><i class="fas fa-minus"></i> 0.0%</span>
-                        <span class="period">vs last month</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
-                        <h3>Monthly Expenses</h3>
-                    </div>
-                    <p id="monthlyExpenses">Rp 0</p>
-                    <div class="stat-footer">
-                        <span class="trend" id="expenseTrend"><i class="fas fa-minus"></i> 0.0%</span>
-                        <span class="period">vs last month</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bagian Tombol Aksi Cepat -->
-            <div class="quick-actions">
-                <button class="action-btn" id="quickAddIncome">
-                    <i class="fas fa-plus"></i>
-                    <span>Income</span>
-                </button>
-                <button class="action-btn" id="quickAddExpense">
-                    <i class="fas fa-minus"></i>
-                    <span>Expense</span>
-                </button>
-                <button class="action-btn" id="quickTransfer">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Transfer</span>
-                </button>
-                <button class="action-btn" id="quickBudget">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Budget</span>
-                </button>
-            </div>
-
-            <!-- Tata Letak Grid Utama Dashboard -->
-            <div class="dashboard-grid">
-                <!-- Kolom Utama (Lebih Lebar) -->
-                <div class="grid-item main-col">
-                    <div class="section-header">
-                        <h2><i class="fas fa-history"></i> Recent Transactions</h2>
-                        <a href="transactions.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                    <div id="recentTransactionsList" class="transaction-list enhanced">
-                        <p class="empty-state">Loading recent transactions...</p>
-                    </div>
-                </div>
-
-                <!-- Kolom Samping (Lebih Sempit) -->
-                <div class="grid-item side-col">
-                    <div class="section-header">
-                        <h2><i class="fas fa-bullseye"></i> Top Budgets</h2>
-                        <div class="section-controls">
-                            <div class="toggle-view">
-                                <button class="toggle-btn active" id="viewByPercentage">Progress</button>
-                                <button class="toggle-btn" id="viewByAmount">Limit</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="topBudgets" class="budget-progress-list">
-                        <p class="empty-state">Loading budgets...</p>
-                    </div>
-                </div>
-
-                    <!-- Item lain di Kolom Utama -->
-                    <div class="grid-item main-col">
-                        <div class="section-header">
-                            <h2><i class="fas fa-wallet"></i> Top Wallets</h2>
-                            <a href="wallets.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                        <div id="topWallets" class="wallet-grid">
-                            <p class="empty-state">Loading wallets...</p>
-                        </div>
-                    </div>
                 
-                    <!-- Item lain di Kolom Samping -->
-                    <div class="grid-item side-col">
-                        <div class="section-header">
-                            <h2><i class="fas fa-chart-line"></i> Weekly Trends</h2>
+                <!-- User Menu -->
+                <div class="user-menu" id="userMenu">
+                    <button class="user-menu-btn">
+                        <div class="user-avatar">
+                            <img src="assets/avatar.jpg" alt="User Avatar">
                         </div>
-                        <div class="mini-charts">
-                            <div class="mini-chart-card">
-                                <h3>Income</h3>
-                                <canvas id="incomeSparkline"></canvas>
-                                <p class="chart-value" id="weeklyIncomeTotal">Rp 0</p>
+                        <div class="user-info">
+                            <span class="user-name">John Doe</span>
+                            <span class="user-email">john@example.com</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    
+                    <!-- User Menu Dropdown -->
+                    <div class="user-menu-dropdown">
+                        <div class="user-menu-header">
+                            <div class="user-avatar">
+                                <img src="assets/avatar.jpg" alt="User Avatar">
                             </div>
-                            <div class="mini-chart-card">
-                                <h3>Expense</h3>
-                                <canvas id="expenseSparkline"></canvas>
-                                <p class="chart-value" id="weeklyExpenseTotal">Rp 0</p>
+                            <div class="user-info">
+                                <span class="user-name">John Doe</span>
+                                <span class="user-email">john@example.com</span>
                             </div>
-                    </div>
-                </div>
-
-                <!-- Item yang merentang penuh di bawah -->
-                <div class="grid-item full-width">
-                    <div class="finance-tip">
-                        <i class="fas fa-lightbulb"></i>
-                        <p id="dailyTip">Loading financial tip...</p>
+                        </div>
+                        <div class="user-menu-body">
+                            <a href="profile.html" class="user-menu-item">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="settings.html" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                            <a href="#" class="user-menu-item">
+                                <i class="fas fa-question-circle"></i>
+                                Help & Support
+                            </a>
+                        </div>
+                        <div class="user-menu-footer">
+                            <button class="btn-logout" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </main>
-
-        <footer>
-            <p>© 2025 Finance Tracker. Made with <i class="fas fa-heart footer-heart"></i> by Addo.</p>
-        </footer>
+        </div>
+    </header>
+    
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-container">
+            <div class="mobile-nav-header">
+                <a href="dashboard.html" class="logo">
+                    <img src="assets/logo.svg" alt="FinTrack Logo">
+                    <span class="logo-name">FinTrack</span>
+                </a>
+                <button class="mobile-nav-close" id="mobileNavClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-body">
+                <ul class="mobile-nav-list">
+                    <li class="mobile-nav-item">
+                        <a href="dashboard.html" class="mobile-nav-link active">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="transactions.html" class="mobile-nav-link">
+                            <i class="fas fa-exchange-alt"></i>
+                            Transactions
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="wallets.html" class="mobile-nav-link">
+                            <i class="fas fa-wallet"></i>
+                            Wallets
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="budgets.html" class="mobile-nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            Budgets
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="reports.html" class="mobile-nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            Reports
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="profile.html" class="mobile-nav-link">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="settings.html" class="mobile-nav-link">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="mobile-nav-footer">
+                <div class="mobile-nav-user">
+                    <div class="user-avatar">
+                        <img src="assets/avatar.jpg" alt="User Avatar">
+                    </div>
+                    <div class="mobile-nav-user-info">
+                        <div class="mobile-nav-user-name">John Doe</div>
+                        <div class="mobile-nav-user-email">john@example.com</div>
+                    </div>
+                </div>
+                <button class="btn-logout" id="mobileLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
     </div>
-
-    <script type="module" src="js/main.js"></script>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>Welcome back, John! Here's an overview of your finances.</p>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="card-grid-3">
+                <!-- Total Balance -->
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3>Total Balance</h3>
+                    <p class="amount" id="totalBalance">Rp0</p>
+                    <div class="trend positive" id="balanceTrend">
+                        <i class="fas fa-arrow-up"></i> 5.2%
+                    </div>
+                </div>
+                
+                <!-- Monthly Income -->
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <h3>Monthly Income</h3>
+                    <p class="amount" id="monthlyIncome">Rp0</p>
+                    <div class="trend positive" id="incomeTrend">
+                        <i class="fas fa-arrow-up"></i> 3.1%
+                    </div>
+                </div>
+                
+                <!-- Monthly Expenses -->
+                <div class="summary-card">
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <h3>Monthly Expenses</h3>
+                    <p class="amount" id="monthlyExpenses">Rp0</p>
+                    <div class="trend negative" id="expenseTrend">
+                        <i class="fas fa-arrow-up"></i> 2.5%
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="section">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="card-grid-4">
+                    <div class="quick-action-btn" id="quickAddIncome">
+                        <div class="icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <span class="label">Add Income</span>
+                    </div>
+                    <div class="quick-action-btn" id="quickAddExpense">
+                        <div class="icon">
+                            <i class="fas fa-minus"></i>
+                        </div>
+                        <span class="label">Add Expense</span>
+                    </div>
+                    <div class="quick-action-btn" id="quickTransfer">
+                        <div class="icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <span class="label">Transfer</span>
+                    </div>
+                    <div class="quick-action-btn" id="quickBudget">
+                        <div class="icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <span class="label">Set Budget</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Dashboard Content -->
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-lg-8">
+                    <!-- Recent Transactions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-history"></i> Recent Transactions</h3>
+                            <div class="card-actions">
+                                <a href="transactions.html" class="btn-link">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div id="recentTransactionsList">
+                                <!-- Transactions will be loaded here -->
+                                <p class="empty-state">Loading transactions...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Weekly Trends -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Weekly Trends</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="stats-card">
+                                        <div class="stats-header">
+                                            <h3>Income</h3>
+                                            <span class="stats-total" id="weeklyIncomeTotal">Rp0</span>
+                                        </div>
+                                        <div class="stats-content">
+                                            <canvas id="incomeSparkline"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="stats-card">
+                                        <div class="stats-header">
+                                            <h3>Expenses</h3>
+                                            <span class="stats-total" id="weeklyExpenseTotal">Rp0</span>
+                                        </div>
+                                        <div class="stats-content">
+                                            <canvas id="expenseSparkline"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="col-lg-4">
+                    <!-- Top Wallets -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-wallet"></i> Top Wallets</h3>
+                            <div class="card-actions">
+                                <a href="wallets.html" class="btn-link">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div id="topWallets" class="wallet-grid">
+                                <!-- Wallets will be loaded here -->
+                                <p class="empty-state">Loading wallets...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Budgets -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Top Budgets</h3>
+                            <div class="card-actions">
+                                <div class="toggle-view">
+                                    <button class="toggle-btn active" id="viewByPercentage">%</button>
+                                    <button class="toggle-btn" id="viewByAmount">Rp</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div id="topBudgets">
+                                <!-- Budgets will be loaded here -->
+                                <p class="empty-state">Loading budgets...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Daily Tip -->
+                    <div class="tip-card">
+                        <i class="fas fa-lightbulb tip-icon"></i>
+                        <span class="tip-content" id="dailyTip">Track every expense, no matter how small.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>© 2023 FinTrack. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
     <script type="module" src="js/theme.js"></script>
-    <script src="js/dropdown.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
