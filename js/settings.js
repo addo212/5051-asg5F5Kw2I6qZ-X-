@@ -3,22 +3,14 @@
 // ============================================================================
 // MODULE IMPORTS
 // ============================================================================
-import firebaseConfig from './firebase-config.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 import { 
-    getDatabase, 
-    ref, 
-    get, 
-    set 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
-
-// ============================================================================
-// FIREBASE INITIALIZATION
-// ============================================================================
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
+    auth, 
+    loadUserData, 
+    saveAccentColor, 
+    saveAccount, 
+    deleteAccount 
+} from './database.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
 // ============================================================================
 // GLOBAL STATE
@@ -41,13 +33,13 @@ onAuthStateChanged(auth, (user) => {
 async function initializeSettingsPage() {
     setupEventListeners();
     try {
-        const userData = await loadUserData();
+        const userData = await loadUserData(userId);
         
-        // Logika baru untuk memuat dan merender aksen warna
+        // Memuat aksen warna dari userData
         const savedAccentColor = (userData.settings && userData.settings.accentColor) || '#4CAF50';
         renderAccentColorUI(savedAccentColor);
         
-        // Memuat data akun/kategori seperti sebelumnya
+        // Memuat data akun/kategori
         const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
         const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
         renderAccountLists(incomeAccounts, expenseAccounts);
@@ -56,11 +48,6 @@ async function initializeSettingsPage() {
         console.error("Error initializing settings page:", error);
         alert("Failed to load settings. Please refresh the page.");
     }
-}
-
-async function loadUserData() {
-    const snapshot = await get(ref(database, `users/${userId}`));
-    return snapshot.val() || {};
 }
 
 // ============================================================================
@@ -75,7 +62,7 @@ function setupEventListeners() {
         }
     });
 
-    // Listener untuk form akun (tetap sama)
+    // Listener untuk form akun
     document.getElementById('addIncomeAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'income'));
     document.getElementById('addExpenseAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'expense'));
     document.getElementById('incomeAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'income'));
@@ -114,22 +101,35 @@ function updateAccentColor(newColor) {
     // 2. Perbarui tampilan kontrol di halaman settings
     renderAccentColorUI(newColor);
     
-    // 3. Simpan ke Firebase
-    saveAccentColorToFirebase(newColor);
-}
-
-async function saveAccentColorToFirebase(color) {
-    try {
-        const colorRef = ref(database, `users/${userId}/settings/accentColor`);
-        await set(colorRef, color);
-    } catch (error) {
-        console.error("Failed to save accent color:", error);
-        alert("Could not save your color preference.");
-    }
+    // 3. Simpan ke Firebase menggunakan fungsi dari database.js
+    saveAccentColor(userId, newColor)
+        .then(() => {
+            // Hitung dan terapkan variasi warna untuk gradien
+            const rgbColor = hexToRgb(newColor);
+            if (rgbColor) {
+                // Variasi lebih terang untuk gradient-start
+                const lighterColor = adjustBrightness(rgbColor, 20);
+                // Variasi lebih gelap untuk gradient-end
+                const darkerColor = adjustBrightness(rgbColor, -20);
+                
+                document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
+                document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
+                
+                // Ekstrak nilai RGB untuk digunakan dalam rgba()
+                document.documentElement.style.setProperty(
+                    '--accent-color-rgb', 
+                    `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
+                );
+            }
+        })
+        .catch(error => {
+            console.error("Failed to save accent color:", error);
+            alert("Could not save your color preference.");
+        });
 }
 
 // ============================================================================
-// ACCOUNT MANAGEMENT (Logika ini tetap sama seperti sebelumnya)
+// ACCOUNT MANAGEMENT
 // ============================================================================
 function renderAccountLists(incomeAccounts, expenseAccounts) {
     renderList('incomeAccountList', incomeAccounts, 'income');
@@ -172,28 +172,19 @@ async function handleAddAccount(e, type) {
     btn.disabled = true;
 
     try {
-        const accountPath = `users/${userId}/accounts/${type}`;
-        const accountRef = ref(database, accountPath);
+        await saveAccount(userId, newName, type);
         
-        const snapshot = await get(accountRef);
-        const currentAccounts = snapshot.val() || [];
-
-        if (currentAccounts.includes(newName)) {
-            alert(`Account "${newName}" already exists.`);
-            inputElement.value = '';
-            btn.disabled = false;
-            return;
-        }
-
-        const updatedAccounts = [...currentAccounts, newName];
-        await set(accountRef, updatedAccounts);
+        // Reload user data to get updated accounts
+        const userData = await loadUserData(userId);
+        const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
+        const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
         
-        renderList(`${type}AccountList`, updatedAccounts, type);
+        renderAccountLists(incomeAccounts, expenseAccounts);
         inputElement.value = '';
 
     } catch (error) {
         console.error(`Error adding ${type} account:`, error);
-        alert(`Failed to add account. Please try again.`);
+        alert(`Failed to add account: ${error.message}`);
     } finally {
         btn.disabled = false;
     }
@@ -209,19 +200,49 @@ async function handleDeleteAccount(e, type) {
     }
 
     try {
-        const accountPath = `users/${userId}/accounts/${type}`;
-        const accountRef = ref(database, accountPath);
-
-        const snapshot = await get(accountRef);
-        const currentAccounts = snapshot.val() || [];
-
-        const updatedAccounts = currentAccounts.filter(acc => acc !== accountName);
-        await set(accountRef, updatedAccounts);
-
-        renderList(`${type}AccountList`, updatedAccounts, type);
+        await deleteAccount(userId, accountName, type);
+        
+        // Reload user data to get updated accounts
+        const userData = await loadUserData(userId);
+        const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
+        const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
+        
+        renderAccountLists(incomeAccounts, expenseAccounts);
 
     } catch (error) {
         console.error(`Error deleting ${type} account:`, error);
-        alert(`Failed to delete account. Please try again.`);
+        alert(`Failed to delete account: ${error.message}`);
     }
+}
+
+// ============================================================================
+// COLOR UTILITY FUNCTIONS
+// ============================================================================
+function hexToRgb(hex) {
+    // Pastikan format hex valid
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function rgbToHex(rgb) {
+    return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
+}
+
+function adjustBrightness(rgb, percent) {
+    const adjust = (value) => {
+        return Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
+    };
+    
+    return {
+        r: adjust(rgb.r),
+        g: adjust(rgb.g),
+        b: adjust(rgb.b)
+    };
 }
