@@ -1,97 +1,524 @@
 /* css/components/modals.css */
 
-/* Modal container (overlay) */
-.modal {
+/* ============================================================================ */
+/* MODAL CONTAINER & OVERLAY
+/* ============================================================================ */
+
+.modal-overlay {
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto; /* Memungkinkan scroll jika konten lebih panjang dari layar */
-    background-color: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px); /* Efek blur modern untuk background */
-    
-    /* Menggunakan flexbox untuk centering yang sempurna */
-    display: none; /* Awalnya disembunyikan */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem; /* Memberi jarak dari tepi layar */
-    
-    animation: fadeIn 0.3s ease;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
 }
 
-/* Kelas untuk menampilkan modal, di-toggle dengan JS */
-.modal.show {
-    display: flex;
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
 }
 
-/* Modal content (kotak dialognya) */
-.modal-content {
-    background-color: var(--bg-secondary);
-    padding: 1.5rem 2rem; /* Padding yang lebih seimbang */
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    width: 100%;
-    max-width: 500px; /* Batas lebar maksimum modal */
+.modal {
+    background-color: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
     position: relative;
-    animation: slideInUp 0.3s ease;
-    
-    /* PENTING: Perbaikan utama di sini */
-    margin: 0; /* Hapus margin auto karena sudah di-center oleh flexbox */
-    height: auto; /* Biarkan tinggi menyesuaikan dengan konten di dalamnya */
 }
 
-/* Modal header */
+.modal-overlay.active .modal {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* ============================================================================ */
+/* MODAL HEADER
+/* ============================================================================ */
+
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    padding: 1.5rem;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-primary);
+    z-index: 10;
+    border-radius: 12px 12px 0 0;
 }
 
 .modal-header h2 {
     margin: 0;
+    font-size: 1.3rem;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-header h2 i {
+    color: var(--accent-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
+    transform: rotate(90deg);
+}
+
+/* ============================================================================ */
+/* MODAL BODY
+/* ============================================================================ */
+
+.modal-body {
+    padding: 1.5rem;
+    color: var(--text-primary);
+}
+
+.modal-section {
+    margin-bottom: 1.5rem;
+}
+
+.modal-section:last-child {
+    margin-bottom: 0;
+}
+
+.modal-section h3 {
+    font-size: 1.1rem;
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+}
+
+/* ============================================================================ */
+/* MODAL FOOTER
+/* ============================================================================ */
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--bg-primary);
+    z-index: 10;
+    border-radius: 0 0 12px 12px;
+}
+
+.modal-footer button {
+    min-width: 100px;
+}
+
+/* ============================================================================ */
+/* MODAL VARIANTS
+/* ============================================================================ */
+
+/* Small Modal */
+.modal-sm {
+    max-width: 400px;
+}
+
+/* Large Modal */
+.modal-lg {
+    max-width: 700px;
+}
+
+/* Full Screen Modal */
+.modal-fullscreen {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    margin: 0;
+}
+
+/* ============================================================================ */
+/* MODAL ANIMATIONS
+/* ============================================================================ */
+
+/* Slide Up Animation */
+.modal-slide-up {
+    transform: translateY(50px);
+}
+
+.modal-overlay.active .modal-slide-up {
+    transform: translateY(0);
+}
+
+/* Zoom In Animation */
+.modal-zoom-in {
+    transform: scale(0.9);
+}
+
+.modal-overlay.active .modal-zoom-in {
+    transform: scale(1);
+}
+
+/* Fade In Animation */
+.modal-fade-in {
+    opacity: 0;
+}
+
+.modal-overlay.active .modal-fade-in {
+    opacity: 1;
+}
+
+/* ============================================================================ */
+/* MODAL CONTENT COMPONENTS
+/* ============================================================================ */
+
+/* Modal Tabs */
+.modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.modal-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.modal-tab {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.modal-tab:hover {
+    color: var(--accent-color);
+}
+
+.modal-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    font-weight: 500;
+}
+
+/* Modal Steps */
+.modal-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.modal-steps::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.modal-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.modal-step-indicator {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.modal-step.active .modal-step-indicator {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.modal-step.completed .modal-step-indicator {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.modal-step-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modal-step.active .modal-step-label {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.modal-step.completed .modal-step-label {
+    color: var(--success-color);
+}
+
+/* Modal Alert */
+.modal-alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.modal-alert i {
     font-size: 1.2rem;
 }
 
-/* Tombol Close */
-.close-modal {
-    color: var(--text-secondary);
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s;
+.modal-alert.info {
+    background-color: rgba(var(--info-color-rgb), 0.1);
+    color: var(--info-color);
 }
 
-.close-modal:hover {
+.modal-alert.success {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+    color: var(--success-color);
+}
+
+.modal-alert.warning {
+    background-color: rgba(var(--warning-color-rgb), 0.1);
+    color: var(--warning-color);
+}
+
+.modal-alert.danger {
+    background-color: rgba(var(--danger-color-rgb), 0.1);
+    color: var(--danger-color);
+}
+
+/* Modal Divider */
+.modal-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.modal-divider::before,
+.modal-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.modal-divider::before {
+    margin-right: 1rem;
+}
+
+.modal-divider::after {
+    margin-left: 1rem;
+}
+
+/* ============================================================================ */
+/* SPECIFIC MODAL TYPES
+/* ============================================================================ */
+
+/* Confirmation Modal */
+.confirmation-modal .modal-body {
+    text-align: center;
+    padding: 2rem 1.5rem;
+}
+
+.confirmation-modal .confirmation-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.confirmation-modal .confirmation-icon.success {
+    color: var(--success-color);
+}
+
+.confirmation-modal .confirmation-icon.warning {
+    color: var(--warning-color);
+}
+
+.confirmation-modal .confirmation-icon.danger {
+    color: var(--danger-color);
+}
+
+.confirmation-modal .confirmation-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
     color: var(--text-primary);
 }
 
-/* Animasi Modal */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.confirmation-modal .confirmation-message {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
 }
 
-@keyframes slideInUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+/* Transaction Modal */
+.transaction-modal .amount-input {
+    font-size: 2rem;
+    text-align: center;
+    border: none;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    background-color: transparent;
 }
 
-/* Responsive untuk layar kecil */
-@media (max-width: 576px) {
-    .modal-content {
-        padding: 1.5rem;
+.transaction-modal .amount-input:focus {
+    outline: none;
+}
+
+.transaction-modal .transaction-type-selector {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.transaction-modal .transaction-type-option {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.transaction-modal .transaction-type-option.active.income {
+    background-color: var(--income-color);
+    color: white;
+}
+
+.transaction-modal .transaction-type-option.active.expense {
+    background-color: var(--expense-color);
+    color: white;
+}
+
+/* Filter Modal */
+.filter-modal .filter-section {
+    margin-bottom: 1.5rem;
+}
+
+.filter-modal .filter-section h4 {
+    font-size: 1rem;
+    margin: 0 0 0.75rem 0;
+    color: var(--text-primary);
+}
+
+.filter-modal .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-modal .filter-option {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-modal .filter-option:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.filter-modal .filter-option.active {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.filter-modal .date-range {
+    display: flex;
+    gap: 1rem;
+}
+
+.filter-modal .date-range .form-group {
+    flex: 1;
+}
+
+/* ============================================================================ */
+/* RESPONSIVE ADJUSTMENTS
+/* ============================================================================ */
+
+@media (max-width: 768px) {
+    .modal {
+        width: 95%;
+        max-height: 80vh;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 1rem;
+        flex-direction: column;
+    }
+    
+    .modal-footer button {
+        width: 100%;
+    }
+    
+    .modal-step-label {
+        font-size: 0.7rem;
     }
 }
