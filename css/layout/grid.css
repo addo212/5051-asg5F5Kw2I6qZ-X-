@@ -1,82 +1,980 @@
-/* css/layout/grid.css */
+/* css/base/grid.css */
 
-/* Main container for dashboard pages */
-.dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem;
+/* ============================================================================ */
+/* CONTAINER
+/* ============================================================================ */
+
+.container {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
 }
 
-/* PERBAIKAN: Dashboard Grid Layout yang lebih dinamis */
-.dashboard-grid {
-    display: grid;
-    /* Membuat 2 kolom: kolom pertama 2x lebih lebar dari kolom kedua */
-    grid-template-columns: 2fr 1fr; 
-    gap: 1.5rem;
-}
-
-/* PERBAIKAN: Menyesuaikan item agar bisa merentang di kolom yang berbeda */
-.grid-item.main-col {
-    grid-column: 1 / 2; /* Menempati kolom pertama */
-}
-
-.grid-item.side-col {
-    grid-column: 2 / 3; /* Menempati kolom kedua */
-}
-
-/* Item yang merentang penuh tetap sama */
-.full-width {
-    grid-column: 1 / -1;
-}
-
-/* Section Headers */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.section-header h2 {
-    font-size: 1.2rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--text-primary);
-    padding: 0;
-    border: none;
-}
-
-.section-header h2 i {
-    color: var(--accent-color);
-}
-
-.view-all {
-    color: var(--accent-color);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    transition: all 0.2s;
-}
-
-.view-all:hover {
-    transform: translateX(3px);
-    text-decoration: underline;
-}
-
-/* Responsive: Di layar kecil, semua menjadi 1 kolom */
-@media (max-width: 992px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
+@media (min-width: 576px) {
+    .container {
+        max-width: var(--container-sm);
     }
-    .grid-item.main-col,
-    .grid-item.side-col {
-        grid-column: 1 / -1; /* Semua item menempati 1 kolom penuh */
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: var(--container-md);
     }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: var(--container-lg);
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: var(--container-xl);
+    }
+}
+
+.container-fluid {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container-sm {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+    max-width: var(--container-sm);
+}
+
+.container-md {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+    max-width: var(--container-md);
+}
+
+.container-lg {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+    max-width: var(--container-lg);
+}
+
+.container-xl {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+    max-width: var(--container-xl);
+}
+
+/* ============================================================================ */
+/* ROW
+/* ============================================================================ */
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: calc(var(--spacing-md) * -1);
+    margin-left: calc(var(--spacing-md) * -1);
+}
+
+.row-no-gutters {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.row-no-gutters > .col,
+.row-no-gutters > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+/* ============================================================================ */
+/* COLUMNS
+/* ============================================================================ */
+
+.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
+.col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12,
+.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
+.col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12,
+.col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12 {
+    position: relative;
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+}
+
+.col {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+}
+
+.col-auto {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+}
+
+.col-1 {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
+}
+
+.col-2 {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+}
+
+.col-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+.col-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.col-5 {
+    flex: 0 0 41.666667%;
+    max-width: 41.666667%;
+}
+
+.col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.col-7 {
+    flex: 0 0 58.333333%;
+    max-width: 58.333333%;
+}
+
+.col-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+}
+
+.col-9 {
+    flex: 0 0 75%;
+    max-width: 75%;
+}
+
+.col-10 {
+    flex: 0 0 83.333333%;
+    max-width: 83.333333%;
+}
+
+.col-11 {
+    flex: 0 0 91.666667%;
+    max-width: 91.666667%;
+}
+
+.col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+/* ============================================================================ */
+/* RESPONSIVE COLUMNS
+/* ============================================================================ */
+
+/* Small devices (576px and up) */
+@media (min-width: 576px) {
+    .col-sm {
+        flex-basis: 0;
+        flex-grow: 1;
+        max-width: 100%;
+    }
+    
+    .col-sm-auto {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+    }
+    
+    .col-sm-1 {
+        flex: 0 0 8.333333%;
+        max-width: 8.333333%;
+    }
+    
+    .col-sm-2 {
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+    }
+    
+    .col-sm-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+    
+    .col-sm-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+    
+    .col-sm-5 {
+        flex: 0 0 41.666667%;
+        max-width: 41.666667%;
+    }
+    
+    .col-sm-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .col-sm-7 {
+        flex: 0 0 58.333333%;
+        max-width: 58.333333%;
+    }
+    
+    .col-sm-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+    
+    .col-sm-9 {
+        flex: 0 0 75%;
+        max-width: 75%;
+    }
+    
+    .col-sm-10 {
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+    }
+    
+    .col-sm-11 {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667%;
+    }
+    
+    .col-sm-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Medium devices (768px and up) */
+@media (min-width: 768px) {
+    .col-md {
+        flex-basis: 0;
+        flex-grow: 1;
+        max-width: 100%;
+    }
+    
+    .col-md-auto {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+    }
+    
+    .col-md-1 {
+        flex: 0 0 8.333333%;
+        max-width: 8.333333%;
+    }
+    
+    .col-md-2 {
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+    }
+    
+    .col-md-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+    
+    .col-md-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+    
+    .col-md-5 {
+        flex: 0 0 41.666667%;
+        max-width: 41.666667%;
+    }
+    
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .col-md-7 {
+        flex: 0 0 58.333333%;
+        max-width: 58.333333%;
+    }
+    
+    .col-md-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+    
+    .col-md-9 {
+        flex: 0 0 75%;
+        max-width: 75%;
+    }
+    
+    .col-md-10 {
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+    }
+    
+    .col-md-11 {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667%;
+    }
+    
+    .col-md-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Large devices (992px and up) */
+@media (min-width: 992px) {
+    .col-lg {
+        flex-basis: 0;
+        flex-grow: 1;
+        max-width: 100%;
+    }
+    
+    .col-lg-auto {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+    }
+    
+    .col-lg-1 {
+        flex: 0 0 8.333333%;
+        max-width: 8.333333%;
+    }
+    
+    .col-lg-2 {
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+    }
+    
+    .col-lg-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+    
+    .col-lg-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+    
+    .col-lg-5 {
+        flex: 0 0 41.666667%;
+        max-width: 41.666667%;
+    }
+    
+    .col-lg-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .col-lg-7 {
+        flex: 0 0 58.333333%;
+        max-width: 58.333333%;
+    }
+    
+    .col-lg-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+    
+    .col-lg-9 {
+        flex: 0 0 75%;
+        max-width: 75%;
+    }
+    
+    .col-lg-10 {
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+    }
+    
+    .col-lg-11 {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667%;
+    }
+    
+    .col-lg-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Extra large devices (1200px and up) */
+@media (min-width: 1200px) {
+    .col-xl {
+        flex-basis: 0;
+        flex-grow: 1;
+        max-width: 100%;
+    }
+    
+    .col-xl-auto {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+    }
+    
+    .col-xl-1 {
+        flex: 0 0 8.333333%;
+        max-width: 8.333333%;
+    }
+    
+    .col-xl-2 {
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+    }
+    
+    .col-xl-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+    
+    .col-xl-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+    
+    .col-xl-5 {
+        flex: 0 0 41.666667%;
+        max-width: 41.666667%;
+    }
+    
+    .col-xl-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .col-xl-7 {
+        flex: 0 0 58.333333%;
+        max-width: 58.333333%;
+    }
+    
+    .col-xl-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+    
+    .col-xl-9 {
+        flex: 0 0 75%;
+        max-width: 75%;
+    }
+    
+    .col-xl-10 {
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+    }
+    
+    .col-xl-11 {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667%;
+    }
+    
+    .col-xl-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ============================================================================ */
+/* GRID UTILITIES
+/* ============================================================================ */
+
+/* Order Classes */
+.order-first {
+    order: -1;
+}
+
+.order-last {
+    order: 13;
+}
+
+.order-0 {
+    order: 0;
+}
+
+.order-1 {
+    order: 1;
+}
+
+.order-2 {
+    order: 2;
+}
+
+.order-3 {
+    order: 3;
+}
+
+.order-4 {
+    order: 4;
+}
+
+.order-5 {
+    order: 5;
+}
+
+.order-6 {
+    order: 6;
+}
+
+.order-7 {
+    order: 7;
+}
+
+.order-8 {
+    order: 8;
+}
+
+.order-9 {
+    order: 9;
+}
+
+.order-10 {
+    order: 10;
+}
+
+.order-11 {
+    order: 11;
+}
+
+.order-12 {
+    order: 12;
+}
+
+/* Offset Classes */
+.offset-1 {
+    margin-left: 8.333333%;
+}
+
+.offset-2 {
+    margin-left: 16.666667%;
+}
+
+.offset-3 {
+    margin-left: 25%;
+}
+
+.offset-4 {
+    margin-left: 33.333333%;
+}
+
+.offset-5 {
+    margin-left: 41.666667%;
+}
+
+.offset-6 {
+    margin-left: 50%;
+}
+
+.offset-7 {
+    margin-left: 58.333333%;
+}
+
+.offset-8 {
+    margin-left: 66.666667%;
+}
+
+.offset-9 {
+    margin-left: 75%;
+}
+
+.offset-10 {
+    margin-left: 83.333333%;
+}
+
+.offset-11 {
+    margin-left: 91.666667%;
+}
+
+/* ============================================================================ */
+/* FLEXBOX UTILITIES
+/* ============================================================================ */
+
+/* Flex Direction */
+.flex-row {
+    flex-direction: row !important;
+}
+
+.flex-column {
+    flex-direction: column !important;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse !important;
+}
+
+.flex-column-reverse {
+    flex-direction: column-reverse !important;
+}
+
+/* Flex Wrap */
+.flex-wrap {
+    flex-wrap: wrap !important;
+}
+
+.flex-nowrap {
+    flex-wrap: nowrap !important;
+}
+
+.flex-wrap-reverse {
+    flex-wrap: wrap-reverse !important;
+}
+
+/* Justify Content */
+.justify-content-start {
+    justify-content: flex-start !important;
+}
+
+.justify-content-end {
+    justify-content: flex-end !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.justify-content-between {
+    justify-content: space-between !important;
+}
+
+.justify-content-around {
+    justify-content: space-around !important;
+}
+
+.justify-content-evenly {
+    justify-content: space-evenly !important;
+}
+
+/* Align Items */
+.align-items-start {
+    align-items: flex-start !important;
+}
+
+.align-items-end {
+    align-items: flex-end !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.align-items-baseline {
+    align-items: baseline !important;
+}
+
+.align-items-stretch {
+    align-items: stretch !important;
+}
+
+/* Align Self */
+.align-self-start {
+    align-self: flex-start !important;
+}
+
+.align-self-end {
+    align-self: flex-end !important;
+}
+
+.align-self-center {
+    align-self: center !important;
+}
+
+.align-self-baseline {
+    align-self: baseline !important;
+}
+
+.align-self-stretch {
+    align-self: stretch !important;
+}
+
+/* Align Content */
+.align-content-start {
+    align-content: flex-start !important;
+}
+
+.align-content-end {
+    align-content: flex-end !important;
+}
+
+.align-content-center {
+    align-content: center !important;
+}
+
+.align-content-between {
+    align-content: space-between !important;
+}
+
+.align-content-around {
+    align-content: space-around !important;
+}
+
+.align-content-stretch {
+    align-content: stretch !important;
+}
+
+/* Flex Grow & Shrink */
+.flex-grow-0 {
+    flex-grow: 0 !important;
+}
+
+.flex-grow-1 {
+    flex-grow: 1 !important;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0 !important;
+}
+
+.flex-shrink-1 {
+    flex-shrink: 1 !important;
+}
+
+/* ============================================================================ */
+/* GRID ANIMATIONS
+/* ============================================================================ */
+
+.grid-animate-in .col,
+.grid-animate-in [class*="col-"] {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Staggered animation for grid items */
+.grid-animate-in .col:nth-child(1),
+.grid-animate-in [class*="col-"]:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.grid-animate-in .col:nth-child(2),
+.grid-animate-in [class*="col-"]:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.grid-animate-in .col:nth-child(3),
+.grid-animate-in [class*="col-"]:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.grid-animate-in .col:nth-child(4),
+.grid-animate-in [class*="col-"]:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.grid-animate-in .col:nth-child(5),
+.grid-animate-in [class*="col-"]:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.grid-animate-in .col:nth-child(6),
+.grid-animate-in [class*="col-"]:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+/* ============================================================================ */
+/* RESPONSIVE UTILITIES
+/* ============================================================================ */
+
+/* Hide on different screen sizes */
+@media (max-width: 575.98px) {
+    .d-none-xs {
+        display: none !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .d-none-sm {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .d-none-md {
+        display: none !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .d-none-lg {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .d-none-xl {
+        display: none !important;
+    }
+}
+
+/* Show only on specific screen sizes */
+.d-block-xs {
+    display: none !important;
+}
+
+.d-block-sm {
+    display: none !important;
+}
+
+.d-block-md {
+    display: none !important;
+}
+
+.d-block-lg {
+    display: none !important;
+}
+
+.d-block-xl {
+    display: none !important;
+}
+
+@media (max-width: 575.98px) {
+    .d-block-xs {
+        display: block !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .d-block-sm {
+        display: block !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .d-block-md {
+        display: block !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .d-block-lg {
+        display: block !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .d-block-xl {
+        display: block !important;
+    }
+}
+
+/* ============================================================================ */
+/* GRID GAPS (GUTTERS)
+/* ============================================================================ */
+
+.gap-0 {
+    gap: 0 !important;
+}
+
+.gap-1 {
+    gap: var(--spacing-xs) !important;
+}
+
+.gap-2 {
+    gap: var(--spacing-sm) !important;
+}
+
+.gap-3 {
+    gap: var(--spacing-md) !important;
+}
+
+.gap-4 {
+    gap: var(--spacing-lg) !important;
+}
+
+.gap-5 {
+    gap: var(--spacing-xl) !important;
+}
+
+.row.g-0 {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.row.g-0 > .col,
+.row.g-0 > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.row.g-1 {
+    margin-right: calc(var(--spacing-xs) * -0.5);
+    margin-left: calc(var(--spacing-xs) * -0.5);
+}
+
+.row.g-1 > .col,
+.row.g-1 > [class*="col-"] {
+    padding-right: calc(var(--spacing-xs) * 0.5);
+    padding-left: calc(var(--spacing-xs) * 0.5);
+}
+
+.row.g-2 {
+    margin-right: calc(var(--spacing-sm) * -0.5);
+    margin-left: calc(var(--spacing-sm) * -0.5);
+}
+
+.row.g-2 > .col,
+.row.g-2 > [class*="col-"] {
+    padding-right: calc(var(--spacing-sm) * 0.5);
+    padding-left: calc(var(--spacing-sm) * 0.5);
+}
+
+.row.g-3 {
+    margin-right: calc(var(--spacing-md) * -0.5);
+    margin-left: calc(var(--spacing-md) * -0.5);
+}
+
+.row.g-3 > .col,
+.row.g-3 > [class*="col-"] {
+    padding-right: calc(var(--spacing-md) * 0.5);
+    padding-left: calc(var(--spacing-md) * 0.5);
+}
+
+.row.g-4 {
+    margin-right: calc(var(--spacing-lg) * -0.5);
+    margin-left: calc(var(--spacing-lg) * -0.5);
+}
+
+.row.g-4 > .col,
+.row.g-4 > [class*="col-"] {
+    padding-right: calc(var(--spacing-lg) * 0.5);
+    padding-left: calc(var(--spacing-lg) * 0.5);
+}
+
+.row.g-5 {
+    margin-right: calc(var(--spacing-xl) * -0.5);
+    margin-left: calc(var(--spacing-xl) * -0.5);
+}
+
+.row.g-5 > .col,
+.row.g-5 > [class*="col-"] {
+    padding-right: calc(var(--spacing-xl) * 0.5);
+    padding-left: calc(var(--spacing-xl) * 0.5);
 }
