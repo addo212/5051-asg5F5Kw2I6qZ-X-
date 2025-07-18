@@ -1,132 +1,689 @@
 /* css/components/forms.css */
 
-/* Common form elements */
+/* ============================================================================ */
+/* FORM CONTAINERS
+/* ============================================================================ */
+
+.form-container {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-header h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-footer a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================================ */
+/* FORM GROUPS
+/* ============================================================================ */
+
 .form-group {
     margin-bottom: 1.5rem;
-    text-align: left;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
+    color: var(--text-primary);
     font-weight: 500;
-    color: var(--text-primary);
+    font-size: 0.95rem;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    box-sizing: border-box;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    transition: border-color 0.3s, box-shadow 0.3s;
+.form-group .helper-text {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
-    outline: none;
+.form-group.error label {
+    color: var(--danger-color);
 }
 
-/* Select styling */
-.form-group select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px;
+.form-group.error .helper-text {
+    color: var(--danger-color);
 }
 
-[data-theme="dark"] .form-group select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23bbb'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+    border-color: var(--danger-color);
 }
 
-/* Dark theme adjustments */
-[data-theme="dark"] .form-group input,
-[data-theme="dark"] .form-group select,
-[data-theme="dark"] .form-group textarea {
-    background-color: #2d2d2d;
-    border-color: #555555;
-    color: #ffffff;
+.form-group.success input,
+.form-group.success select,
+.form-group.success textarea {
+    border-color: var(--success-color);
 }
 
-/* Form layout variations */
-.form-group-inline {
+.form-row {
     display: flex;
     gap: 1rem;
-    align-items: center;
+    margin-bottom: 1.5rem;
 }
 
-.form-group-inline .form-group {
+.form-row .form-group {
     flex: 1;
     margin-bottom: 0;
 }
 
-/* Date input styling */
-input[type="date"] {
+/* ============================================================================ */
+/* FORM INPUTS
+/* ============================================================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
     width: 100%;
-    padding: 10px;
+    padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-size: 14px;
-    transition: border-color 0.3s;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
-input[type="date"]:focus {
-    border-color: var(--accent-color);
+input:focus,
+textarea:focus,
+select:focus {
     outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.2);
 }
 
-/* Styling untuk browser yang mendukung ::-webkit-calendar-picker-indicator */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: var(--calendar-icon-filter);
-    cursor: pointer;
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-tertiary);
 }
 
-/* Color input */
-.color-input {
-    width: 40px !important;
-    height: 40px;
-    padding: 2px;
-    border-radius: 50%;
-    overflow: hidden;
-    cursor: pointer;
+textarea {
+    min-height: 100px;
+    resize: vertical;
 }
 
-/* Checkbox and radio styling */
-.form-check {
+/* ============================================================================ */
+/* SELECT INPUTS
+/* ============================================================================ */
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+select:focus {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+[data-theme="dark"] select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+[data-theme="dark"] select:focus {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* ============================================================================ */
+/* CHECKBOXES AND RADIOS
+/* ============================================================================ */
+
+.checkbox-group,
+.radio-group {
     display: flex;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
 }
 
-.form-check input[type="checkbox"],
-.form-check input[type="radio"] {
-    margin-right: 0.5rem;
-    width: auto;
+.checkbox-group input[type="checkbox"],
+.radio-group input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.form-check label {
+.checkbox-group label,
+.radio-group label {
+    display: flex;
+    align-items: center;
     margin-bottom: 0;
-    font-weight: normal;
+    cursor: pointer;
 }
 
-/* Form validation */
-.form-group input.is-invalid,
-.form-group select.is-invalid {
+.checkbox-custom,
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    margin-right: 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkbox-custom {
+    border-radius: 4px;
+}
+
+.radio-custom {
+    border-radius: 50%;
+}
+
+.checkbox-group input[type="checkbox"]:checked ~ label .checkbox-custom,
+.radio-group input[type="radio"]:checked ~ label .radio-custom {
+    border-color: var(--accent-color);
+    background-color: var(--accent-color);
+}
+
+.checkbox-custom::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.radio-custom::after {
+    content: '';
+    position: absolute;
+    display: none;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+}
+
+.checkbox-group input[type="checkbox"]:checked ~ label .checkbox-custom::after,
+.radio-group input[type="radio"]:checked ~ label .radio-custom::after {
+    display: block;
+}
+
+.checkbox-group:hover .checkbox-custom,
+.radio-group:hover .radio-custom {
+    border-color: var(--accent-color);
+}
+
+/* ============================================================================ */
+/* TOGGLE SWITCHES
+/* ============================================================================ */
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--accent-color);
+}
+
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px var(--accent-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.toggle-group label {
+    margin-bottom: 0;
+    flex-grow: 1;
+}
+
+/* ============================================================================ */
+/* RANGE SLIDERS
+/* ============================================================================ */
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: var(--border-color);
+    outline: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(var(--accent-color-rgb), 0.2);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(var(--accent-color-rgb), 0.2);
+}
+
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================================================ */
+/* FILE INPUTS
+/* ============================================================================ */
+
+.file-input {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-primary);
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 100px;
+}
+
+.file-input-label i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent-color);
+}
+
+.file-input:hover .file-input-label {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.file-input-preview {
+    margin-top: 1rem;
+    display: none;
+}
+
+.file-input-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+}
+
+/* ============================================================================ */
+/* SEARCH INPUTS
+/* ============================================================================ */
+
+.search-input {
+    position: relative;
+}
+
+.search-input input {
+    padding-left: 2.5rem;
+}
+
+.search-input i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.search-input input:focus + i {
+    color: var(--accent-color);
+}
+
+/* ============================================================================ */
+/* FORM ACTIONS
+/* ============================================================================ */
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.form-actions button {
+    min-width: 120px;
+}
+
+/* ============================================================================ */
+/* FORM VALIDATION
+/* ============================================================================ */
+
+.validation-message {
+    display: none;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.validation-message.error {
+    display: block;
+    color: var(--danger-color);
+}
+
+.validation-message.success {
+    display: block;
+    color: var(--success-color);
+}
+
+input.invalid,
+select.invalid,
+textarea.invalid {
     border-color: var(--danger-color);
 }
 
-.invalid-feedback {
-    color: var(--danger-color);
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
+input.valid,
+select.valid,
+textarea.valid {
+    border-color: var(--success-color);
+}
+
+/* ============================================================================ */
+/* FORM ANIMATIONS
+/* ============================================================================ */
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* ============================================================================ */
+/* CUSTOM FORM ELEMENTS
+/* ============================================================================ */
+
+/* Amount Input with Currency */
+.amount-input {
+    position: relative;
+}
+
+.amount-input input {
+    padding-left: 2.5rem;
+}
+
+.amount-input .currency {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Date Picker */
+input[type="date"] {
+    position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3e%3c/rect%3e%3cline x1='16' y1='2' x2='16' y2='6'%3e%3c/line%3e%3cline x1='8' y1='2' x2='8' y2='6'%3e%3c/line%3e%3cline x1='3' y1='10' x2='21' y2='10'%3e%3c/line%3e%3c/svg%3e");
+    cursor: pointer;
+}
+
+/* Color Picker */
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 50px;
+    height: 50px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+input[type="color"]::-moz-color-swatch {
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+}
+
+input[type="color"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.3);
+}
+
+.color-value {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    background-color: var(--bg-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+/* Color Swatches */
+.color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.color-swatch {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.active {
+    border-color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+/* Icon Selector */
+.icon-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.icon-option {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+}
+
+.icon-option i {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.icon-option:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+}
+
+.icon-option:hover i {
+    color: var(--accent-color);
+}
+
+.icon-option.active {
+    border-color: var(--accent-color);
+    background-color: var(--accent-color);
+}
+
+.icon-option.active i {
+    color: white;
+}
+
+/* ============================================================================ */
+/* RESPONSIVE ADJUSTMENTS
+/* ============================================================================ */
+
+@media (max-width: 768px) {
+    .form-container {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
 }
