@@ -1,0 +1,92 @@
+/* css/pages/login.css */
+
+/* Body style untuk halaman login/auth */
+body:not(.dashboard-body) {
+    display: flex;
+    flex-direction: column; /* Menyusun auth-container dan footer secara vertikal */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+/* Memastikan footer tetap di bawah */
+body:not(.dashboard-body) .auth-container {
+    margin-bottom: auto; /* Mendorong footer ke bawah */
+}
+body:not(.dashboard-body) footer {
+    margin-top: auto; /* Mendorong footer ke bawah */
+    border-top: none; /* Hapus garis atas pada footer di halaman login */
+    padding-top: 0;
+}
+
+/* Container utama untuk form login/register */
+.auth-container {
+    background: var(--bg-secondary);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+/* PERBAIKAN: Style untuk logo di halaman login */
+.auth-logo {
+    width: 90px;  /* Ukuran yang pas untuk halaman login */
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1.5rem;
+    border: 4px solid var(--bg-primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.auth-container h1 {
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.auth-container .status-message {
+    margin-bottom: 2rem;
+}
+
+.auth-container .btn-primary {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+}
+
+.auth-footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.error-message {
+    color: var(--danger-color);
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+/* sr-only untuk label yang disembunyikan secara visual tapi tetap ada untuk screen reader */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
