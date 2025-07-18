@@ -1,12 +1,22 @@
 // js/transactions.js
 
-import { auth, db } from './firebase-config.js';
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+// Impor yang disesuaikan dengan struktur firebase-config.js Anda
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { app } from './firebase-config.js';
+
+// Inisialisasi auth dan firestore
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+import { 
+    onAuthStateChanged, signOut 
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
 import { 
     collection, doc, addDoc, updateDoc, deleteDoc, getDocs, query, 
     where, orderBy, limit, startAfter, getDoc, Timestamp 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-
 // ============================================================================
 // Global Variables
 // ============================================================================
