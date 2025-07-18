@@ -1,75 +1,217 @@
-/* variables.css - Variabel tema dan warna */
+/* css/base/variables.css */
+
+/* ============================================================================ */
+/* CSS VARIABLES - ROOT LEVEL
+/* ============================================================================ */
 
 :root {
-  /* Default Light Theme */
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #ffffff;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --accent-color: #4CAF50;
-  --accent-color-rgb: 76, 175, 80;
-  --accent-hover: #45a049;
-  --border-color: #dddddd;
-  --card-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  --danger-color: #dc3545;
-  --income-color: #4CAF50;
-  --expense-color: #f44336;
-  --gradient-start: #4CAF50;
-  --gradient-end: #8BC34A;
-  --calendar-icon-filter: invert(0.5);
+    /* Base Colors */
+    --white: #ffffff;
+    --black: #000000;
+    
+    /* Primary Accent Color - Default Green */
+    --accent-color: #4CAF50;
+    --accent-color-rgb: 76, 175, 80; /* RGB values for rgba() usage */
+    
+    /* Gradient Colors - Calculated from accent color */
+    --gradient-start: #5fd364; /* Lighter version of accent color */
+    --gradient-end: #3b8c3f;   /* Darker version of accent color */
+    
+    /* Status Colors */
+    --success-color: #4CAF50;
+    --success-color-rgb: 76, 175, 80;
+    --warning-color: #FF9800;
+    --warning-color-rgb: 255, 152, 0;
+    --danger-color: #F44336;
+    --danger-color-rgb: 244, 67, 54;
+    --info-color: #2196F3;
+    --info-color-rgb: 33, 150, 243;
+    
+    /* Transaction Colors */
+    --income-color: #4CAF50;
+    --income-color-rgb: 76, 175, 80;
+    --expense-color: #F44336;
+    --expense-color-rgb: 244, 67, 54;
+    
+    /* Light Theme Colors (Default) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-tertiary: #adb5bd;
+    
+    --border-color: #dee2e6;
+    
+    /* Shadows */
+    --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    --dropdown-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+    --button-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+    --border-radius-round: 50%;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Z-index Layers */
+    --z-index-dropdown: 100;
+    --z-index-sticky: 200;
+    --z-index-fixed: 300;
+    --z-index-modal-backdrop: 400;
+    --z-index-modal: 500;
+    --z-index-popover: 600;
+    --z-index-tooltip: 700;
 }
 
-/* Dark Theme */
+/* ============================================================================ */
+/* DARK THEME VARIABLES
+/* ============================================================================ */
+
 [data-theme="dark"] {
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --accent-color: #F9A825; /* Emas */
-  --accent-color-rgb: 249, 168, 37;
-  --accent-hover: #F57F17; /* Emas lebih gelap saat hover */
-  --border-color: #444444;
-  --card-shadow: 0 5px 15px rgba(0,0,0,0.4);
-  --danger-color: #ff6b6b;
-  --income-color: #4ecca3;
-  --expense-color: #ff6b6b;
-  --gradient-start: #F9A825;
-  --gradient-end: #F57F17;
-  --calendar-icon-filter: invert(0.8);
+    /* Dark Theme Colors */
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2d2d2d;
+    
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --text-tertiary: #6c6c6c;
+    
+    --border-color: #333333;
+    
+    /* Shadows for Dark Theme */
+    --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --dropdown-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+    --button-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Blue Theme */
-[data-theme="blue"] {
-  --bg-primary: #f0f8ff;
-  --bg-secondary: #ffffff;
-  --text-primary: #2c3e50;
-  --text-secondary: #7f8c8d;
-  --accent-color: #3498db;
-  --accent-color-rgb: 52, 152, 219;
-  --accent-hover: #2980b9;
-  --border-color: #e0e0e0;
-  --card-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
-  --danger-color: #e74c3c;
-  --income-color: #2ecc71;
-  --expense-color: #e74c3c;
-  --gradient-start: #3498db;
-  --gradient-end: #2980b9;
+/* ============================================================================ */
+/* TYPOGRAPHY VARIABLES
+/* ============================================================================ */
+
+:root {
+    /* Font Families */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-secondary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-monospace: 'Roboto Mono', 'SF Mono', 'Consolas', 'Monaco', monospace;
+    
+    /* Font Sizes */
+    --font-size-xs: 0.75rem;   /* 12px */
+    --font-size-sm: 0.875rem;  /* 14px */
+    --font-size-md: 1rem;      /* 16px */
+    --font-size-lg: 1.125rem;  /* 18px */
+    --font-size-xl: 1.25rem;   /* 20px */
+    --font-size-2xl: 1.5rem;   /* 24px */
+    --font-size-3xl: 1.875rem; /* 30px */
+    --font-size-4xl: 2.25rem;  /* 36px */
+    
+    /* Font Weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Line Heights */
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-loose: 1.8;
 }
 
-/* Purple Theme */
-[data-theme="purple"] {
-  --bg-primary: #f8f5fe;
-  --bg-secondary: #ffffff;
-  --text-primary: #2c2c54;
-  --text-secondary: #57606f;
-  --accent-color: #9b59b6;
-  --accent-color-rgb: 155, 89, 182;
-  --accent-hover: #8e44ad;
-  --border-color: #e0e0e0;
-  --card-shadow: 0 5px 15px rgba(155, 89, 182, 0.1);
-  --danger-color: #e74c3c;
-  --income-color: #2ecc71;
-  --expense-color: #e74c3c;
-  --gradient-start: #9b59b6;
-  --gradient-end: #8e44ad;
+/* ============================================================================ */
+/* LAYOUT VARIABLES
+/* ============================================================================ */
+
+:root {
+    /* Container Widths */
+    --container-sm: 540px;
+    --container-md: 720px;
+    --container-lg: 960px;
+    --container-xl: 1140px;
+    
+    /* Grid Breakpoints */
+    --breakpoint-xs: 0;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+    
+    /* Header & Footer */
+    --header-height: 70px;
+    --footer-height: 60px;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 70px;
+}
+
+/* ============================================================================ */
+/* ANIMATION VARIABLES
+/* ============================================================================ */
+
+:root {
+    /* Animation Durations */
+    --animation-fast: 150ms;
+    --animation-normal: 300ms;
+    --animation-slow: 500ms;
+    
+    /* Animation Curves */
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ============================================================================ */
+/* MEDIA QUERY VARIABLES
+/* ============================================================================ */
+
+@media (max-width: 576px) {
+    :root {
+        /* Adjust spacing for mobile */
+        --spacing-lg: 1.25rem;
+        --spacing-xl: 1.5rem;
+        
+        /* Adjust font sizes for mobile */
+        --font-size-2xl: 1.375rem;
+        --font-size-3xl: 1.625rem;
+        --font-size-4xl: 1.875rem;
+    }
+}
+
+/* ============================================================================ */
+/* PRINT VARIABLES
+/* ============================================================================ */
+
+@media print {
+    :root {
+        /* Print-friendly colors */
+        --bg-primary: #ffffff;
+        --bg-secondary: #ffffff;
+        --bg-tertiary: #f8f8f8;
+        
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --text-tertiary: #666666;
+        
+        --border-color: #cccccc;
+        
+        /* Remove shadows for print */
+        --card-shadow: none;
+        --dropdown-shadow: none;
+        --button-shadow: none;
+    }
 }
