@@ -129,7 +129,7 @@ function setupEventListeners() {
 }
 
 // ============================================================================
-// CRUD HANDLERS (Tidak ada perubahan di sini)
+// CRUD HANDLERS
 // ============================================================================
 async function handleAddTransaction(e) {
     e.preventDefault();
@@ -141,13 +141,15 @@ async function handleAddTransaction(e) {
     try {
         const date = form.transactionDate.value;
         const timestamp = new Date(date).getTime();
+        const walletId = form.transactionWallet.value;
+        
         const newTransaction = {
             type: form.transactionType.value,
             amount: parseFloat(form.transactionAmount.value),
             description: form.transactionDescription.value,
             account: form.transactionAccount.value,
-            walletId: form.transactionWallet.value,
-            wallet: wallets[form.transactionWallet.value].name,
+            walletId: walletId, // Penting untuk menyimpan ID
+            wallet: wallets[walletId].name, // Menyimpan nama untuk kemudahan tampilan
             timestamp: timestamp,
             date: date
         };
@@ -188,6 +190,7 @@ async function handleUpdateTransaction(e) {
         const txId = form.editTransactionId.value;
         const date = form.editTransactionDate.value;
         const timestamp = new Date(date).getTime();
+        const walletId = form.editTransactionWallet.value;
 
         const updatedData = {
             id: txId,
@@ -195,8 +198,8 @@ async function handleUpdateTransaction(e) {
             amount: parseFloat(form.editTransactionAmount.value),
             description: form.editTransactionDescription.value,
             account: form.editTransactionAccount.value,
-            walletId: form.editTransactionWallet.value,
-            wallet: wallets[form.editTransactionWallet.value].name,
+            walletId: walletId, // Penting untuk menyimpan ID
+            wallet: wallets[walletId].name, // Menyimpan nama untuk kemudahan tampilan
             timestamp: timestamp,
             date: date
         };
@@ -262,11 +265,10 @@ function displayTransactions() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filterType = document.getElementById('filterType').value;
     const filterAccount = document.getElementById('filterAccount').value;
-    const filterWallet = document.getElementById('filterWallet').value;
+    const filterWalletId = document.getElementById('filterWallet').value; // Ini adalah ID
     const filterStartDate = document.getElementById('filterStartDate').value;
     const filterEndDate = document.getElementById('filterEndDate').value;
 
-    // PERBAIKAN: Logika filter dan pencarian yang lebih andal
     filteredTransactions = filteredTransactions.filter(tx => {
         // Pencarian Komprehensif
         if (searchTerm) {
@@ -288,9 +290,16 @@ function displayTransactions() {
             return false;
         }
 
-        // Filter berdasarkan Dompet (Wallet)
-        if (filterWallet && tx.walletId !== filterWallet) {
-            return false;
+        // PERBAIKAN: Logika filter dompet yang baru dan lebih andal
+        if (filterWalletId) {
+            // Jika transaksi memiliki walletId (data baru), bandingkan langsung.
+            if (tx.walletId) {
+                if (tx.walletId !== filterWalletId) return false;
+            } else {
+                // Jika tidak ada walletId (data lama), cari nama wallet berdasarkan ID yang dipilih, lalu bandingkan namanya.
+                const selectedWalletName = wallets[filterWalletId]?.name;
+                if (tx.wallet !== selectedWalletName) return false;
+            }
         }
 
         // Filter berdasarkan Tanggal Mulai
@@ -301,11 +310,11 @@ function displayTransactions() {
 
         // Filter berdasarkan Tanggal Akhir
         if (filterEndDate) {
-            const endDate = new Date(filterEndDate).getTime() + (24 * 60 * 60 * 1000 - 1); // Akhir hari
+            const endDate = new Date(filterEndDate).getTime() + (24 * 60 * 60 * 1000 - 1);
             if (tx.timestamp > endDate) return false;
         }
 
-        return true; // Jika lolos semua filter
+        return true;
     });
 
     // 2. Sorting
@@ -374,7 +383,8 @@ async function openEditModal(txId) {
         option.textContent = wallet.name;
         walletSelect.appendChild(option);
     });
-    walletSelect.value = tx.walletId;
+    // PERBAIKAN: Menangani kasus di mana walletId mungkin tidak ada
+    walletSelect.value = tx.walletId || Object.keys(wallets).find(id => wallets[id].name === tx.wallet) || '';
 
     updateAccountDropdown('editTransactionAccount', tx.type);
     form.editTransactionAccount.value = tx.account;
