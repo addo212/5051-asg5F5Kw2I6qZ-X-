@@ -1,6 +1,8 @@
 /* css/pages/transactions.css */
 
-/* Collapsible Section for the form */
+/* ============================================================================ */
+/* SECTION: ADD TRANSACTION (COLLAPSIBLE)
+/* ============================================================================ */
 .collapsible-section {
     background-color: var(--bg-secondary);
     border-radius: 12px;
@@ -38,75 +40,96 @@ details[open] > summary .collapse-icon {
 
 .collapsible-content {
     padding: 0 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-color);
 }
 
-/* Table Header Controls (Toolbar) */
+/* ============================================================================ */
+/* SECTION: TRANSACTION LIST HEADER & SEARCH
+/* ============================================================================ */
 .table-header-controls {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
-.table-actions {
-    display: flex;
-    gap: 1rem; 
-    align-items: center;
+.table-header-controls h2 {
+    padding: 0;
+    border: none;
+    margin: 0;
 }
 
+/* PERBAIKAN: Search Container */
 .search-container {
     position: relative;
+    min-width: 280px;
 }
 
 .search-container input {
+    width: 100%;
     padding: 0.75rem 2.5rem 0.75rem 1rem;
-    min-width: 250px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
-.search-container .fa-search {
+.search-container .search-icon {
     position: absolute;
     right: 1rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
+    pointer-events: none; /* Agar ikon tidak bisa diklik */
 }
 
-/* Collapsible Filter Panel */
-.filter-panel.collapsible {
-    max-height: 0;
-    overflow: hidden;
-    padding: 0 1.5rem;
-    margin-bottom: 0;
-    border-radius: 12px;
-    background-color: var(--bg-primary);
-    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
-}
-
-.filter-panel.collapsible.show {
-    max-height: 500px;
+/* ============================================================================ */
+/* SECTION: FILTER BAR (Tampilan Satu Baris)
+/* ============================================================================ */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap; /* Akan pindah ke baris baru jika tidak cukup ruang */
+    gap: 1rem;
+    align-items: flex-end; /* Menyejajarkan semua elemen ke bawah */
     padding: 1.5rem;
+    background-color: var(--bg-primary);
+    border-radius: 12px;
     margin-bottom: 1.5rem;
 }
 
-.filter-panel .filter-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+.filter-bar .form-group {
+    flex: 1; /* Membuat setiap grup form fleksibel */
+    min-width: 150px; /* Lebar minimum untuk setiap filter */
+    margin-bottom: 0; /* Hapus margin bawah default dari form-group */
 }
 
-.filter-panel .filter-actions {
-    margin-top: 1rem;
+.filter-bar .form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.filter-bar .form-group select,
+.filter-bar .form-group input {
+    padding: 0.6rem; /* Padding lebih kecil untuk baris filter */
+}
+
+.filter-bar .filter-actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
-/* Table container */
+.filter-bar .btn-filter {
+    padding: 0.6rem;
+    width: 40px; /* Membuat tombol menjadi kotak */
+    height: 40px;
+    font-size: 1rem;
+}
+
+/* ============================================================================ */
+/* SECTION: TRANSACTION TABLE
+/* ============================================================================ */
 .table-container {
     width: 100%;
     overflow-x: auto;
@@ -168,7 +191,12 @@ details[open] > summary .collapse-icon {
 .type-cell .income { background-color: var(--income-color); }
 .type-cell .expense { background-color: var(--expense-color); }
 
-/* Pagination */
+.amount-income { color: var(--income-color); }
+.amount-expense { color: var(--expense-color); }
+
+/* ============================================================================ */
+/* SECTION: PAGINATION
+/* ============================================================================ */
 .pagination-container {
     display: flex;
     justify-content: center;
