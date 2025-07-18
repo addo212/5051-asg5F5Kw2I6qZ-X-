@@ -18,6 +18,7 @@
     border: 1px solid transparent;
     gap: 0.5rem;
     text-decoration: none;
+    min-width: 120px; /* Memastikan lebar minimum */
 }
 
 .btn i {
@@ -68,6 +69,7 @@
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
     border-radius: 6px;
+    min-width: 100px; /* Lebar minimum untuk tombol kecil */
 }
 
 /* Primary small button */
@@ -81,6 +83,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 1px 3px rgba(var(--accent-color-rgb), 0.2);
+    min-width: 80px; /* Lebar minimum untuk konsistensi */
 }
 
 .btn-primary-small:hover {
@@ -105,6 +108,7 @@
     font-size: 0.875rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-width: 80px; /* Lebar minimum untuk konsistensi */
 }
 
 .btn-secondary-small:hover {
@@ -133,6 +137,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 0;
+    min-width: unset; /* Reset min-width untuk tombol ikon */
 }
 
 .btn-icon:hover {
@@ -147,8 +152,8 @@
 
 /* Add button (plus) */
 .add-btn {
-    width: 50px;
-    height: 50px;
+    width: 56px; /* Ukuran yang lebih besar */
+    height: 56px; /* Ukuran yang lebih besar */
     border-radius: 50%;
     background-color: var(--accent-color);
     color: white;
@@ -164,6 +169,7 @@
     bottom: 2rem;
     right: 2rem;
     z-index: 100;
+    min-width: unset; /* Reset min-width untuk tombol add */
 }
 
 .add-btn:hover {
@@ -187,6 +193,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.875rem;
+    min-width: unset; /* Reset min-width untuk tombol filter */
 }
 
 .filter-btn:hover {
@@ -209,6 +216,7 @@
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-width: unset; /* Reset min-width untuk tombol action */
 }
 
 .action-btn:hover {
@@ -230,6 +238,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    min-width: unset; /* Reset min-width untuk tombol card */
 }
 
 .card-btn:hover {
@@ -248,6 +257,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
+    min-width: unset; /* Reset min-width untuk tombol tab */
 }
 
 .tab-btn:hover {
@@ -269,6 +279,7 @@
     font-size: inherit;
     text-decoration: underline;
     transition: all 0.3s ease;
+    min-width: unset; /* Reset min-width untuk tombol link */
 }
 
 .btn-link:hover {
@@ -295,6 +306,7 @@
     bottom: 2rem;
     right: 2rem;
     z-index: 100;
+    min-width: unset; /* Reset min-width untuk tombol fab */
 }
 
 .fab-btn:hover {
@@ -321,6 +333,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-width: unset; /* Reset min-width untuk tombol pagination */
 }
 
 .pagination-btn:hover {
@@ -347,11 +360,82 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-width: unset; /* Reset min-width untuk tombol table action */
 }
 
 .table-action-btn:hover {
     color: var(--accent-color);
     background-color: rgba(var(--accent-color-rgb), 0.1);
+}
+
+/* ============================================================================ */
+/* SPECIFIC ACTION BUTTONS
+/* ============================================================================ */
+
+/* Add Transaction Button */
+.btn-add-transaction {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 5px rgba(var(--accent-color-rgb), 0.3);
+    transition: all 0.3s ease;
+    min-width: 160px; /* Lebar minimum yang lebih besar */
+    justify-content: center;
+}
+
+.btn-add-transaction:hover {
+    background-color: var(--accent-color);
+    box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.4);
+    transform: translateY(-2px);
+}
+
+/* Add Wallet Button */
+.btn-add-wallet {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 5px rgba(var(--accent-color-rgb), 0.3);
+    transition: all 0.3s ease;
+    min-width: 140px; /* Lebar minimum yang lebih besar */
+    justify-content: center;
+}
+
+.btn-add-wallet:hover {
+    background-color: var(--accent-color);
+    box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.4);
+    transform: translateY(-2px);
+}
+
+/* Add Budget Button */
+.btn-add-budget {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 5px rgba(var(--accent-color-rgb), 0.3);
+    transition: all 0.3s ease;
+    min-width: 140px; /* Lebar minimum yang lebih besar */
+    justify-content: center;
+}
+
+.btn-add-budget:hover {
+    background-color: var(--accent-color);
+    box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.4);
+    transform: translateY(-2px);
 }
 
 /* ============================================================================ */
@@ -462,6 +546,7 @@ input:checked + .slider:before {
     color: var(--text-secondary);
     border-radius: 4px;
     transition: all 0.2s ease;
+    min-width: unset; /* Reset min-width untuk tombol toggle */
 }
 
 .toggle-btn:hover {
@@ -494,6 +579,7 @@ input:checked + .slider:before {
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    min-width: 100px; /* Lebar minimum untuk tombol logout */
 }
 
 /* Efek hover yang lebih menarik */
@@ -615,17 +701,19 @@ input:checked + .slider:before {
 @media (max-width: 768px) {
     .btn {
         padding: 0.6rem 1.2rem;
+        min-width: 100px; /* Lebar minimum yang lebih kecil untuk mobile */
     }
     
     .btn-small,
     .btn-primary-small,
     .btn-secondary-small {
         padding: 0.4rem 0.8rem;
+        min-width: 70px; /* Lebar minimum yang lebih kecil untuk mobile */
     }
     
     .add-btn {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         font-size: 1.2rem;
     }
     
@@ -634,4 +722,65 @@ input:checked + .slider:before {
         height: 50px;
         font-size: 1.2rem;
     }
+    
+    .btn-add-transaction,
+    .btn-add-wallet,
+    .btn-add-budget {
+        min-width: 120px; /* Lebar minimum yang lebih kecil untuk mobile */
+        padding: 0.6rem 1rem;
+    }
+}
+
+/* ============================================================================ */
+/* QUICK ACTION BUTTONS
+/* ============================================================================ */
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    min-height: 100px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.quick-action-btn .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.quick-action-btn .label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(var(--accent-color-rgb), 0.15);
+    border-color: var(--accent-color);
+}
+
+.quick-action-btn:hover .icon {
+    background-color: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
 }
