@@ -101,7 +101,10 @@ function updateAccentColor(newColor) {
     // 2. Perbarui tampilan kontrol di halaman settings
     renderAccentColorUI(newColor);
     
-    // 3. Simpan ke Firebase menggunakan fungsi dari database.js
+    // 3. Simpan ke localStorage sebagai cache untuk mencegah kedipan tema
+    localStorage.setItem('accentColor', newColor);
+    
+    // 4. Simpan ke Firebase menggunakan fungsi dari database.js
     saveAccentColor(userId, newColor)
         .then(() => {
             // Hitung dan terapkan variasi warna untuk gradien
