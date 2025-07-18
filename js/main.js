@@ -277,8 +277,8 @@ async function initializeDashboard() {
 // ============================================================================
 function updateUserInfo(userData) {
     // Get user name and email
-    const userName = userData.displayName || auth.currentUser.displayName || 'User';
-    const userEmail = userData.email || auth.currentUser.email || '';
+    const userName = userData?.displayName || auth.currentUser?.displayName || 'User';
+    const userEmail = userData?.email || auth.currentUser?.email || 'user@example.com';
     
     // Update user name in header
     const userNameElements = document.querySelectorAll('.user-name');
@@ -304,8 +304,8 @@ function updateUserInfo(userData) {
     }
     
     // Update user avatar if available
-    if (userData.photoURL || auth.currentUser.photoURL) {
-        const photoURL = userData.photoURL || auth.currentUser.photoURL;
+    const photoURL = userData?.photoURL || auth.currentUser?.photoURL;
+    if (photoURL) {
         const avatarElements = document.querySelectorAll('.user-avatar img');
         avatarElements.forEach(element => {
             element.src = photoURL;
@@ -315,7 +315,7 @@ function updateUserInfo(userData) {
 
 function updateWelcomeMessage(userData) {
     // Get user's first name
-    const fullName = userData.displayName || auth.currentUser.displayName || 'User';
+    const fullName = userData?.displayName || auth.currentUser?.displayName || 'User';
     const firstName = fullName.split(' ')[0];
     
     // Update welcome message
@@ -832,7 +832,7 @@ function displayTopWallets(wallets) {
         
         // Create a darker shade for gradient
         const darkerColor = adjustColor(color, -30);
-html += `
+        html += `
             <div class="wallet-card" style="background: linear-gradient(135deg, ${color}, ${darkerColor})">
                 <div class="wallet-icon">
                     <i class="fas ${wallet.icon || 'fa-wallet'}"></i>
@@ -981,4 +981,4 @@ async function loadInitialData() {
         console.error("Error loading initial data:", error);
         throw error;
     }
-}	
+}
