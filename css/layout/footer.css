@@ -8,3 +8,24 @@ footer {
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
+
+/* Style untuk ikon hati di footer */
+.footer-heart {
+    color: var(--danger-color); /* Menggunakan variabel warna merah dari tema Anda */
+    font-size: 0.85em; /* Sedikit lebih kecil agar sejajar dengan teks */
+    margin: 0 4px;
+    animation: pulse 1.5s infinite; /* Menambahkan efek berdenyut halus */
+}
+
+/* Animasi berdenyut */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
