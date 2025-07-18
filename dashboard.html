@@ -116,7 +116,8 @@
 
             <!-- Tata Letak Grid Utama Dashboard -->
             <div class="dashboard-grid">
-                <div class="grid-item">
+                <!-- Kolom Utama (Lebih Lebar) -->
+                <div class="grid-item main-col">
                     <div class="section-header">
                         <h2><i class="fas fa-history"></i> Recent Transactions</h2>
                         <a href="transactions.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
@@ -126,41 +127,14 @@
                     </div>
                 </div>
 
-                <div class="grid-item">
-                    <div class="section-header">
-                        <h2><i class="fas fa-chart-line"></i> Weekly Trends</h2>
-                    </div>
-                    <div class="mini-charts">
-                        <div class="mini-chart-card">
-                            <h3>Income</h3>
-                            <canvas id="incomeSparkline"></canvas>
-                            <p class="chart-value" id="weeklyIncomeTotal">Rp 0</p>
-                        </div>
-                        <div class="mini-chart-card">
-                            <h3>Expense</h3>
-                            <canvas id="expenseSparkline"></canvas>
-                            <p class="chart-value" id="weeklyExpenseTotal">Rp 0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid-item">
-                    <div class="section-header">
-                        <h2><i class="fas fa-wallet"></i> Top Wallets</h2>
-                        <a href="wallets.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                    <div id="topWallets" class="wallet-grid">
-                        <p class="empty-state">Loading wallets...</p>
-                    </div>
-                </div>
-
-                <div class="grid-item">
+                <!-- Kolom Samping (Lebih Sempit) -->
+                <div class="grid-item side-col">
                     <div class="section-header">
                         <h2><i class="fas fa-bullseye"></i> Top Budgets</h2>
                         <div class="section-controls">
                             <div class="toggle-view">
-                                <button class="toggle-btn active" id="viewByPercentage">By Progress</button>
-                                <button class="toggle-btn" id="viewByAmount">By Limit</button>
+                                <button class="toggle-btn active" id="viewByPercentage">Progress</button>
+                                <button class="toggle-btn" id="viewByAmount">Limit</button>
                             </div>
                         </div>
                     </div>
@@ -169,6 +143,37 @@
                     </div>
                 </div>
 
+                    <!-- Item lain di Kolom Utama -->
+                    <div class="grid-item main-col">
+                        <div class="section-header">
+                            <h2><i class="fas fa-wallet"></i> Top Wallets</h2>
+                            <a href="wallets.html" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div id="topWallets" class="wallet-grid">
+                            <p class="empty-state">Loading wallets...</p>
+                        </div>
+                    </div>
+                
+                    <!-- Item lain di Kolom Samping -->
+                    <div class="grid-item side-col">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chart-line"></i> Weekly Trends</h2>
+                        </div>
+                        <div class="mini-charts">
+                            <div class="mini-chart-card">
+                                <h3>Income</h3>
+                                <canvas id="incomeSparkline"></canvas>
+                                <p class="chart-value" id="weeklyIncomeTotal">Rp 0</p>
+                            </div>
+                            <div class="mini-chart-card">
+                                <h3>Expense</h3>
+                                <canvas id="expenseSparkline"></canvas>
+                                <p class="chart-value" id="weeklyExpenseTotal">Rp 0</p>
+                            </div>
+                    </div>
+                </div>
+
+                <!-- Item yang merentang penuh di bawah -->
                 <div class="grid-item full-width">
                     <div class="finance-tip">
                         <i class="fas fa-lightbulb"></i>
