@@ -29,7 +29,7 @@ const database = getDatabase(app);
 let userId;
 let allTransactions = [];
 let wallets = {};
-let allAccounts = {}; // Objek untuk menyimpan semua kategori (income & expense)
+let allAccounts = {};
 let currentPage = 1;
 const rowsPerPage = 10;
 let sortColumn = 'date';
@@ -53,11 +53,9 @@ async function initializeTransactionsPage() {
         const userData = await loadInitialData();
         wallets = userData.wallets || {};
         
-        // Membaca kategori dari struktur array yang benar
         const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
         const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
         
-        // Menggabungkan semua kategori menjadi satu objek untuk kemudahan akses
         allAccounts = {};
         incomeAccounts.filter(acc => acc).forEach(acc => allAccounts[acc] = 'income');
         expenseAccounts.filter(acc => acc).forEach(acc => allAccounts[acc] = 'expense');
@@ -67,7 +65,6 @@ async function initializeTransactionsPage() {
         const transactionsData = (await get(ref(database, `users/${userId}/transactions`))).val() || {};
         processAndDisplayTransactions(transactionsData);
 
-        // Handle URL params untuk quick add
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get('type');
         if (type === 'income' || type === 'expense') {
@@ -106,18 +103,26 @@ function setupEventListeners() {
     document.getElementById('editTransactionForm').addEventListener('submit', handleUpdateTransaction);
     document.getElementById('transactionTableBody').addEventListener('click', handleTableActions);
     document.querySelectorAll('.sortable').forEach(header => header.addEventListener('click', handleSort));
-    document.getElementById('filterToggleBtn').addEventListener('click', () => {
-        document.getElementById('filterPanel').classList.toggle('show');
-    });
-    document.getElementById('applyFilterBtn').addEventListener('click', () => displayTransactions());
-    document.getElementById('resetFilterBtn').addEventListener('click', () => {
-        document.getElementById('filterPanel').querySelectorAll('input, select').forEach(el => el.value = '');
+    
+    // PERBAIKAN: Listener untuk tombol filter yang baru
+    document.getElementById('applyFilterBtn').addEventListener('click', () => {
+        currentPage = 1; // Selalu kembali ke halaman pertama saat filter baru diterapkan
         displayTransactions();
     });
-    document.getElementById('searchInput').addEventListener('input', () => displayTransactions());
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+        document.querySelector('.filter-bar').querySelectorAll('input, select').forEach(el => el.value = '');
+        currentPage = 1;
+        displayTransactions();
+    });
+
+    // Pencarian tetap bekerja secara live
+    document.getElementById('searchInput').addEventListener('input', () => {
+        currentPage = 1;
+        displayTransactions();
+    });
+    
     document.getElementById('paginationContainer').addEventListener('click', handlePagination);
 
-    // Listener untuk mengubah isi dropdown kategori berdasarkan tipe transaksi
     document.getElementById('transactionType').addEventListener('change', (e) => {
         updateAccountDropdown('transactionAccount', e.target.value);
     });
