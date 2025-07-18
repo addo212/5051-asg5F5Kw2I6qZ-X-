@@ -24,7 +24,6 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <!-- Logo dengan kelas yang benar dan konsisten -->
                 <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
                 <h1>Finance Tracker</h1>
             </div>
@@ -58,11 +57,28 @@
             </div>
 
             <div class="settings-container">
-                <!-- Bagian Pengaturan Tema -->
+                <!-- Bagian Pengaturan Tampilan dengan UI Aksen Warna Baru -->
                 <section class="settings-section">
-                    <h3><i class="fas fa-palette"></i> Theme Settings</h3>
-                    <div id="themeOptions" class="theme-options">
-                        <!-- Opsi tema akan diisi oleh JavaScript -->
+                    <h3><i class="fas fa-palette"></i> Appearance Settings</h3>
+                    
+                    <p class="status-message">
+                        Use the sun/moon toggle in the header to switch between Light and Dark mode.
+                    </p>
+
+                    <div id="accentColorOptions">
+                        <div class="form-group">
+                            <label for="accentColorPicker">Custom Accent Color (Light Theme Only)</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="accentColorPicker">
+                                <span id="accentColorValue">#4CAF50</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Or choose a preset:</label>
+                            <div id="colorSwatches" class="color-swatches">
+                                <!-- Swatch warna akan diisi oleh JavaScript -->
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -76,7 +92,6 @@
                                 <h4><i class="fas fa-arrow-down"></i> Income Accounts</h4>
                             </div>
                             <ul id="incomeAccountList" class="item-list">
-                                <!-- Daftar akun pemasukan akan diisi oleh JavaScript -->
                                 <li class="empty-state">Loading...</li>
                             </ul>
                             <form id="addIncomeAccountForm" class="add-item-form">
@@ -93,7 +108,6 @@
                                 <h4><i class="fas fa-arrow-up"></i> Expense Accounts</h4>
                             </div>
                             <ul id="expenseAccountList" class="item-list">
-                                <!-- Daftar akun pengeluaran akan diisi oleh JavaScript -->
                                 <li class="empty-state">Loading...</li>
                             </ul>
                             <form id="addExpenseAccountForm" class="add-item-form">
@@ -106,7 +120,7 @@
                     </div>
                 </section>
 
-                <!-- Bagian Ekspor/Impor Data (Contoh) -->
+                <!-- Bagian Ekspor/Impor Data -->
                 <section class="settings-section">
                     <h3><i class="fas fa-database"></i> Data Management</h3>
                     <div class="page-actions">
@@ -118,7 +132,7 @@
         </main>
 
         <footer>
-            <p>© 2025 Finance Tracker. Made with <i class="fas fa-heart footer-heart"></i> by Addo.</p>
+            <p>&copy; 2025 Finance Tracker. Made with <i class="fas fa-heart footer-heart"></i> by Addo.</p>
         </footer>
     </div>
 
