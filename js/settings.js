@@ -10,8 +10,7 @@ import {
     getDatabase, 
     ref, 
     get, 
-    set, 
-    remove 
+    set
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
 // ============================================================================
@@ -43,7 +42,12 @@ async function initializeSettingsPage() {
     try {
         const userData = await loadUserData();
         renderThemeOptions();
-        renderAccountLists(userData.incomeAccounts || {}, userData.expenseAccounts || {});
+        
+        // PERBAIKAN: Mengambil data dari struktur yang benar (userData.accounts)
+        const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
+        const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
+        
+        renderAccountLists(incomeAccounts, expenseAccounts);
     } catch (error) {
         console.error("Error initializing settings page:", error);
         alert("Failed to load settings. Please refresh the page.");
@@ -60,24 +64,17 @@ async function loadUserData() {
 // EVENT LISTENERS
 // ============================================================================
 function setupEventListeners() {
-    // Theme selection using event delegation
     document.getElementById('themeOptions').addEventListener('click', handleThemeSelection);
-
-    // Add account forms
     document.getElementById('addIncomeAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'income'));
     document.getElementById('addExpenseAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'expense'));
-
-    // Delete account buttons using event delegation
     document.getElementById('incomeAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'income'));
     document.getElementById('expenseAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'expense'));
-
-    // Placeholder for data management buttons
     document.getElementById('exportDataBtn').addEventListener('click', () => alert('Export data feature is coming soon!'));
     document.getElementById('importDataBtn').addEventListener('click', () => alert('Import data feature is coming soon!'));
 }
 
 // ============================================================================
-// THEME MANAGEMENT
+// THEME MANAGEMENT (Tetap sama)
 // ============================================================================
 function renderThemeOptions() {
     const themeContainer = document.getElementById('themeOptions');
@@ -104,38 +101,35 @@ function renderThemeOptions() {
 function handleThemeSelection(e) {
     const themeOption = e.target.closest('.theme-option');
     if (!themeOption) return;
-
     const newTheme = themeOption.dataset.theme;
-    
-    // Apply theme
     document.documentElement.setAttribute('data-theme', newTheme);
-    
-    // Save theme to local storage
     localStorage.setItem('theme', newTheme);
-
-    // Update active class
     document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
     themeOption.classList.add('active');
 }
 
 // ============================================================================
-// ACCOUNT MANAGEMENT (CRUD)
+// ACCOUNT MANAGEMENT (CRUD) - Diperbaiki untuk menangani ARRAY
 // ============================================================================
 function renderAccountLists(incomeAccounts, expenseAccounts) {
+    // PERBAIKAN: Langsung memproses array
     renderList('incomeAccountList', incomeAccounts, 'income');
     renderList('expenseAccountList', expenseAccounts, 'expense');
 }
 
-function renderList(containerId, accounts, type) {
+function renderList(containerId, accountsArray, type) {
     const listContainer = document.getElementById(containerId);
     if (!listContainer) return;
 
-    if (Object.keys(accounts).length === 0) {
+    // PERBAIKAN: Memfilter nilai null yang mungkin ada di database Anda
+    const validAccounts = accountsArray.filter(acc => acc !== null);
+
+    if (validAccounts.length === 0) {
         listContainer.innerHTML = `<li class="empty-state">No ${type} accounts found.</li>`;
         return;
     }
 
-    listContainer.innerHTML = Object.keys(accounts).sort().map(accountName => `
+    listContainer.innerHTML = validAccounts.sort().map(accountName => `
         <li>
             <span>${accountName}</span>
             <button class="delete-btn" data-name="${accountName}" data-type="${type}">
@@ -160,22 +154,27 @@ async function handleAddAccount(e, type) {
     btn.disabled = true;
 
     try {
-        const accountPath = `users/${userId}/${type}Accounts/${newName}`;
+        // PERBAIKAN: Path sekarang menunjuk ke node array (income atau expense)
+        const accountPath = `users/${userId}/accounts/${type}`;
         const accountRef = ref(database, accountPath);
         
-        // Check if account already exists
         const snapshot = await get(accountRef);
-        if (snapshot.exists()) {
+        const currentAccounts = snapshot.val() || [];
+
+        if (currentAccounts.includes(newName)) {
             alert(`Account "${newName}" already exists.`);
+            inputElement.value = '';
+            btn.disabled = false;
             return;
         }
 
-        await set(accountRef, true); // Using true as a simple placeholder value
+        // PERBAIKAN: Menambahkan item baru ke array dan menulis ulang seluruh array
+        const updatedAccounts = [...currentAccounts, newName];
+        await set(accountRef, updatedAccounts);
         
         // Refresh UI
-        const userData = await loadUserData();
-        renderAccountLists(userData.incomeAccounts || {}, userData.expenseAccounts || {});
-        inputElement.value = ''; // Clear input
+        renderList(`${type}AccountList`, updatedAccounts, type);
+        inputElement.value = '';
 
     } catch (error) {
         console.error(`Error adding ${type} account:`, error);
@@ -195,12 +194,19 @@ async function handleDeleteAccount(e, type) {
     }
 
     try {
-        const accountPath = `users/${userId}/${type}Accounts/${accountName}`;
-        await remove(ref(database, accountPath));
+        // PERBAIKAN: Path sekarang menunjuk ke node array
+        const accountPath = `users/${userId}/accounts/${type}`;
+        const accountRef = ref(database, accountPath);
+
+        const snapshot = await get(accountRef);
+        const currentAccounts = snapshot.val() || [];
+
+        // PERBAIKAN: Membuat array baru tanpa item yang dihapus, lalu menulis ulang
+        const updatedAccounts = currentAccounts.filter(acc => acc !== accountName);
+        await set(accountRef, updatedAccounts);
 
         // Refresh UI
-        const userData = await loadUserData();
-        renderAccountLists(userData.incomeAccounts || {}, userData.expenseAccounts || {});
+        renderList(`${type}AccountList`, updatedAccounts, type);
 
     } catch (error) {
         console.error(`Error deleting ${type} account:`, error);
