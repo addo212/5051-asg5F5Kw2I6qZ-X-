@@ -10,7 +10,6 @@ import {
     getDatabase, 
     ref, 
     get, 
-    set, 
     update, 
     push, 
     remove 
@@ -30,7 +29,7 @@ const database = getDatabase(app);
 let userId;
 let allTransactions = [];
 let wallets = {};
-let accounts = {};
+let allAccounts = {}; // Objek untuk menyimpan semua kategori (income & expense)
 let currentPage = 1;
 const rowsPerPage = 10;
 let sortColumn = 'date';
@@ -53,19 +52,28 @@ async function initializeTransactionsPage() {
     try {
         const userData = await loadInitialData();
         wallets = userData.wallets || {};
-        accounts = { ...userData.incomeAccounts, ...userData.expenseAccounts };
         
-        populateDropdowns(wallets, accounts);
+        // Membaca kategori dari struktur array yang benar
+        const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
+        const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
+        
+        // Menggabungkan semua kategori menjadi satu objek untuk kemudahan akses
+        allAccounts = {};
+        incomeAccounts.filter(acc => acc).forEach(acc => allAccounts[acc] = 'income');
+        expenseAccounts.filter(acc => acc).forEach(acc => allAccounts[acc] = 'expense');
+
+        populateDropdowns();
         
         const transactionsData = (await get(ref(database, `users/${userId}/transactions`))).val() || {};
         processAndDisplayTransactions(transactionsData);
 
-        // Handle URL params for quick add
+        // Handle URL params untuk quick add
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get('type');
         if (type === 'income' || type === 'expense') {
             document.getElementById('addTransactionSection').open = true;
             document.getElementById('transactionType').value = type;
+            updateAccountDropdown('transactionAccount', type);
         }
 
     } catch (error) {
@@ -81,7 +89,7 @@ async function loadInitialData() {
 }
 
 function processAndDisplayTransactions(transactionsData) {
-    allTransactions = Object.entries(transactionsData).map(([id, tx]) => ({ id, ...tx }));
+    allTransactions = Object.values(transactionsData);
     displayTransactions();
 }
 
@@ -89,26 +97,15 @@ function processAndDisplayTransactions(transactionsData) {
 // EVENT LISTENERS
 // ============================================================================
 function setupEventListeners() {
-    // Add Transaction Form
     document.getElementById('addTransactionForm').addEventListener('submit', handleAddTransaction);
-
-    // Edit Transaction Modal
     document.getElementById('editTransactionModal').addEventListener('click', (e) => {
         if (e.target.classList.contains('close-modal')) {
             document.getElementById('editTransactionModal').classList.remove('show');
         }
     });
     document.getElementById('editTransactionForm').addEventListener('submit', handleUpdateTransaction);
-
-    // Table Actions (Edit/Delete) using Event Delegation
     document.getElementById('transactionTableBody').addEventListener('click', handleTableActions);
-
-    // Sorting
-    document.querySelectorAll('.sortable').forEach(header => {
-        header.addEventListener('click', handleSort);
-    });
-
-    // Filtering
+    document.querySelectorAll('.sortable').forEach(header => header.addEventListener('click', handleSort));
     document.getElementById('filterToggleBtn').addEventListener('click', () => {
         document.getElementById('filterPanel').classList.toggle('show');
     });
@@ -117,12 +114,16 @@ function setupEventListeners() {
         document.getElementById('filterPanel').querySelectorAll('input, select').forEach(el => el.value = '');
         displayTransactions();
     });
-
-    // Search
     document.getElementById('searchInput').addEventListener('input', () => displayTransactions());
-
-    // Pagination
     document.getElementById('paginationContainer').addEventListener('click', handlePagination);
+
+    // Listener untuk mengubah isi dropdown kategori berdasarkan tipe transaksi
+    document.getElementById('transactionType').addEventListener('change', (e) => {
+        updateAccountDropdown('transactionAccount', e.target.value);
+    });
+    document.getElementById('editTransactionType').addEventListener('change', (e) => {
+        updateAccountDropdown('editTransactionAccount', e.target.value);
+    });
 }
 
 // ============================================================================
@@ -159,12 +160,11 @@ async function handleAddTransaction(e) {
         form.reset();
         document.getElementById('addTransactionSection').open = false;
         
-        // Refresh data
         const transactionsData = (await get(ref(database, `users/${userId}/transactions`))).val() || {};
         processAndDisplayTransactions(transactionsData);
         const userData = await loadInitialData();
         wallets = userData.wallets || {};
-        populateDropdowns(wallets, accounts);
+        populateDropdowns();
 
     } catch (error) {
         console.error("Error adding transaction:", error);
@@ -208,12 +208,11 @@ async function handleUpdateTransaction(e) {
         alert('Transaction updated successfully!');
         document.getElementById('editTransactionModal').classList.remove('show');
         
-        // Refresh data
         const transactionsData = (await get(ref(database, `users/${userId}/transactions`))).val() || {};
         processAndDisplayTransactions(transactionsData);
         const userData = await loadInitialData();
         wallets = userData.wallets || {};
-        populateDropdowns(wallets, accounts);
+        populateDropdowns();
 
     } catch (error) {
         console.error("Error updating transaction:", error);
@@ -232,18 +231,17 @@ async function handleDeleteTransaction(txId) {
         const txToDelete = txSnapshot.val();
         if (!txToDelete) throw new Error("Transaction not found.");
 
-        const updates = await createTransactionUpdates(null, txToDelete); // Pass null for newTx to signify deletion
-        updates[`users/${userId}/transactions/${txId}`] = null; // Add deletion path
+        const updates = await createTransactionUpdates(null, txToDelete);
+        updates[`users/${userId}/transactions/${txId}`] = null;
         await update(ref(database), updates);
 
         alert('Transaction deleted successfully!');
         
-        // Refresh data
         const transactionsData = (await get(ref(database, `users/${userId}/transactions`))).val() || {};
         processAndDisplayTransactions(transactionsData);
         const userData = await loadInitialData();
         wallets = userData.wallets || {};
-        populateDropdowns(wallets, accounts);
+        populateDropdowns();
 
     } catch (error) {
         console.error("Error deleting transaction:", error);
@@ -257,7 +255,6 @@ async function handleDeleteTransaction(txId) {
 function displayTransactions() {
     const tableBody = document.getElementById('transactionTableBody');
     
-    // 1. Filtering
     let filteredTransactions = [...allTransactions];
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filterType = document.getElementById('filterType').value;
@@ -273,25 +270,18 @@ function displayTransactions() {
             tx.wallet.toLowerCase().includes(searchTerm)
         );
     }
-    if (filterType) {
-        filteredTransactions = filteredTransactions.filter(tx => tx.type === filterType);
-    }
-    if (filterAccount) {
-        filteredTransactions = filteredTransactions.filter(tx => tx.account === filterAccount);
-    }
-    if (filterWallet) {
-        filteredTransactions = filteredTransactions.filter(tx => tx.walletId === filterWallet);
-    }
+    if (filterType) filteredTransactions = filteredTransactions.filter(tx => tx.type === filterType);
+    if (filterAccount) filteredTransactions = filteredTransactions.filter(tx => tx.account === filterAccount);
+    if (filterWallet) filteredTransactions = filteredTransactions.filter(tx => tx.walletId === filterWallet);
     if (filterStartDate) {
         const startDate = new Date(filterStartDate).getTime();
         filteredTransactions = filteredTransactions.filter(tx => tx.timestamp >= startDate);
     }
     if (filterEndDate) {
-        const endDate = new Date(filterEndDate).getTime() + (24 * 60 * 60 * 1000 - 1); // End of day
+        const endDate = new Date(filterEndDate).getTime() + (24 * 60 * 60 * 1000 - 1);
         filteredTransactions = filteredTransactions.filter(tx => tx.timestamp <= endDate);
     }
 
-    // 2. Sorting
     filteredTransactions.sort((a, b) => {
         let valA = a[sortColumn];
         let valB = b[sortColumn];
@@ -309,12 +299,10 @@ function displayTransactions() {
     });
     updateSortIcons();
 
-    // 3. Pagination
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
 
-    // 4. Rendering
     if (paginatedTransactions.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">No transactions found.</td></tr>`;
     } else {
@@ -372,17 +360,6 @@ async function openEditModal(txId) {
     form.editTransactionAmount.value = tx.amount;
     form.editTransactionDescription.value = tx.description;
     
-    // Populate and set dropdowns
-    const accountSelect = form.editTransactionAccount;
-    accountSelect.innerHTML = '';
-    Object.keys(accounts).forEach(acc => {
-        const option = document.createElement('option');
-        option.value = acc;
-        option.textContent = acc;
-        accountSelect.appendChild(option);
-    });
-    accountSelect.value = tx.account;
-
     const walletSelect = form.editTransactionWallet;
     walletSelect.innerHTML = '';
     Object.entries(wallets).forEach(([id, wallet]) => {
@@ -392,6 +369,9 @@ async function openEditModal(txId) {
         walletSelect.appendChild(option);
     });
     walletSelect.value = tx.walletId;
+
+    updateAccountDropdown('editTransactionAccount', tx.type);
+    form.editTransactionAccount.value = tx.account;
 
     modal.classList.add('show');
 }
@@ -433,27 +413,40 @@ function handlePagination(e) {
 // ============================================================================
 // HELPER & UTILITY FUNCTIONS
 // ============================================================================
-function populateDropdowns(walletsData, accountsData) {
+function populateDropdowns() {
     const walletSelects = document.querySelectorAll('#transactionWallet, #editTransactionWallet, #filterWallet');
-    const accountSelects = document.querySelectorAll('#transactionAccount, #editTransactionAccount, #filterAccount');
-
     walletSelects.forEach(select => {
         const currentValue = select.value;
-        select.innerHTML = select.id === 'filterWallet' ? '<option value="">All</option>' : '<option value="" disabled>Select a wallet</option>';
-        Object.entries(walletsData).forEach(([id, wallet]) => {
+        select.innerHTML = select.id === 'filterWallet' ? '<option value="">All</option>' : '<option value="" disabled selected>Select a wallet</option>';
+        Object.entries(wallets).forEach(([id, wallet]) => {
             select.innerHTML += `<option value="${id}">${wallet.name}</option>`;
         });
         select.value = currentValue;
     });
 
-    accountSelects.forEach(select => {
-        const currentValue = select.value;
-        select.innerHTML = select.id === 'filterAccount' ? '<option value="">All</option>' : '<option value="" disabled>Select an account</option>';
-        Object.keys(accountsData).sort().forEach(acc => {
-            select.innerHTML += `<option value="${acc}">${acc}</option>`;
-        });
-        select.value = currentValue;
+    const filterAccountSelect = document.getElementById('filterAccount');
+    filterAccountSelect.innerHTML = '<option value="">All</option>';
+    Object.keys(allAccounts).sort().forEach(acc => {
+        filterAccountSelect.innerHTML += `<option value="${acc}">${acc}</option>`;
     });
+
+    updateAccountDropdown('transactionAccount', document.getElementById('transactionType').value);
+}
+
+function updateAccountDropdown(selectId, transactionType) {
+    const accountSelect = document.getElementById(selectId);
+    const currentValue = accountSelect.value;
+    accountSelect.innerHTML = '<option value="" disabled selected>Select an account</option>';
+    
+    Object.entries(allAccounts).forEach(([account, type]) => {
+        if (type === transactionType) {
+            accountSelect.innerHTML += `<option value="${account}">${account}</option>`;
+        }
+    });
+    
+    if (accountSelect.querySelector(`option[value="${currentValue}"]`)) {
+        accountSelect.value = currentValue;
+    }
 }
 
 function updateSortIcons() {
@@ -477,19 +470,13 @@ async function createTransactionUpdates(newTx, oldTx = null) {
     const walletsCopy = { ...userData.wallets };
     const budgetsCopy = { ...userData.budgets };
 
-    // 1. Revert old transaction if it exists (for update/delete)
     if (oldTx) {
         if (oldTx.type === 'income') {
             totalBalance -= oldTx.amount;
-            if (walletsCopy[oldTx.walletId]) {
-                walletsCopy[oldTx.walletId].balance -= oldTx.amount;
-            }
-        } else { // expense
+            if (walletsCopy[oldTx.walletId]) walletsCopy[oldTx.walletId].balance -= oldTx.amount;
+        } else {
             totalBalance += oldTx.amount;
-            if (walletsCopy[oldTx.walletId]) {
-                walletsCopy[oldTx.walletId].balance += oldTx.amount;
-            }
-            // Revert budget
+            if (walletsCopy[oldTx.walletId]) walletsCopy[oldTx.walletId].balance += oldTx.amount;
             const period = new Date(oldTx.timestamp).toISOString().slice(0, 7);
             if (budgetsCopy[period] && budgetsCopy[period][oldTx.account]) {
                 budgetsCopy[period][oldTx.account].spent -= oldTx.amount;
@@ -497,19 +484,13 @@ async function createTransactionUpdates(newTx, oldTx = null) {
         }
     }
 
-    // 2. Apply new transaction if it exists (for add/update)
     if (newTx) {
         if (newTx.type === 'income') {
             totalBalance += newTx.amount;
-            if (walletsCopy[newTx.walletId]) {
-                walletsCopy[newTx.walletId].balance += newTx.amount;
-            }
-        } else { // expense
+            if (walletsCopy[newTx.walletId]) walletsCopy[newTx.walletId].balance += newTx.amount;
+        } else {
             totalBalance -= newTx.amount;
-            if (walletsCopy[newTx.walletId]) {
-                walletsCopy[newTx.walletId].balance -= newTx.amount;
-            }
-            // Apply budget
+            if (walletsCopy[newTx.walletId]) walletsCopy[newTx.walletId].balance -= newTx.amount;
             const period = new Date(newTx.timestamp).toISOString().slice(0, 7);
             if (budgetsCopy[period] && budgetsCopy[period][newTx.account]) {
                 budgetsCopy[period][newTx.account].spent = (budgetsCopy[period][newTx.account].spent || 0) + newTx.amount;
@@ -518,7 +499,6 @@ async function createTransactionUpdates(newTx, oldTx = null) {
         updates[`users/${userId}/transactions/${newTx.id}`] = newTx;
     }
 
-    // 3. Add final values to the updates object
     updates[`users/${userId}/totalBalance`] = totalBalance;
     updates[`users/${userId}/wallets`] = walletsCopy;
     updates[`users/${userId}/budgets`] = budgetsCopy;
