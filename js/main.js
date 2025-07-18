@@ -26,6 +26,22 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "index.html";
     }
 });
+// ============================================================================
+// Bagian Tema
+// ============================================================================
+async function initializeDashboard() {
+    setupEventListeners();
+    try {
+        const userData = await loadInitialData();
+
+        // ====================================================================
+        // PERUBAHAN: PENERAPAN TEMA AKSEN WARNA
+        // Blok ini membaca pengaturan warna dari Firebase dan menerapkannya
+        // ke seluruh halaman dengan mengubah variabel CSS.
+        // ====================================================================
+        const savedAccentColor = (userData.settings && userData.settings.accentColor);
+        if (savedAccentColor) {
+            document.documentElement.style.setProperty('--accent-color', savedAccentColor);
 
 // ============================================================================
 // Event Listeners
