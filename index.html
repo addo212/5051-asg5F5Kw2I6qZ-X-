@@ -4,6 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Finance Tracker</title>
+    	<!-- Skrip pencegah kedipan tema yang ditingkatkan -->
+	<script>
+		(function() {
+			try {
+				// 1. Terapkan tema light/dark dari localStorage (cepat)
+				const savedTheme = localStorage.getItem('theme') || 'light';
+				document.documentElement.setAttribute('data-theme', savedTheme);
+				
+				// 2. Terapkan warna aksen dari localStorage (jika ada)
+				const cachedAccentColor = localStorage.getItem('accentColor');
+				if (cachedAccentColor) {
+					document.documentElement.style.setProperty('--accent-color', cachedAccentColor);
+					
+					// Fungsi sederhana untuk mengkonversi hex ke rgb
+					function hexToRgb(hex) {
+						hex = hex.replace(/^#/, '');
+						const bigint = parseInt(hex, 16);
+						const r = (bigint >> 16) & 255;
+						const g = (bigint >> 8) & 255;
+						const b = bigint & 255;
+						return { r, g, b };
+					}
+					
+					// Fungsi untuk menyesuaikan kecerahan
+					function adjustBrightness(rgb, percent) {
+						const adjust = (value) => Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
+						return {
+							r: adjust(rgb.r),
+							g: adjust(rgb.g),
+							b: adjust(rgb.b)
+						};
+					}
+					
+					// Fungsi untuk mengkonversi rgb ke hex
+					function rgbToHex(rgb) {
+						return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
+					}
+					
+					// Hitung variasi warna untuk gradien
+					const rgbColor = hexToRgb(cachedAccentColor);
+					if (rgbColor) {
+						const lighterColor = adjustBrightness(rgbColor, 20);
+						const darkerColor = adjustBrightness(rgbColor, -20);
+						
+						document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
+						document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
+						document.documentElement.style.setProperty(
+							'--accent-color-rgb', 
+							`${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
+						);
+					}
+				}
+			} catch (e) {
+				console.error("Error in theme flash prevention script:", e);
+			}
+		})();
+	</script>
     
     <!-- Menggunakan main.css yang sudah dipecah -->
     <link rel="stylesheet" href="css/main.css">
