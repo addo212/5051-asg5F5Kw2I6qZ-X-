@@ -17,6 +17,7 @@
 @import 'components/cards.css';
 
 /* Pages */
+@import 'pages/login.css';
 @import 'pages/dashboard.css';
 @import 'pages/wallets.css';
 @import 'pages/transactions.css';
