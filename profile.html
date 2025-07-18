@@ -79,16 +79,261 @@
     <link rel="stylesheet" href="css/pages/profile.css">
 </head>
 <body>
-    <!-- Header (sama seperti di dashboard.html) -->
-    <!-- ... -->
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Logo -->
+            <a href="dashboard.html" class="logo">
+                <img src="images/logo.jpeg" alt="Finance Tracker Logo">
+                <div class="logo-text">
+                    <span class="logo-name">Finance Tracker</span>
+                    <span class="logo-tagline">Personal Finance</span>
+                </div>
+            </a>
+            
+            <!-- Navigation -->
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="transactions.html" class="nav-link">
+                            <i class="fas fa-exchange-alt"></i> Transactions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="wallets.html" class="nav-link">
+                            <i class="fas fa-wallet"></i> Wallets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="budgets.html" class="nav-link">
+                            <i class="fas fa-chart-pie"></i> Budgets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-line"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <!-- Search -->
+                <div class="header-search">
+                    <input type="text" class="header-search-input" placeholder="Search...">
+                    <i class="fas fa-search header-search-icon"></i>
+                </div>
+                
+                <!-- Notifications -->
+                <button class="header-action-btn" id="notificationsBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                
+                <!-- Notifications Dropdown -->
+                <div class="notifications-dropdown">
+                    <div class="notifications-header">
+                        <h3>Notifications</h3>
+                        <button class="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notifications-body">
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Budget Alert</h4>
+                                <p class="notification-text">You've reached 80% of your Food budget for this month.</p>
+                                <span class="notification-time">2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Payment Successful</h4>
+                                <p class="notification-text">Your payment of $50 to Electricity Bill was successful.</p>
+                                <span class="notification-time">Yesterday</span>
+                            </div>
+                        </div>
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">New Feature</h4>
+                                <p class="notification-text">We've added a new budget tracking feature. Check it out!</p>
+                                <span class="notification-time">3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notifications-footer">
+                        <a href="#">View all notifications</a>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <div class="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <i class="fas fa-moon"></i>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="user-menu" id="userMenu">
+                    <button class="user-menu-btn">
+                        <div class="user-avatar">
+                            <img src="assets/avatar.jpg" alt="User Avatar">
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">User</span>
+                            <span class="user-email">user@example.com</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    
+                    <!-- User Menu Dropdown -->
+                    <div class="user-menu-dropdown">
+                        <div class="user-menu-header">
+                            <div class="user-avatar">
+                                <img src="assets/avatar.jpg" alt="User Avatar">
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">User</span>
+                                <span class="user-email">user@example.com</span>
+                            </div>
+                        </div>
+                        <div class="user-menu-body">
+                            <a href="profile.html" class="user-menu-item">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="settings.html" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                            <a href="#" class="user-menu-item">
+                                <i class="fas fa-question-circle"></i>
+                                Help & Support
+                            </a>
+                        </div>
+                        <div class="user-menu-footer">
+                            <button class="btn-logout" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-container">
+            <div class="mobile-nav-header">
+                <a href="dashboard.html" class="logo">
+                    <img src="images/logo.jpeg" alt="Finance Tracker Logo">
+                    <span class="logo-name">Finance Tracker</span>
+                </a>
+                <button class="mobile-nav-close" id="mobileNavClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-body">
+                <ul class="mobile-nav-list">
+                    <li class="mobile-nav-item">
+                        <a href="dashboard.html" class="mobile-nav-link">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="transactions.html" class="mobile-nav-link">
+                            <i class="fas fa-exchange-alt"></i>
+                            Transactions
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="wallets.html" class="mobile-nav-link">
+                            <i class="fas fa-wallet"></i>
+                            Wallets
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="budgets.html" class="mobile-nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            Budgets
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="reports.html" class="mobile-nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            Reports
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="profile.html" class="mobile-nav-link active">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="settings.html" class="mobile-nav-link">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="mobile-nav-footer">
+                <div class="mobile-nav-user">
+                    <div class="user-avatar">
+                        <img src="assets/avatar.jpg" alt="User Avatar">
+                    </div>
+                    <div class="mobile-nav-user-info">
+                        <div class="mobile-nav-user-name">User</div>
+                        <div class="mobile-nav-user-email">user@example.com</div>
+                    </div>
+                </div>
+                <button class="btn-logout" id="mobileLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
     
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
             <!-- Page Header -->
             <div class="page-header">
-                <h1>Profile</h1>
-                <p>Manage your personal information and preferences</p>
+                <div class="page-header-content">
+                    <a href="dashboard.html" class="back-button">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1>Profile</h1>
+                        <p>Manage your personal information and preferences</p>
+                    </div>
+                </div>
             </div>
             
             <div class="row">
