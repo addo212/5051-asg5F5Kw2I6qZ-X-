@@ -10,7 +10,7 @@ import {
     getDatabase, 
     ref, 
     get, 
-    set
+    set 
 } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
 // ============================================================================
@@ -24,6 +24,7 @@ const database = getDatabase(app);
 // GLOBAL STATE
 // ============================================================================
 let userId;
+const presetColors = ['#4CAF50', '#3498db', '#9b59b6', '#e91e63', '#f44336', '#ff9800'];
 
 // ============================================================================
 // AUTHENTICATION & INITIALIZATION
@@ -41,13 +42,16 @@ async function initializeSettingsPage() {
     setupEventListeners();
     try {
         const userData = await loadUserData();
-        renderThemeOptions();
         
-        // PERBAIKAN: Mengambil data dari struktur yang benar (userData.accounts)
+        // Logika baru untuk memuat dan merender aksen warna
+        const savedAccentColor = (userData.settings && userData.settings.accentColor) || '#4CAF50';
+        renderAccentColorUI(savedAccentColor);
+        
+        // Memuat data akun/kategori seperti sebelumnya
         const incomeAccounts = (userData.accounts && userData.accounts.income) || [];
         const expenseAccounts = (userData.accounts && userData.accounts.expense) || [];
-        
         renderAccountLists(incomeAccounts, expenseAccounts);
+
     } catch (error) {
         console.error("Error initializing settings page:", error);
         alert("Failed to load settings. Please refresh the page.");
@@ -55,8 +59,7 @@ async function initializeSettingsPage() {
 }
 
 async function loadUserData() {
-    const userRef = ref(database, `users/${userId}`);
-    const snapshot = await get(userRef);
+    const snapshot = await get(ref(database, `users/${userId}`));
     return snapshot.val() || {};
 }
 
@@ -64,55 +67,71 @@ async function loadUserData() {
 // EVENT LISTENERS
 // ============================================================================
 function setupEventListeners() {
-    document.getElementById('themeOptions').addEventListener('click', handleThemeSelection);
+    // Listener untuk kustomisasi warna
+    document.getElementById('accentColorPicker').addEventListener('input', (e) => updateAccentColor(e.target.value));
+    document.getElementById('colorSwatches').addEventListener('click', (e) => {
+        if (e.target.classList.contains('color-swatch')) {
+            updateAccentColor(e.target.dataset.color);
+        }
+    });
+
+    // Listener untuk form akun (tetap sama)
     document.getElementById('addIncomeAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'income'));
     document.getElementById('addExpenseAccountForm').addEventListener('submit', (e) => handleAddAccount(e, 'expense'));
     document.getElementById('incomeAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'income'));
     document.getElementById('expenseAccountList').addEventListener('click', (e) => handleDeleteAccount(e, 'expense'));
+    
+    // Placeholder untuk fitur lain
     document.getElementById('exportDataBtn').addEventListener('click', () => alert('Export data feature is coming soon!'));
     document.getElementById('importDataBtn').addEventListener('click', () => alert('Import data feature is coming soon!'));
 }
 
 // ============================================================================
-// THEME MANAGEMENT (Tetap sama)
+// ACCENT COLOR MANAGEMENT
 // ============================================================================
-function renderThemeOptions() {
-    const themeContainer = document.getElementById('themeOptions');
-    const themes = [
-        { name: 'light', label: 'Light' },
-        { name: 'dark', label: 'Dark' },
-        { name: 'blue', label: 'Blue' },
-        { name: 'purple', label: 'Purple' }
-    ];
-    const currentTheme = localStorage.getItem('theme') || 'light';
+function renderAccentColorUI(color) {
+    const colorPicker = document.getElementById('accentColorPicker');
+    const colorValueText = document.getElementById('accentColorValue');
+    const swatchesContainer = document.getElementById('colorSwatches');
 
-    themeContainer.innerHTML = themes.map(theme => `
-        <div class="theme-option ${currentTheme === theme.name ? 'active' : ''}" data-theme="${theme.name}">
-            <div class="theme-preview ${theme.name}-theme">
-                <div class="preview-header"></div>
-                <div class="preview-content"></div>
-            </div>
-            <span>${theme.label}</span>
-            <i class="fas fa-check-circle theme-selected"></i>
+    // Set nilai awal pada UI
+    colorPicker.value = color;
+    colorValueText.textContent = color.toUpperCase();
+
+    // Buat swatch warna preset
+    swatchesContainer.innerHTML = presetColors.map(presetColor => `
+        <div class="color-swatch ${presetColor.toLowerCase() === color.toLowerCase() ? 'active' : ''}" 
+             data-color="${presetColor}" 
+             style="background-color: ${presetColor};">
         </div>
     `).join('');
 }
 
-function handleThemeSelection(e) {
-    const themeOption = e.target.closest('.theme-option');
-    if (!themeOption) return;
-    const newTheme = themeOption.dataset.theme;
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-    themeOption.classList.add('active');
+function updateAccentColor(newColor) {
+    // 1. Terapkan ke UI secara langsung untuk feedback instan
+    document.documentElement.style.setProperty('--accent-color', newColor);
+    
+    // 2. Perbarui tampilan kontrol di halaman settings
+    renderAccentColorUI(newColor);
+    
+    // 3. Simpan ke Firebase
+    saveAccentColorToFirebase(newColor);
+}
+
+async function saveAccentColorToFirebase(color) {
+    try {
+        const colorRef = ref(database, `users/${userId}/settings/accentColor`);
+        await set(colorRef, color);
+    } catch (error) {
+        console.error("Failed to save accent color:", error);
+        alert("Could not save your color preference.");
+    }
 }
 
 // ============================================================================
-// ACCOUNT MANAGEMENT (CRUD) - Diperbaiki untuk menangani ARRAY
+// ACCOUNT MANAGEMENT (Logika ini tetap sama seperti sebelumnya)
 // ============================================================================
 function renderAccountLists(incomeAccounts, expenseAccounts) {
-    // PERBAIKAN: Langsung memproses array
     renderList('incomeAccountList', incomeAccounts, 'income');
     renderList('expenseAccountList', expenseAccounts, 'expense');
 }
@@ -121,7 +140,6 @@ function renderList(containerId, accountsArray, type) {
     const listContainer = document.getElementById(containerId);
     if (!listContainer) return;
 
-    // PERBAIKAN: Memfilter nilai null yang mungkin ada di database Anda
     const validAccounts = accountsArray.filter(acc => acc !== null);
 
     if (validAccounts.length === 0) {
@@ -154,7 +172,6 @@ async function handleAddAccount(e, type) {
     btn.disabled = true;
 
     try {
-        // PERBAIKAN: Path sekarang menunjuk ke node array (income atau expense)
         const accountPath = `users/${userId}/accounts/${type}`;
         const accountRef = ref(database, accountPath);
         
@@ -168,11 +185,9 @@ async function handleAddAccount(e, type) {
             return;
         }
 
-        // PERBAIKAN: Menambahkan item baru ke array dan menulis ulang seluruh array
         const updatedAccounts = [...currentAccounts, newName];
         await set(accountRef, updatedAccounts);
         
-        // Refresh UI
         renderList(`${type}AccountList`, updatedAccounts, type);
         inputElement.value = '';
 
@@ -194,18 +209,15 @@ async function handleDeleteAccount(e, type) {
     }
 
     try {
-        // PERBAIKAN: Path sekarang menunjuk ke node array
         const accountPath = `users/${userId}/accounts/${type}`;
         const accountRef = ref(database, accountPath);
 
         const snapshot = await get(accountRef);
         const currentAccounts = snapshot.val() || [];
 
-        // PERBAIKAN: Membuat array baru tanpa item yang dihapus, lalu menulis ulang
         const updatedAccounts = currentAccounts.filter(acc => acc !== accountName);
         await set(accountRef, updatedAccounts);
 
-        // Refresh UI
         renderList(`${type}AccountList`, updatedAccounts, type);
 
     } catch (error) {
