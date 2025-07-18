@@ -3,272 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions - Finance Tracker</title>
-    	<!-- Skrip pencegah kedipan tema yang ditingkatkan -->
-	<script>
-		(function() {
-			try {
-				// 1. Terapkan tema light/dark dari localStorage (cepat)
-				const savedTheme = localStorage.getItem('theme') || 'light';
-				document.documentElement.setAttribute('data-theme', savedTheme);
-				
-				// 2. Terapkan warna aksen dari localStorage (jika ada)
-				const cachedAccentColor = localStorage.getItem('accentColor');
-				if (cachedAccentColor) {
-					document.documentElement.style.setProperty('--accent-color', cachedAccentColor);
-					
-					// Fungsi sederhana untuk mengkonversi hex ke rgb
-					function hexToRgb(hex) {
-						hex = hex.replace(/^#/, '');
-						const bigint = parseInt(hex, 16);
-						const r = (bigint >> 16) & 255;
-						const g = (bigint >> 8) & 255;
-						const b = bigint & 255;
-						return { r, g, b };
-					}
-					
-					// Fungsi untuk menyesuaikan kecerahan
-					function adjustBrightness(rgb, percent) {
-						const adjust = (value) => Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
-						return {
-							r: adjust(rgb.r),
-							g: adjust(rgb.g),
-							b: adjust(rgb.b)
-						};
-					}
-					
-					// Fungsi untuk mengkonversi rgb ke hex
-					function rgbToHex(rgb) {
-						return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
-					}
-					
-					// Hitung variasi warna untuk gradien
-					const rgbColor = hexToRgb(cachedAccentColor);
-					if (rgbColor) {
-						const lighterColor = adjustBrightness(rgbColor, 20);
-						const darkerColor = adjustBrightness(rgbColor, -20);
-						
-						document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
-						document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
-						document.documentElement.style.setProperty(
-							'--accent-color-rgb', 
-							`${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
-						);
-					}
-				}
-			} catch (e) {
-				console.error("Error in theme flash prevention script:", e);
-			}
-		})();
-	</script>
-    <!-- Menggunakan main.css yang sudah dipecah -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Transactions | Finance Tracker</title>
+    
+    <!-- Favicon -->
     <link rel="icon" href="images/logo.jpeg">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Skrip pencegah kedipan tema -->
+    <script>
+        (function() {
+            try {
+                // 1. Terapkan tema light/dark dari localStorage (cepat)
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // 2. Terapkan warna aksen dari localStorage (jika ada)
+                const cachedAccentColor = localStorage.getItem('accentColor');
+                if (cachedAccentColor) {
+                    document.documentElement.style.setProperty('--accent-color', cachedAccentColor);
+                    
+                    // Fungsi sederhana untuk mengkonversi hex ke rgb
+                    function hexToRgb(hex) {
+                        hex = hex.replace(/^#/, '');
+                        const bigint = parseInt(hex, 16);
+                        const r = (bigint >> 16) & 255;
+                        const g = (bigint >> 8) & 255;
+                        const b = bigint & 255;
+                        return { r, g, b };
+                    }
+                    
+                    // Fungsi untuk menyesuaikan kecerahan
+                    function adjustBrightness(rgb, percent) {
+                        const adjust = (value) => Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
+                        return {
+                            r: adjust(rgb.r),
+                            g: adjust(rgb.g),
+                            b: adjust(rgb.b)
+                        };
+                    }
+                    
+                    // Fungsi untuk mengkonversi rgb ke hex
+                    function rgbToHex(rgb) {
+                        return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
+                    }
+                    
+                    // Hitung variasi warna untuk gradien
+                    const rgbColor = hexToRgb(cachedAccentColor);
+                    if (rgbColor) {
+                        const lighterColor = adjustBrightness(rgbColor, 20);
+                        const darkerColor = adjustBrightness(rgbColor, -20);
+                        
+                        document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
+                        document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
+                        document.documentElement.style.setProperty(
+                            '--accent-color-rgb', 
+                            `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
+                        );
+                    }
+                }
+            } catch (e) {
+                console.error("Error in theme flash prevention script:", e);
+            }
+        })();
+    </script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/transactions.css">
 </head>
-<body class="dashboard-body">
-    <div class="container">
-        <header>
-            <div class="header-left">
-                <img src="images/logo.jpeg" alt="ASDO Logo" class="logo">
-                <h1>Finance Tracker</h1>
-            </div>
-            <div class="theme-toggle">
-                <i class="fas fa-sun"></i>
-                <label class="switch">
-                    <input type="checkbox" id="themeToggle">
-                    <span class="slider round"></span>
-                </label>
-                <i class="fas fa-moon"></i>
-            </div>
-        </header>
-
-        <nav class="main-nav">
-            <div class="dropdown">
-                <button class="dropbtn"><i class="fas fa-bars"></i> Menu</button>
-                <div class="dropdown-content">
-                    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
-                    <a href="transactions.html" class="active"><i class="fas fa-exchange-alt"></i> Transactions</a>
-                    <a href="wallets.html"><i class="fas fa-wallet"></i> Wallets</a>
-                    <a href="budgets.html"><i class="fas fa-chart-pie"></i> Budgets</a>
-                    <a href="reports.html"><i class="fas fa-chart-line"></i> Reports</a>
-                    <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Logo -->
+            <a href="dashboard.html" class="logo">
+                <img src="images/logo.jpeg" alt="Finance Tracker Logo">
+                <div class="logo-text">
+                    <span class="logo-name">Finance Tracker</span>
+                    <span class="logo-tagline">Personal Finance</span>
                 </div>
-            </div>
-        </nav>
-
-        <main>
-            <!-- Bagian Form Tambah Transaksi yang Bisa Dilipat -->
-            <details class="collapsible-section" id="addTransactionSection">
-                <summary class="collapsible-header">
-                    <h2><i class="fas fa-plus-circle"></i> Add New Transaction</h2>
-                    <i class="fas fa-chevron-down collapse-icon"></i>
-                </summary>
-                <div class="collapsible-content">
-                    <form id="addTransactionForm">
-                        <div class="form-group-inline">
-                            <div class="form-group">
-                                <label for="transactionType">Type</label>
-                                <select id="transactionType" required>
-                                    <option value="expense">Expense</option>
-                                    <option value="income">Income</option>
-                                </select>
+            </a>
+            
+            <!-- Navigation -->
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="transactions.html" class="nav-link active">
+                            <i class="fas fa-exchange-alt"></i> Transactions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="wallets.html" class="nav-link">
+                            <i class="fas fa-wallet"></i> Wallets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="budgets.html" class="nav-link">
+                            <i class="fas fa-chart-pie"></i> Budgets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-line"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <!-- Search -->
+                <div class="header-search">
+                    <input type="text" class="header-search-input" placeholder="Search...">
+                    <i class="fas fa-search header-search-icon"></i>
+                </div>
+                
+                <!-- Notifications -->
+                <button class="header-action-btn" id="notificationsBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                
+                <!-- Notifications Dropdown -->
+                <div class="notifications-dropdown">
+                    <div class="notifications-header">
+                        <h3>Notifications</h3>
+                        <button class="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notifications-body">
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-exclamation-circle"></i>
                             </div>
-                            <div class="form-group">
-                                <label for="transactionDate">Date</label>
-                                <input type="date" id="transactionDate" required>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Budget Alert</h4>
+                                <p class="notification-text">You've reached 80% of your Food budget for this month.</p>
+                                <span class="notification-time">2 hours ago</span>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="transactionAmount">Amount</label>
-                            <input type="number" id="transactionAmount" placeholder="e.g., 150000" min="0" step="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="transactionDescription">Description</label>
-                            <input type="text" id="transactionDescription" placeholder="e.g., Lunch with client" required>
-                        </div>
-                        <div class="form-group-inline">
-                            <div class="form-group">
-                                <label for="transactionAccount">Account / Category</label>
-                                <select id="transactionAccount" required>
-                                    <option value="" disabled selected>Select an account</option>
-                                </select>
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-check-circle"></i>
                             </div>
-                            <div class="form-group">
-                                <label for="transactionWallet">Wallet</label>
-                                <select id="transactionWallet" required>
-                                    <option value="" disabled selected>Select a wallet</option>
-                                </select>
+                            <div class="notification-content">
+                                <h4 class="notification-title">Payment Successful</h4>
+                                <p class="notification-text">Your payment of $50 to Electricity Bill was successful.</p>
+                                <span class="notification-time">Yesterday</span>
                             </div>
                         </div>
-                        <button type="submit" id="addTransactionBtn" class="btn-primary">Add Transaction</button>
-                    </form>
-                </div>
-            </details>
-
-            <!-- Bagian Daftar Transaksi -->
-            <div class="content-container">
-                <div class="table-header-controls">
-                    <h2><i class="fas fa-history"></i> Transaction History</h2>
-                    <!-- PERBAIKAN: Struktur search container yang benar -->
-                    <div class="search-container">
-                        <input type="text" id="searchInput" placeholder="Search transactions...">
-                        <i class="fas fa-search search-icon"></i>
+                        <div class="notification-item unread">
+                            <div class="notification-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4 class="notification-title">New Feature</h4>
+                                <p class="notification-text">We've added a new budget tracking feature. Check it out!</p>
+                                <span class="notification-time">3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notifications-footer">
+                        <a href="#">View all notifications</a>
                     </div>
                 </div>
-
-                <!-- PERBAIKAN: Filter sekarang dalam satu baris -->
-                <div class="filter-bar">
-                    <div class="form-group">
-                        <label for="filterStartDate">Start Date</label>
-                        <input type="date" id="filterStartDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="filterEndDate">End Date</label>
-                        <input type="date" id="filterEndDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="filterAccount">Account</label>
-                        <select id="filterAccount">
-                            <option value="">All</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filterWallet">Wallet</label>
-                        <select id="filterWallet">
-                            <option value="">All</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filterType">Type</label>
-                        <select id="filterType">
-                            <option value="">All</option>
-                            <option value="income">Income</option>
-                            <option value="expense">Expense</option>
-                        </select>
-                    </div>
-                    <div class="filter-actions">
-                        <button id="applyFilterBtn" class="btn-filter apply" title="Apply Filters"><i class="fas fa-check"></i></button>
-                        <button id="resetFilterBtn" class="btn-filter reset" title="Reset Filters"><i class="fas fa-undo"></i></button>
-                    </div>
+                
+                <!-- Theme Toggle -->
+                <div class="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <i class="fas fa-moon"></i>
                 </div>
-
-                <div class="table-container">
-                    <table class="transaction-table">
-                        <thead>
-                            <tr>
-                                <th class="sortable" data-sort="date">Date <i class="fas fa-sort sort-icon"></i></th>
-                                <th class="sortable" data-sort="description">Description <i class="fas fa-sort sort-icon"></i></th>
-                                <th class="sortable" data-sort="account">Account <i class="fas fa-sort sort-icon"></i></th>
-                                <th class="sortable" data-sort="wallet">Wallet <i class="fas fa-sort sort-icon"></i></th>
-                                <th class="sortable" data-sort="amount">Amount <i class="fas fa-sort sort-icon"></i></th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactionTableBody">
-                            <tr><td colspan="6" class="empty-state">Loading transactions...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination-container" id="paginationContainer">
-                    <!-- Tombol paginasi akan diisi oleh JavaScript -->
+                
+                <!-- User Menu -->
+                <div class="user-menu" id="userMenu">
+                    <button class="user-menu-btn">
+                        <div class="user-avatar">
+                            <img src="assets/avatar.jpg" alt="User Avatar">
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">User</span>
+                            <span class="user-email">user@example.com</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    
+                    <!-- User Menu Dropdown -->
+                    <div class="user-menu-dropdown">
+                        <div class="user-menu-header">
+                            <div class="user-avatar">
+                                <img src="assets/avatar.jpg" alt="User Avatar">
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">User</span>
+                                <span class="user-email">user@example.com</span>
+                            </div>
+                        </div>
+                        <div class="user-menu-body">
+                            <a href="profile.html" class="user-menu-item">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="settings.html" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                            <a href="#" class="user-menu-item">
+                                <i class="fas fa-question-circle"></i>
+                                Help & Support
+                            </a>
+                        </div>
+                        <div class="user-menu-footer">
+                            <button class="btn-logout" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </main>
-
-        <footer>
-            <p>© 2025 Finance Tracker. Made with <i class="fas fa-heart footer-heart"></i> by Addo.</p>
-        </footer>
-    </div>
-
-    <!-- Edit Transaction Modal -->
-    <div id="editTransactionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Transaction</h2>
-                <span class="close-modal">&times;</span>
+        </div>
+    </header>
+    
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-container">
+            <div class="mobile-nav-header">
+                <a href="dashboard.html" class="logo">
+                    <img src="images/logo.jpeg" alt="Finance Tracker Logo">
+                    <span class="logo-name">Finance Tracker</span>
+                </a>
+                <button class="mobile-nav-close" id="mobileNavClose">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="editTransactionForm">
-                <input type="hidden" id="editTransactionId">
-                <div class="form-group-inline">
-                    <div class="form-group">
-                        <label for="editTransactionType">Type</label>
-                        <select id="editTransactionType" required>
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
-                        </select>
+            <div class="mobile-nav-body">
+                <ul class="mobile-nav-list">
+                    <li class="mobile-nav-item">
+                        <a href="dashboard.html" class="mobile-nav-link">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="transactions.html" class="mobile-nav-link active">
+                            <i class="fas fa-exchange-alt"></i>
+                            Transactions
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="wallets.html" class="mobile-nav-link">
+                            <i class="fas fa-wallet"></i>
+                            Wallets
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="budgets.html" class="mobile-nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            Budgets
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="reports.html" class="mobile-nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            Reports
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="profile.html" class="mobile-nav-link">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="settings.html" class="mobile-nav-link">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="mobile-nav-footer">
+                <div class="mobile-nav-user">
+                    <div class="user-avatar">
+                        <img src="assets/avatar.jpg" alt="User Avatar">
                     </div>
-                    <div class="form-group">
-                        <label for="editTransactionDate">Date</label>
-                        <input type="date" id="editTransactionDate" required>
+                    <div class="mobile-nav-user-info">
+                        <div class="mobile-nav-user-name">User</div>
+                        <div class="mobile-nav-user-email">user@example.com</div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="editTransactionAmount">Amount</label>
-                    <input type="number" id="editTransactionAmount" min="0" step="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="editTransactionDescription">Description</label>
-                    <input type="text" id="editTransactionDescription" required>
-                </div>
-                <div class="form-group-inline">
-                    <div class="form-group">
-                        <label for="editTransactionAccount">Account / Category</label>
-                        <select id="editTransactionAccount" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTransactionWallet">Wallet</label>
-                        <select id="editTransactionWallet" required></select>
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary">Save Changes</button>
-            </form>
+                <button class="btn-logout" id="mobileLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
         </div>
     </div>
-
-    <script type="module" src="js/transactions.js"></script>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <a href="dashboard.html" class="back-button">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1>Transactions</h1>
+                        <p>Manage your income and expenses</p>
+                    </div>
+                </div>
+                <div class="page-actions">
+                    <button class="btn-primary" id="addTransactionBtn">
+                        <i class="fas fa-plus"></i> Add Transaction
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Transactions Filter -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-filter"></i> Filter Transactions</h3>
+                    <div class="card-actions">
+                        <button class="btn-icon" id="toggleFilterBtn">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content" id="filterContent">
+                    <form id="filterForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filterType">Type</label>
+                                <select id="filterType" name="filterType">
+                                    <option value="all">All Types</option>
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterAccount">Category</label>
+                                <select id="filterAccount" name="filterAccount">
+                                    <option value="all">All Categories</option>
+                                    <!-- Categories will be loaded dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterWallet">Wallet</label>
+                                <select id="filterWallet" name="filterWallet">
+                                    <option value="all">All Wallets</option>
+                                    <!-- Wallets will be loaded dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filterDateFrom">From Date</label>
+                                <input type="date" id="filterDateFrom" name="filterDateFrom">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterDateTo">To Date</label>
+                                <input type="date" id="filterDateTo" name="filterDateTo">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterAmount">Amount Range</label>
+                                <div class="amount-range">
+                                    <input type="number" id="filterAmountMin" name="filterAmountMin" placeholder="Min">
+                                    <span class="range-separator">to</span>
+                                    <input type="number" id="filterAmountMax" name="filterAmountMax" placeholder="Max">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-search"></i> Apply Filters
+                            </button>
+                            <button type="reset" class="btn-secondary">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Transactions List -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Transactions List</h3>
+                    <div class="card-actions">
+                        <div class="dropdown">
+                            <button class="btn-secondary-small" id="sortDropdownBtn">
+                                <i class="fas fa-sort"></i> Sort
+                            </button>
+                            <div class="dropdown-menu" id="sortDropdown">
+                                <a href="#" class="dropdown-item" data-sort="date-desc">
+                                    <i class="fas fa-sort-amount-down"></i> Date (Newest First)
+                                </a>
+                                <a href="#" class="dropdown-item" data-sort="date-asc">
+                                    <i class="fas fa-sort-amount-up"></i> Date (Oldest First)
+                                </a>
+                                <a href="#" class="dropdown-item" data-sort="amount-desc">
+                                    <i class="fas fa-sort-numeric-down"></i> Amount (Highest First)
+                                </a>
+                                <a href="#" class="dropdown-item" data-sort="amount-asc">
+                                    <i class="fas fa-sort-numeric-up"></i> Amount (Lowest First)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="transactions-summary">
+                        <div class="summary-item income">
+                            <span class="summary-label">Total Income</span>
+                            <span class="summary-value" id="totalIncome">Rp0</span>
+                        </div>
+                        <div class="summary-item expense">
+                            <span class="summary-label">Total Expense</span>
+                            <span class="summary-value" id="totalExpense">Rp0</span>
+                        </div>
+                        <div class="summary-item balance">
+                            <span class="summary-label">Net Balance</span>
+                            <span class="summary-value" id="netBalance">Rp0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="transactions-list" id="transactionsList">
+                        <!-- Transactions will be loaded dynamically -->
+                        <p class="empty-state">Loading transactions...</p>
+                    </div>
+                    
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination will be generated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Add/Edit Transaction Modal -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Transaction</h2>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="transactionForm">
+                    <input type="hidden" id="transactionId" name="transactionId">
+                    
+                    <div class="form-group">
+                        <label>Transaction Type</label>
+                        <div class="transaction-type-selector">
+                            <label class="type-option">
+                                <input type="radio" name="type" value="income" checked>
+                                <span class="type-label income">
+                                    <i class="fas fa-arrow-down"></i> Income
+                                </span>
+                            </label>
+                            <label class="type-option">
+                                <input type="radio" name="type" value="expense">
+                                <span class="type-label expense">
+                                    <i class="fas fa-arrow-up"></i> Expense
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <div class="input-with-icon">
+                                <span class="input-icon">Rp</span>
+                                <input type="number" id="amount" name="amount" placeholder="0" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" name="description" placeholder="Enter transaction description" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="account">Category</label>
+                            <select id="account" name="account" required>
+                                <option value="" disabled selected>Select category</option>
+                                <!-- Categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="wallet">Wallet</label>
+                            <select id="wallet" name="wallet" required>
+                                <option value="" disabled selected>Select wallet</option>
+                                <!-- Wallets will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes (Optional)</label>
+                        <textarea id="notes" name="notes" placeholder="Add additional notes"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" id="saveTransactionBtn">
+                            <i class="fas fa-save"></i> Save Transaction
+                        </button>
+                        <button type="button" class="btn-danger" id="deleteTransactionBtn" style="display: none;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteConfirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="modal-close" id="closeDeleteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this transaction? This action cannot be undone.</p>
+                <div class="form-actions">
+                    <button class="btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn-secondary" id="cancelDeleteBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>© 2025 Finance Tracker. Made with <i class="fas fa-heart footer-heart"></i> by Addo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
     <script type="module" src="js/theme.js"></script>
-    <script src="js/dropdown.js"></script>
+    <script type="module" src="js/transactions.js"></script>
 </body>
 </html>
