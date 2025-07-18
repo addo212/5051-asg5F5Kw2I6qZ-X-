@@ -1,22 +1,10 @@
 // js/transactions.js
 
-// Impor yang disesuaikan dengan struktur firebase-config.js Anda
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-import { app } from './firebase-config.js';
+// Impor dari database.js
+import { auth, db, loadUserData, loadTransactions as fetchTransactions, saveTransaction, updateTransaction, deleteTransaction } from './database.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+import { ref, get, set, update, remove, push, query, orderByChild, limitToFirst, startAt } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
-// Inisialisasi auth dan firestore
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-import { 
-    onAuthStateChanged, signOut 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-
-import { 
-    collection, doc, addDoc, updateDoc, deleteDoc, getDocs, query, 
-    where, orderBy, limit, startAfter, getDoc, Timestamp 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 // ============================================================================
 // Global Variables
 // ============================================================================
@@ -28,10 +16,6 @@ let lastVisible = null;
 let currentSort = 'date-desc';
 let currentFilters = {};
 let editingTransactionId = null;
-let categories = {
-    income: ['Salary', 'Freelance', 'Investment', 'Gift', 'Other Income'],
-    expense: ['Food', 'Transportation', 'Housing', 'Entertainment', 'Shopping', 'Utilities', 'Healthcare', 'Education', 'Other Expense']
-};
 
 // ============================================================================
 // Main Initialization
@@ -55,7 +39,7 @@ async function initializeTransactionsPage() {
         populateWalletDropdowns(userData.wallets || {});
         
         // Populate category dropdowns
-        populateCategoryDropdowns();
+        populateCategoryDropdowns(userData.accounts || {});
         
         // Set default date for new transaction
         setDefaultDate();
@@ -103,7 +87,7 @@ function setupEventListeners() {
     // Transaction form submission
     document.getElementById('transactionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await saveTransaction();
+        await saveTransactionHandler();
     });
     
     // Delete transaction button
@@ -113,7 +97,7 @@ function setupEventListeners() {
     
     // Confirm delete button
     document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-        await deleteTransaction();
+        await deleteTransactionHandler();
     });
     
     // Filter form submission
@@ -320,23 +304,6 @@ function updateUserInfo(userData) {
 // ============================================================================
 // Data Loading Functions
 // ============================================================================
-async function loadUserData(userId) {
-    try {
-        const userDocRef = doc(db, "users", userId);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-            return userDoc.data();
-        } else {
-            console.log("No user data found!");
-            return {};
-        }
-    } catch (error) {
-        console.error("Error loading user data:", error);
-        throw error;
-    }
-}
-
 async function loadTransactions(refresh = false) {
     try {
         const transactionsContainer = document.getElementById('transactionsList');
@@ -345,43 +312,37 @@ async function loadTransactions(refresh = false) {
             transactionsContainer.innerHTML = '<p class="empty-state">Loading transactions...</p>';
         }
         
-        // Build query
-        let transactionsQuery = buildTransactionsQuery();
+        // Gunakan fungsi loadTransactions dari database.js
+        const transactions = await fetchTransactions(userId);
         
-        // Execute query
-        const querySnapshot = await getDocs(transactionsQuery);
+        // Konversi objek transaksi menjadi array
+        const transactionsArray = transactions ? Object.keys(transactions).map(key => ({
+            id: key,
+            ...transactions[key]
+        })) : [];
         
-        // Update last visible for pagination
-        if (querySnapshot.docs.length > 0) {
-            lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-        } else {
-            lastVisible = null;
-        }
+        // Filter dan sort transaksi
+        const filteredTransactions = filterTransactions(transactionsArray);
+        const sortedTransactions = sortTransactions(filteredTransactions);
         
-        // Process transactions
-        const transactions = [];
-        querySnapshot.forEach((doc) => {
-            transactions.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
+        // Pagination
+        const paginatedTransactions = paginateTransactions(sortedTransactions);
         
         // Update current transactions
         if (refresh) {
-            currentTransactions = transactions;
+            currentTransactions = paginatedTransactions;
         } else {
-            currentTransactions = [...currentTransactions, ...transactions];
+            currentTransactions = [...currentTransactions, ...paginatedTransactions];
         }
         
         // Display transactions
         displayTransactions(currentTransactions);
         
         // Update summary
-        updateTransactionsSummary(currentTransactions);
+        updateTransactionsSummary(filteredTransactions);
         
         // Update pagination
-        updatePagination(querySnapshot.size < transactionsPerPage);
+        updatePagination(paginatedTransactions.length < transactionsPerPage);
         
     } catch (error) {
         console.error("Error loading transactions:", error);
@@ -390,48 +351,75 @@ async function loadTransactions(refresh = false) {
     }
 }
 
-function buildTransactionsQuery() {
-    // Start with base query
-    let q = collection(db, "users", userId, "transactions");
-    
-    // Apply filters
-    if (currentFilters.type && currentFilters.type !== 'all') {
-        q = query(q, where("type", "==", currentFilters.type));
+function filterTransactions(transactions) {
+    if (Object.keys(currentFilters).length === 0) {
+        return transactions;
     }
     
-    if (currentFilters.account && currentFilters.account !== 'all') {
-        q = query(q, where("account", "==", currentFilters.account));
-    }
-    
-    if (currentFilters.wallet && currentFilters.wallet !== 'all') {
-        q = query(q, where("wallet", "==", currentFilters.wallet));
-    }
-    
-    if (currentFilters.dateFrom) {
-        const fromDate = new Date(currentFilters.dateFrom);
-        fromDate.setHours(0, 0, 0, 0);
-        q = query(q, where("timestamp", ">=", fromDate.getTime()));
-    }
-    
-    if (currentFilters.dateTo) {
-        const toDate = new Date(currentFilters.dateTo);
-        toDate.setHours(23, 59, 59, 999);
-        q = query(q, where("timestamp", "<=", toDate.getTime()));
-    }
-    
-    // Apply sorting
+    return transactions.filter(transaction => {
+        // Filter by type
+        if (currentFilters.type && currentFilters.type !== 'all' && transaction.type !== currentFilters.type) {
+            return false;
+        }
+        
+        // Filter by account (category)
+        if (currentFilters.account && currentFilters.account !== 'all' && transaction.account !== currentFilters.account) {
+            return false;
+        }
+        
+        // Filter by wallet
+        if (currentFilters.wallet && currentFilters.wallet !== 'all' && transaction.wallet !== currentFilters.wallet) {
+            return false;
+        }
+        
+        // Filter by date range
+        if (currentFilters.dateFrom) {
+            const fromDate = new Date(currentFilters.dateFrom);
+            fromDate.setHours(0, 0, 0, 0);
+            if (transaction.timestamp < fromDate.getTime()) {
+                return false;
+            }
+        }
+        
+        if (currentFilters.dateTo) {
+            const toDate = new Date(currentFilters.dateTo);
+            toDate.setHours(23, 59, 59, 999);
+            if (transaction.timestamp > toDate.getTime()) {
+                return false;
+            }
+        }
+        
+        // Filter by amount range
+        if (currentFilters.amountMin && transaction.amount < parseFloat(currentFilters.amountMin)) {
+            return false;
+        }
+        
+        if (currentFilters.amountMax && transaction.amount > parseFloat(currentFilters.amountMax)) {
+            return false;
+        }
+        
+        return true;
+    });
+}
+
+function sortTransactions(transactions) {
     const [sortField, sortDirection] = currentSort.split('-');
-    q = query(q, orderBy(sortField === 'date' ? 'timestamp' : 'amount', sortDirection === 'asc' ? 'asc' : 'desc'));
     
-    // Apply pagination
-    q = query(q, limit(transactionsPerPage));
-    
-    // If we have a last visible document and we're not on the first page
-    if (lastVisible && currentPage > 1) {
-        q = query(q, startAfter(lastVisible));
-    }
-    
-    return q;
+    return [...transactions].sort((a, b) => {
+        const fieldA = sortField === 'date' ? a.timestamp : a.amount;
+        const fieldB = sortField === 'date' ? b.timestamp : b.amount;
+        
+        if (sortDirection === 'asc') {
+            return fieldA - fieldB;
+        } else {
+            return fieldB - fieldA;
+        }
+    });
+}
+
+function paginateTransactions(transactions) {
+    const startIndex = (currentPage - 1) * transactionsPerPage;
+    return transactions.slice(startIndex, startIndex + transactionsPerPage);
 }
 
 // ============================================================================
@@ -469,10 +457,10 @@ function displayTransactions(transactions) {
                     ${isIncome ? '+' : '-'} Rp${formatNumber(transaction.amount)}
                 </div>
                 <div class="transaction-actions">
-                    <button class="transaction-action-btn edit" onclick="editTransaction('${transaction.id}')">
+                    <button class="transaction-action-btn edit" data-id="${transaction.id}">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="transaction-action-btn delete" onclick="deleteTransactionPrompt('${transaction.id}')">
+                    <button class="transaction-action-btn delete" data-id="${transaction.id}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -485,14 +473,14 @@ function displayTransactions(transactions) {
     // Add event listeners for edit and delete buttons
     document.querySelectorAll('.transaction-action-btn.edit').forEach(btn => {
         btn.addEventListener('click', () => {
-            const transactionId = btn.closest('.transaction-item').dataset.id;
+            const transactionId = btn.dataset.id;
             editTransaction(transactionId);
         });
     });
     
     document.querySelectorAll('.transaction-action-btn.delete').forEach(btn => {
         btn.addEventListener('click', () => {
-            const transactionId = btn.closest('.transaction-item').dataset.id;
+            const transactionId = btn.dataset.id;
             deleteTransactionPrompt(transactionId);
         });
     });
@@ -504,9 +492,9 @@ function updateTransactionsSummary(transactions) {
     
     transactions.forEach(transaction => {
         if (transaction.type === 'income') {
-            totalIncome += transaction.amount;
+            totalIncome += parseFloat(transaction.amount);
         } else {
-            totalExpense += transaction.amount;
+            totalExpense += parseFloat(transaction.amount);
         }
     });
     
@@ -608,36 +596,48 @@ function populateWalletDropdowns(wallets) {
     });
 }
 
-function populateCategoryDropdowns() {
-    const accountSelects = [
-        document.getElementById('account'),
-        document.getElementById('filterAccount')
-    ];
+function populateCategoryDropdowns(accounts) {
+    if (!accounts) {
+        accounts = {
+            income: ['Salary', 'Freelance', 'Investment', 'Gift', 'Other Income'],
+            expense: ['Food', 'Transportation', 'Housing', 'Entertainment', 'Shopping', 'Utilities', 'Healthcare', 'Education', 'Other Expense']
+        };
+    }
     
-    accountSelects.forEach(select => {
-        if (!select) return;
-        
+    // Populate filter account dropdown
+    const filterAccountSelect = document.getElementById('filterAccount');
+    if (filterAccountSelect) {
         // Clear existing options except the first one
-        while (select.options.length > 1) {
-            select.remove(1);
+        while (filterAccountSelect.options.length > 1) {
+            filterAccountSelect.remove(1);
         }
         
-        // Add category options based on current transaction type
-        const transactionType = document.querySelector('input[name="type"]:checked')?.value || 'income';
-        const categoryList = categories[transactionType] || [];
-        
-        categoryList.forEach(category => {
+        // Add all categories
+        const allCategories = [...accounts.income, ...accounts.expense];
+        allCategories.forEach(category => {
             const option = document.createElement('option');
             option.value = category;
             option.textContent = category;
-            select.appendChild(option);
+            filterAccountSelect.appendChild(option);
         });
-    });
+    }
+    
+    // Update transaction form category dropdown based on selected type
+    updateCategoryOptions(accounts);
 }
 
-function updateCategoryOptions() {
+function updateCategoryOptions(accounts) {
+    if (!accounts) {
+        accounts = {
+            income: ['Salary', 'Freelance', 'Investment', 'Gift', 'Other Income'],
+            expense: ['Food', 'Transportation', 'Housing', 'Entertainment', 'Shopping', 'Utilities', 'Healthcare', 'Education', 'Other Expense']
+        };
+    }
+    
     const transactionType = document.querySelector('input[name="type"]:checked').value;
     const accountSelect = document.getElementById('account');
+    
+    if (!accountSelect) return;
     
     // Clear existing options
     while (accountSelect.options.length > 0) {
@@ -653,7 +653,7 @@ function updateCategoryOptions() {
     accountSelect.appendChild(placeholderOption);
     
     // Add category options based on transaction type
-    const categoryList = categories[transactionType] || [];
+    const categoryList = accounts[transactionType] || [];
     
     categoryList.forEach(category => {
         const option = document.createElement('option');
@@ -738,7 +738,7 @@ function closeDeleteModal() {
 // ============================================================================
 // Transaction CRUD Functions
 // ============================================================================
-async function saveTransaction() {
+async function saveTransactionHandler() {
     try {
         const form = document.getElementById('transactionForm');
         const type = document.querySelector('input[name="type"]:checked').value;
@@ -766,12 +766,13 @@ async function saveTransaction() {
         
         if (editingTransactionId) {
             // Update existing transaction
-            await updateDoc(doc(db, "users", userId, "transactions", editingTransactionId), transactionData);
+            transactionData.id = editingTransactionId;
+            await updateTransaction(userId, editingTransactionId, transactionData);
             showToast("Transaction updated successfully!", "success");
         } else {
             // Add new transaction
             transactionData.createdAt = Date.now();
-            await addDoc(collection(db, "users", userId, "transactions"), transactionData);
+            await saveTransaction(userId, transactionData);
             showToast("Transaction added successfully!", "success");
         }
         
@@ -792,25 +793,23 @@ async function saveTransaction() {
     }
 }
 
-async function deleteTransaction() {
+async function deleteTransactionHandler() {
     try {
         if (!editingTransactionId) return;
         
         // Get transaction data before deleting
-        const transactionRef = doc(db, "users", userId, "transactions", editingTransactionId);
-        const transactionSnap = await getDoc(transactionRef);
+        const transactions = await fetchTransactions(userId);
+        const transaction = transactions[editingTransactionId];
         
-        if (transactionSnap.exists()) {
-            const transactionData = transactionSnap.data();
-            
+        if (transaction) {
             // Delete transaction
-            await deleteDoc(transactionRef);
+            await deleteTransaction(userId, editingTransactionId);
             
             // Update wallet balance
             await updateWalletBalance(
-                transactionData.wallet, 
-                transactionData.amount, 
-                transactionData.type, 
+                transaction.wallet, 
+                transaction.amount, 
+                transaction.type, 
                 'delete'
             );
             
@@ -834,12 +833,7 @@ async function deleteTransaction() {
 async function updateWalletBalance(walletName, amount, type, action) {
     try {
         // Get user data to find wallet
-        const userDocRef = doc(db, "users", userId);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (!userDoc.exists()) return;
-        
-        const userData = userDoc.data();
+        const userData = await loadUserData(userId);
         const wallets = userData.wallets || {};
         
         // Find wallet by name
@@ -867,26 +861,18 @@ async function updateWalletBalance(walletName, amount, type, action) {
                 newBalance -= amount;
             }
         } else if (action === 'update') {
-            // Updating existing transaction
-            // For simplicity, we're just recalculating all transactions
-            // In a real app, you might want to calculate the difference
+            // For simplicity, recalculate from all transactions
+            const transactions = await fetchTransactions(userId);
             
-            // Get all transactions for this wallet
-            const transactionsQuery = query(
-                collection(db, "users", userId, "transactions"),
-                where("wallet", "==", walletName)
-            );
-            
-            const querySnapshot = await getDocs(transactionsQuery);
-            
-            // Calculate balance from all transactions
+            // Calculate balance from all transactions for this wallet
             newBalance = 0;
-            querySnapshot.forEach((doc) => {
-                const tx = doc.data();
-                if (tx.type === 'income') {
-                    newBalance += tx.amount;
-                } else {
-                    newBalance -= tx.amount;
+            Object.values(transactions).forEach(tx => {
+                if (tx.wallet === walletName) {
+                    if (tx.type === 'income') {
+                        newBalance += parseFloat(tx.amount);
+                    } else {
+                        newBalance -= parseFloat(tx.amount);
+                    }
                 }
             });
         } else if (action === 'delete') {
@@ -899,19 +885,20 @@ async function updateWalletBalance(walletName, amount, type, action) {
         }
         
         // Update wallet balance
-        wallets[walletId].balance = newBalance;
+        await update(ref(db, `users/${userId}/wallets/${walletId}`), { balance: newBalance });
         
         // Calculate total balance
         let totalBalance = 0;
         for (const id in wallets) {
-            totalBalance += wallets[id].balance || 0;
+            if (id === walletId) {
+                totalBalance += newBalance;
+            } else {
+                totalBalance += wallets[id].balance || 0;
+            }
         }
         
-        // Update user document
-        await updateDoc(userDocRef, {
-            wallets,
-            totalBalance
-        });
+        // Update total balance
+        await update(ref(db, `users/${userId}`), { totalBalance });
         
     } catch (error) {
         console.error("Error updating wallet balance:", error);
@@ -963,10 +950,10 @@ function checkUrlParams() {
         openTransactionModal();
     }
 }
-
 function formatNumber(number) {
-    return number.toLocaleString('id-ID');
+    return new Intl.NumberFormat('id-ID').format(number);
 }
+
 // Show toast notification
 function showToast(message, type = 'info') {
     // Check if toast container exists, if not create it
