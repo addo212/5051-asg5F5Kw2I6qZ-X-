@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Finance Tracker</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="images/logo.jpeg">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Skrip pencegah kedipan tema -->
+    <script>
+        (function() {
+            try {
+                // 1. Terapkan tema light/dark dari localStorage (cepat)
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // 2. Terapkan warna aksen dari localStorage (jika ada)
+                const cachedAccentColor = localStorage.getItem('accentColor');
+                if (cachedAccentColor) {
+                    document.documentElement.style.setProperty('--accent-color', cachedAccentColor);
+                    
+                    // Fungsi sederhana untuk mengkonversi hex ke rgb
+                    function hexToRgb(hex) {
+                        hex = hex.replace(/^#/, '');
+                        const bigint = parseInt(hex, 16);
+                        const r = (bigint >> 16) & 255;
+                        const g = (bigint >> 8) & 255;
+                        const b = bigint & 255;
+                        return { r, g, b };
+                    }
+                    
+                    // Fungsi untuk menyesuaikan kecerahan
+                    function adjustBrightness(rgb, percent) {
+                        const adjust = (value) => Math.max(0, Math.min(255, Math.round(value + (value * percent / 100))));
+                        return {
+                            r: adjust(rgb.r),
+                            g: adjust(rgb.g),
+                            b: adjust(rgb.b)
+                        };
+                    }
+                    
+                    // Fungsi untuk mengkonversi rgb ke hex
+                    function rgbToHex(rgb) {
+                        return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
+                    }
+                    
+                    // Hitung variasi warna untuk gradien
+                    const rgbColor = hexToRgb(cachedAccentColor);
+                    if (rgbColor) {
+                        const lighterColor = adjustBrightness(rgbColor, 20);
+                        const darkerColor = adjustBrightness(rgbColor, -20);
+                        
+                        document.documentElement.style.setProperty('--gradient-start', rgbToHex(lighterColor));
+                        document.documentElement.style.setProperty('--gradient-end', rgbToHex(darkerColor));
+                        document.documentElement.style.setProperty(
+                            '--accent-color-rgb', 
+                            `${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}`
+                        );
+                    }
+                }
+            } catch (e) {
+                console.error("Error in theme flash prevention script:", e);
+            }
+        })();
+    </script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/profile.css">
+</head>
+<body>
+    <!-- Header (sama seperti di dashboard.html) -->
+    <!-- ... -->
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Profile</h1>
+                <p>Manage your personal information and preferences</p>
+            </div>
+            
+            <div class="row">
+                <!-- Left Column - Profile Info -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user"></i> Profile Information</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="profile-avatar-container">
+                                <div class="profile-avatar">
+                                    <img src="assets/avatar.jpg" alt="Profile Picture" id="profileAvatar">
+                                </div>
+                                <button class="btn-secondary-small" id="changeAvatarBtn">
+                                    <i class="fas fa-camera"></i> Change
+                                </button>
+                            </div>
+                            
+                            <div class="profile-info">
+                                <div class="profile-info-item">
+                                    <span class="profile-label">Name</span>
+                                    <span class="profile-value" id="profileName">User</span>
+                                </div>
+                                <div class="profile-info-item">
+                                    <span class="profile-label">Email</span>
+                                    <span class="profile-value" id="profileEmail">user@example.com</span>
+                                </div>
+                                <div class="profile-info-item">
+                                    <span class="profile-label">Member Since</span>
+                                    <span class="profile-value" id="profileJoinDate">January 1, 2023</span>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-primary" id="editProfileBtn">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Settings -->
+                <div class="col-lg-8">
+                    <!-- Personal Information -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-id-card"></i> Personal Information</h3>
+                        </div>
+                        <div class="card-content">
+                            <form id="personalInfoForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="firstName">First Name</label>
+                                        <input type="text" id="firstName" name="firstName" placeholder="Enter your first name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastName">Last Name</label>
+                                        <input type="text" id="lastName" name="lastName" placeholder="Enter your last name">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="displayName">Display Name</label>
+                                    <input type="text" id="displayName" name="displayName" placeholder="How you want to be addressed">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" placeholder="Your email address" disabled>
+                                    <span class="helper-text">Email cannot be changed</span>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fas fa-save"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Settings -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-lock"></i> Security</h3>
+                        </div>
+                        <div class="card-content">
+                            <form id="securityForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password">
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="newPassword">New Password</label>
+                                        <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirmPassword">Confirm Password</label>
+                                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fas fa-key"></i> Change Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>© 2025 Finance Tracker. Made with <i class="fas fa-heart footer-heart"></i> by Addo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module" src="js/theme.js"></script>
+    <script type="module" src="js/profile.js"></script>
+</body>
+</html>
