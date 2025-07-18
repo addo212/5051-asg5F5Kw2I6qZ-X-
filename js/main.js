@@ -26,22 +26,6 @@ onAuthStateChanged(auth, (user) => {
         window.location.href = "index.html";
     }
 });
-// ============================================================================
-// Bagian Tema
-// ============================================================================
-async function initializeDashboard() {
-    setupEventListeners();
-    try {
-        const userData = await loadInitialData();
-
-        // ====================================================================
-        // PERUBAHAN: PENERAPAN TEMA AKSEN WARNA
-        // Blok ini membaca pengaturan warna dari Firebase dan menerapkannya
-        // ke seluruh halaman dengan mengubah variabel CSS.
-        // ====================================================================
-        const savedAccentColor = (userData.settings && userData.settings.accentColor);
-        if (savedAccentColor) {
-            document.documentElement.style.setProperty('--accent-color', savedAccentColor);
 
 // ============================================================================
 // Event Listeners
@@ -713,7 +697,8 @@ function displayTopWallets(wallets) {
     
     // Sort by balance (highest first)
     walletsArray.sort((a, b) => (b.balance || 0) - (a.balance || 0));
-// Take top 3
+    
+    // Take top 3
     const topWallets = walletsArray.slice(0, 3);
     
     let html = '';
@@ -810,6 +795,7 @@ function displayTopBudgets(budgets) {
                     <div class="budget-progress ${statusClass}" style="width: ${Math.min(percentage, 100)}%;"></div>
                 </div>
                 <div class="budget-percentage ${statusClass}">
+                    <div class="budget-percentage ${statusClass}">
                     ${budgetViewMode === 'percentage' 
                         ? `${percentage.toFixed(0)}%` 
                         : formatRupiah(budget.limit)}
@@ -863,4 +849,14 @@ function adjustColor(hex, percent) {
 
     // Convert back to hex
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Fungsi untuk memuat data awal
+async function loadInitialData() {
+    try {
+        return await loadUserData(userId);
+    } catch (error) {
+        console.error("Error loading initial data:", error);
+        throw error;
+    }
 }
