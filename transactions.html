@@ -114,12 +114,12 @@
                 <!-- PERBAIKAN: Filter sekarang dalam satu baris -->
                 <div class="filter-bar">
                     <div class="form-group">
-                        <label for="filterType">Type</label>
-                        <select id="filterType">
-                            <option value="">All</option>
-                            <option value="income">Income</option>
-                            <option value="expense">Expense</option>
-                        </select>
+                        <label for="filterStartDate">Start Date</label>
+                        <input type="date" id="filterStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterEndDate">End Date</label>
+                        <input type="date" id="filterEndDate">
                     </div>
                     <div class="form-group">
                         <label for="filterAccount">Account</label>
@@ -134,12 +134,12 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="filterStartDate">Start Date</label>
-                        <input type="date" id="filterStartDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="filterEndDate">End Date</label>
-                        <input type="date" id="filterEndDate">
+                        <label for="filterType">Type</label>
+                        <select id="filterType">
+                            <option value="">All</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
                     </div>
                     <div class="filter-actions">
                         <button id="applyFilterBtn" class="btn-filter apply" title="Apply Filters"><i class="fas fa-check"></i></button>
